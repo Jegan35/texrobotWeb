@@ -21,41 +21,24 @@ const RealRobot = () => {
 
   const { robotState } = useWebSocket();
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
-
   const rad = (deg) => (deg * Math.PI) / 180;
 
   return (
     <group position={[0, 0, 0]} scale={[1000, 1000, 1000]}>
-      
-      {/* BASE */}
       <mesh geometry={link0}><meshStandardMaterial color="#222222" /></mesh>
-
-      {/* J1: Base Pan. Pivot: [0, 0, 0] */}
       <group position={[0, 0, 0]} rotation={[0, 0, rad(j.j1)]}>
         <mesh geometry={link1} position={[0, 0, 0]}><meshStandardMaterial color="#0277bd" /></mesh>
-
-        {/* J2: Shoulder. Pivot: [0.150, 0, 0.462] */}
         <group position={[0.150, 0, 0.462]} rotation={[0, rad(j.j2), 0]}>
           <mesh geometry={link2} position={[-0.150, 0, -0.462]}><meshStandardMaterial color="#0277bd" /></mesh>
-
-          {/* J3: Elbow. Pivot: [0.150, 0, 1.062]. Offset from J2: [0, 0, 0.600] */}
           <group position={[0, 0, 0.600]} rotation={[0, rad(j.j3), 0]}>
             <mesh geometry={link3} position={[-0.150, 0, -1.062]}><meshStandardMaterial color="#0277bd" /></mesh>
-
-            {/* J4: Forearm. Pivot: [0.150, 0, 1.252]. Offset from J3: [0, 0, 0.190] */}
             <group position={[0, 0, 0.190]} rotation={[rad(j.j4), 0, 0]}>
               <mesh geometry={link4} position={[-0.150, 0, -1.252]}><meshStandardMaterial color="#d32f2f" /></mesh>
-
-              {/* J5: Wrist. Pivot: [0.837, 0, 1.252]. Offset from J4: [0.687, 0, 0] */}
               <group position={[0.687, 0, 0]} rotation={[0, rad(j.j5), 0]}>
                 <mesh geometry={link5} position={[-0.837, 0, -1.252]}><meshStandardMaterial color="#ffb300" /></mesh>
-
-                {/* J6: Tool Flange. Pivot: [0.938, 0, 1.252]. Offset from J5: [0.101, 0, 0] */}
                 <group position={[0.101, 0, 0]} rotation={[rad(j.j6), 0, 0]}>
-                  {/* Tool Marker so you can see J6 rotation */}
                   <axesHelper args={[0.3]} />
                 </group>
-
               </group>
             </group>
           </group>
@@ -65,9 +48,6 @@ const RealRobot = () => {
   );
 };
 
-// ==========================================
-// SCENE SETUP
-// ==========================================
 const RawWebGLGridLines = () => {
   const vertices = useMemo(() => {
     const pts = []; const step = 100; const size = 2000; 
@@ -109,22 +89,31 @@ const RobotScene = () => {
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
 
   return (
-    <div style={{ width: "100%", height: "100%", backgroundColor: "#d1d9e0", position: "relative" }}>
+    <div style={{ width: "100%", height: "100%", backgroundColor: "#b5c1ce", position: "relative" }}>
+      
+      {/* HAMBURGER MENU */}
       <HamburgerMenu />
 
-      {/* JOINTS DATA */}
+      {/* ==========================================
+          NEW: TECSONICS BRANDING WATERMARK
+          ========================================== */}
+      
+
+      {/* PREMIUM JOINTS DATA */}
       <div style={{
-        position: 'absolute', top: 0, right: 0, width: '90px', bottom: '70px',
-        backgroundColor: '#1a1e29', borderLeft: '1px solid #333', zIndex: 10,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '15px'
+        position: 'absolute', top: 0, right: 0, width: '100px', bottom: '80px',
+        backgroundColor: 'rgba(26, 30, 41, 0.85)', backdropFilter: 'blur(5px)',
+        borderLeft: '1px solid rgba(255,255,255,0.1)', zIndex: 10,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', 
+        paddingTop: '20px', paddingBottom: '10px', justifyContent: 'space-evenly'
       }}>
-        <div style={{ color: '#00bcd4', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '20px' }}>JOINTS</div>
+        <div style={{ color: '#00bcd4', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '1px' }}>JOINTS</div>
         {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
           const val = j[`j${idx+1}`];
           return (
-            <div key={label} style={{ marginBottom: '15px', textAlign: 'center' }}>
-              <div style={{ color: '#ccc', fontSize: '0.85rem', fontWeight: 'bold' }}>{label}</div>
-              <div style={{ color: '#4CAF50', fontSize: '0.9rem', fontWeight: 'bold' }}>
+            <div key={label} style={{ textAlign: 'center', width: '100%' }}>
+              <div style={{ color: '#aaa', fontSize: '0.8rem', fontWeight: 'bold' }}>{label}</div>
+              <div style={{ color: '#4CAF50', fontSize: '1rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
                 {val !== undefined ? val.toFixed(2) : "0.00"}°
               </div>
             </div>
@@ -132,20 +121,21 @@ const RobotScene = () => {
         })}
       </div>
 
-      {/* CARTESIAN DATA */}
+      {/* PREMIUM CARTESIAN DATA */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: '70px',
-        backgroundColor: '#1a1e29', borderTop: '1px solid #333', zIndex: 10,
-        display: 'flex', alignItems: 'center', padding: '0 20px'
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px',
+        backgroundColor: 'rgba(26, 30, 41, 0.85)', backdropFilter: 'blur(5px)',
+        borderTop: '1px solid rgba(255,255,255,0.1)', zIndex: 10,
+        display: 'flex', alignItems: 'center', padding: '0 25px'
       }}>
-        <div style={{ color: '#00bcd4', fontWeight: 'bold', fontSize: '0.9rem', marginRight: '30px' }}>CARTESIAN</div>
-        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around' }}>
+        <div style={{ color: '#00bcd4', fontWeight: 'bold', fontSize: '1rem', letterSpacing: '1px', marginRight: '40px' }}>CARTESIAN</div>
+        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
           {[ {l: 'X (mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y (mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z (mm)', v: c.z, clr: '#00bcd4'},
              {l: 'A (°)', v: c.rx, clr: '#fff'}, {l: 'B (°)', v: c.ry, clr: '#fff'}, {l: 'C (°)', v: c.rz, clr: '#fff'} 
           ].map(item => (
             <div key={item.l} style={{ textAlign: 'center' }}>
-              <div style={{ color: '#ccc', fontSize: '0.8rem', marginBottom: '4px' }}>{item.l}</div>
-              <div style={{ color: item.clr, fontSize: '1.2rem', fontWeight: 'bold' }}>
+              <div style={{ color: '#aaa', fontSize: '0.75rem', marginBottom: '6px', fontWeight: 'bold' }}>{item.l}</div>
+              <div style={{ color: item.clr, fontSize: '1.3rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
                 {item.v !== undefined ? item.v.toFixed(3) : "0.000"}
               </div>
             </div>
