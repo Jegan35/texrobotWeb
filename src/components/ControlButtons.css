@@ -1,0 +1,67 @@
+.control-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+.btn-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.btn {
+  flex: 1;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover { opacity: 0.85; }
+.btn:active { transform: scale(0.98); }
+
+.btn-dark { background-color: #333333; color: #aaaaaa; }
+.btn-green { background-color: #4CAF50; color: white; }
+.btn-green-full { background-color: #4CAF50; color: white; }
+.btn-blue { background-color: #2196F3; color: white; }
+.btn-yellow { background-color: #FFEB3B; color: #111; }
+.btn-orange { background-color: #FF9800; color: white; }
+.btn-red { background-color: #F44336; color: white; }
+.btn-purple { background-color: #9C27B0; color: white; }
+.btn-purple-dark { background-color: #673AB7; color: white; }
+.btn-pink { background-color: #E91E63; color: white; }
+
+.btn-outline-green { 
+  background-color: transparent; 
+  border: 2px solid #4CAF50; 
+  color: #4CAF50; 
+}
+.btn-outline-green:hover { background-color: rgba(76, 175, 80, 0.1); }
+
+.info-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.dark-box { background-color: #111; border: 1px solid #333; color: #ccc; }
+.empty-box { background-color: transparent; border: 1px dashed #555; color: #666; }
+.text-green { color: #4CAF50; font-weight: bold; justify-content: flex-end; font-size: 1rem; }

@@ -1,0 +1,237 @@
+/* General Layout */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: #1a1e29;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+}
+
+.left-half {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid #2d3245;
+}
+
+.right-half {
+  width: 50%;
+  background-color: #1a1e29;
+  padding: 20px;
+}
+
+/* Header */
+.left-header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background-color: #1a1e29;
+  border-bottom: 2px solid #2d3245;
+}
+.brand { color: #00bcd4; font-weight: bold; letter-spacing: 1px; }
+.title { font-weight: 600; color: #e0e0e0; }
+
+/* 3D Scene Area */
+.scene-area {
+  flex-grow: 1; /* Takes up all available middle space */
+  position: relative;
+}
+
+/* Cartesian Bar */
+.cartesian-bar {
+  display: flex;
+  background-color: #262d3d;
+  padding: 10px 15px;
+  border-top: 2px solid #2d3245;
+  border-bottom: 2px solid #2d3245;
+  align-items: center;
+}
+.cart-title { color: #00bcd4; font-weight: bold; font-size: 0.8rem; width: 100px; }
+.cart-data { display: flex; flex-grow: 1; justify-content: space-around; }
+.cart-item { display: flex; flex-direction: column; align-items: center; font-size: 0.8rem; }
+.cart-item .val { font-size: 1.1rem; font-weight: bold; margin-top: 2px; }
+.blue-text { color: #00bcd4; }
+
+/* Bottom Control Buttons */
+.control-buttons-container {
+  padding: 15px;
+  background-color: #1a1e29;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.btn-row {
+  display: flex;
+  gap: 8px;
+  height: 40px;
+}
+
+/* Standard Button Styles */
+.btn {
+  flex: 1;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+.info-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+}
+.dark-box { background-color: #111; color: #aaa; }
+.empty-box { background-color: #222; color: #555; }
+.text-green { color: #00ff00; font-weight: bold; border-color: #00ff00; }
+
+/* Specific Button Colors */
+.btn-dark { background-color: #333; }
+.btn-blue { background-color: #2196F3; font-size: 1.2rem; }
+.btn-green { background-color: #4CAF50; }
+.btn-orange { background-color: #FF9800; }
+.btn-outline-green { background-color: transparent; border: 2px solid #4CAF50; color: #4CAF50; }
+.btn-purple { background-color: #9c27b0; }
+.btn-pink { background-color: #E91E63; }
+.btn-green-full { background-color: #4CAF50; flex: 2; /* Takes up double width */ }
+.btn-red { background-color: #F44336; color: white;}
+.btn-yellow { background-color: #FFEB3B; color: black; }
+.btn-purple-dark { background-color: #673ab7; }
+/* Middle section containing 3D view and Joints */
+.middle-section {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* The new Joints Panel */
+.joints-panel {
+  width: 75px;
+  background-color: #2b2e3b;
+  border-left: 2px solid #2d3245;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 15px;
+}
+
+.joints-title {
+  color: #00bcd4;
+  font-weight: bold;
+  font-size: 0.75rem;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+.joint-item {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.joint-label {
+  color: #a0a0a0;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.joint-val {
+  color: #00ff00;
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+/* =========================================
+   BOTTOM CONTROL PANEL STYLES
+   ========================================= */
+
+.control-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Forces buttons to sit side-by-side perfectly */
+.btn-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+  align-items: stretch;
+}
+
+/* Base style for all buttons */
+.btn {
+  flex: 1; /* Makes all buttons equally share the row width */
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Button Color Variants */
+.btn-dark { background-color: #333333; color: #aaaaaa; }
+.btn-green { background-color: #4CAF50; color: white; }
+.btn-green-full { background-color: #4CAF50; color: white; }
+.btn-blue { background-color: #2196F3; color: white; }
+.btn-yellow { background-color: #FFEB3B; color: #111; }
+.btn-orange { background-color: #FF9800; color: white; }
+.btn-red { background-color: #F44336; color: white; }
+.btn-purple { background-color: #9C27B0; color: white; }
+.btn-purple-dark { background-color: #673AB7; color: white; }
+.btn-pink { background-color: #E91E63; color: white; }
+
+/* Outline Button for the SIM/REAL Mode */
+.btn-outline-green { 
+  background-color: transparent; 
+  border: 2px solid #4CAF50; 
+  color: #4CAF50; 
+}
+.btn-outline-green:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Info Boxes (Files, Tools, Speed) */
+.info-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.dark-box { background-color: #111; border: 1px solid #333; color: #ccc; }
+.empty-box { background-color: transparent; border: 1px dashed #555; color: #666; }
+.text-green { color: #4CAF50; font-weight: bold; justify-content: flex-end; font-size: 1rem; }
