@@ -1,13 +1,19 @@
-import React, { createContext, useState, useContext, useRef } from 'react';
+import React, { createContext, useState, useContext, useRef, useEffect } from 'react';
 
 const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [ipAddress, setIpAddress] = useState("192.168.1.42");
+  const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
+  
+  const [accessFull, setAccessFull] = useState(false); 
+  const [connectionFailed, setConnectionFailed] = useState(false); 
+  
   const wsRef = useRef(null);
+  const isAccessFullRef = useRef(false); 
+  // NEW: Tracks if the user intentionally clicked Connect/Disconnect
+  const isIntentionalDisconnect = useRef(false); 
 
-  // FIXED: We now store ALL the data your C++ backend broadcasts!
   const [robotState, setRobotState] = useState({
     mode: "Sim",
     started: false,
@@ -19,24 +25,55 @@ export const WebSocketProvider = ({ children }) => {
   });
 
   const connectWebSocket = () => {
+    // If there's an existing socket, close it INTENTIONALLY before making a new one
     if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
+      isIntentionalDisconnect.current = true; 
       wsRef.current.close();
     }
     
+    // Reset all flags for the fresh connection attempt
+    setConnectionFailed(false);
+    setAccessFull(false);
+    isAccessFullRef.current = false;
+    isIntentionalDisconnect.current = false; 
+
     try {
       wsRef.current = new WebSocket(`ws://${ipAddress}:8080`);
 
-      wsRef.current.onopen = () => console.log("WAITING APPROVAL...");
-      wsRef.current.onclose = () => setIsConnected(false);
-      wsRef.current.onerror = () => setIsConnected(false);
+      wsRef.current.onopen = () => console.log("ATTEMPTING CONNECTION...");
+      
+      wsRef.current.onclose = () => {
+        setIsConnected(false);
+        // ONLY show the red popup if the server crashed or dropped us unexpectedly!
+        if (!isAccessFullRef.current && !isIntentionalDisconnect.current) {
+          setConnectionFailed(true);
+        }
+      };
+      
+      wsRef.current.onerror = () => {
+        setIsConnected(false);
+        // ONLY show the red popup if it wasn't an intentional user action
+        if (!isAccessFullRef.current && !isIntentionalDisconnect.current) {
+          setConnectionFailed(true); 
+        }
+      };
 
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
         if (data.type === "connection_accepted") {
           setIsConnected(true);
-        } else if (data.type === "status_update") {
-          // FIXED: Instantly updates React with the real C++ state!
+          setAccessFull(false);
+          setConnectionFailed(false);
+          isAccessFullRef.current = false;
+          isIntentionalDisconnect.current = false;
+        } 
+        else if (data.type === "access_full") {
+          setIsConnected(false);
+          setAccessFull(true);
+          isAccessFullRef.current = true; // Block standard error popup
+        }
+        else if (data.type === "status_update") {
           setRobotState({
             mode: data.mode,
             started: data.started,
@@ -49,11 +86,27 @@ export const WebSocketProvider = ({ children }) => {
         }
       };
     } catch (err) {
-      console.error("INVALID IP", err);
+      console.error("INVALID IP OR NETWORK ERROR", err);
+      if (!isIntentionalDisconnect.current) {
+        setConnectionFailed(true);
+      }
     }
   };
 
+  useEffect(() => {
+    connectWebSocket();
+    return () => {
+      if (wsRef.current) {
+        isIntentionalDisconnect.current = true; // Clean up silently when app closes
+        wsRef.current.close();
+      }
+    };
+    // eslint-disable-next-line
+  }, []); 
+
   const disconnectWebSocket = () => {
+    // Flag this as an intentional user action BEFORE closing the socket!
+    isIntentionalDisconnect.current = true; 
     if (wsRef.current) wsRef.current.close();
     setIsConnected(false);
   };
@@ -66,7 +119,8 @@ export const WebSocketProvider = ({ children }) => {
 
   return (
     <WebSocketContext.Provider value={{ 
-      isConnected, ipAddress, setIpAddress, connectWebSocket, disconnectWebSocket, sendCommand, robotState 
+      isConnected, ipAddress, setIpAddress, connectWebSocket, disconnectWebSocket, sendCommand, robotState,
+      accessFull, setAccessFull, connectionFailed, setConnectionFailed 
     }}>
       {children}
     </WebSocketContext.Provider>

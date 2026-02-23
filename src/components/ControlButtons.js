@@ -19,7 +19,12 @@ const ControlButtons = () => {
   const handleRunPauseToggle = () => sendCommand("TOGGLE_PAUSE", "");
   const handleStartStopToggle = () => sendCommand("TOGGLE_START", "");
   const handleExitClick = () => sendCommand("EXIT", "");
-  const handleModeSelect = (m) => { setIsModeMenuOpen(false); sendCommand(m === "SIM" ? "SET_SIM" : "SET_REAL", ""); };
+  
+  const handleModeSelect = (m) => { 
+      setIsModeMenuOpen(false); 
+      sendCommand(m === "SIM" ? "SET_SIM" : "SET_REAL", ""); 
+  };
+  
   const handleErrorClear = () => sendCommand("CLEAR_ERRORS", "");
   const handleMarkClear = () => sendCommand("CLEAR_MARKS", "");
 
@@ -28,64 +33,74 @@ const ControlButtons = () => {
 
   return (
     <>
-      {/* =======================================================
-          PERFECT CSS GRID ALIGNMENT
-          Forces a strict 6-column layout straight down!
-          ======================================================= */}
       <style>{`
         .control-buttons-container { 
-          display: flex; flex-direction: column; gap: 8px; width: 100%; padding-top: 2px;
+          display: flex; flex-direction: column; gap: 12px; width: 100%; padding-top: 5px;
         }
         
-        /* THE MAGIC GRID */
+        /* EXACT 6-COLUMN GRID */
         .btn-row { 
           display: grid; 
-          grid-template-columns: repeat(6, 1fr); 
-          gap: 8px; 
-          width: 100%; 
-          min-height: 38px;
+          grid-template-columns: repeat(6, minmax(0, 1fr)); 
+          gap: 10px; 
+          width: 100%;
+          align-items: stretch;
         }
         
-        /* Tells the System OK button to take exactly 2 grid spaces */
         .span-2 { grid-column: span 2; }
         
+        /* PREMIUM 3D PHYSICAL BUTTON DESIGN */
         .btn { 
-          width: 100%; box-sizing: border-box; padding: 0 10px; border-radius: 4px; font-weight: 800; font-size: 0.75rem; 
-          color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; 
-          text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid rgba(0,0,0,0.6);
-          box-shadow: 0 3px 5px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.15); text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-          transition: all 0.1s ease-in-out;
+          width: 100%; min-height: 45px; box-sizing: border-box; padding: 5px 2px; 
+          border-radius: 6px; font-weight: 900; 
+          font-size: clamp(8px, 0.85vw, 13px); color: white; cursor: pointer; 
+          display: flex; align-items: center; justify-content: center; text-align: center;
+          text-transform: uppercase; letter-spacing: 0.5px; 
+          border: 1px solid rgba(0,0,0,0.8);
+          /* The 4px shadow creates the "physical edge" of the button */
+          transition: all 0.1s ease-in-out; 
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         
-        .btn:hover { filter: brightness(1.1); } 
-        .btn:active { transform: translateY(2px); box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.4); }
-
-        .btn-dark { background: linear-gradient(180deg, #444b59 0%, #2b303b 100%); color: #ccc; }
-        .btn-green { background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%); }
-        .btn-green-full { background: linear-gradient(180deg, #00C853 0%, #1B5E20 100%); }
-        .btn-blue { background: linear-gradient(180deg, #2196F3 0%, #1565C0 100%); }
-        .btn-yellow { background: linear-gradient(180deg, #FFEB3B 0%, #F9A825 100%); color: #111; text-shadow: none; }
-        .btn-orange { background: linear-gradient(180deg, #FF9800 0%, #E65100 100%); }
-        .btn-red { background: linear-gradient(180deg, #ef5350 0%, #c62828 100%); }
-        .btn-purple { background: linear-gradient(180deg, #ab47bc 0%, #6a1b9a 100%); }
-        .btn-pink { background: linear-gradient(180deg, #ec407a 0%, #ad1457 100%); }
-        .btn-purple-dark { background: linear-gradient(180deg, #7e57c2 0%, #4527a0 100%); }
+        .btn:hover { filter: brightness(1.15); } 
         
-        .btn-outline-green { background: rgba(0, 0, 0, 0.2); border: 2px solid #4CAF50; color: #4CAF50; text-shadow: none; box-shadow: none; }
-        .btn-outline-green:hover { background: rgba(76, 175, 80, 0.15); box-shadow: 0 0 10px rgba(76,175,80,0.3); }
+        /* Physical press down animation */
+        .btn:active { 
+            transform: translateY(4px); 
+            box-shadow: 0 0px 0px rgba(0,0,0,0.8), inset 0 3px 5px rgba(0,0,0,0.6) !important; 
+        }
 
+        /* Upgraded Rich Gradients & 3D Edges */
+        .btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); box-shadow: 0 4px 0 #151822, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); }
+        .btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 0 5px rgba(0,255,0,0.5); }
+        .btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.4); color: #000; text-shadow: none; }
+        .btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); box-shadow: 0 4px 0 #002171, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+        .btn-yellow { background: linear-gradient(180deg, #FFEE58 0%, #F57F17 100%); box-shadow: 0 4px 0 #BC5100, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.5); color: #111; text-shadow: none; }
+        .btn-orange { background: linear-gradient(180deg, #FFA726 0%, #E65100 100%); box-shadow: 0 4px 0 #822C00, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); box-shadow: 0 4px 0 #7F0000, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 0 5px rgba(255,0,0,0.5); }
+        .btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); box-shadow: 0 4px 0 #4A148C, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+        .btn-pink { background: linear-gradient(180deg, #F06292 0%, #880E4F 100%); box-shadow: 0 4px 0 #4A0024, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+        .btn-purple-dark { background: linear-gradient(180deg, #9575CD 0%, #4527A0 100%); box-shadow: 0 4px 0 #311B92, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+        
+        .btn-outline-green { background: #1a1e29; border: 2px solid #4CAF50; color: #4CAF50; box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4); text-shadow: 0 0 5px rgba(76,175,80,0.4); }
+
+        /* RECESSED DIGITAL LCD SCREEN DESIGN */
         .info-box { 
-          width: 100%; box-sizing: border-box; display: flex; align-items: center; padding: 0 8px; 
-          border-radius: 4px; font-size: 0.75rem; font-family: 'Consolas', monospace; overflow: hidden; white-space: nowrap; 
+          width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 0 5px; 
+          border-radius: 4px; font-size: clamp(8px, 0.8vw, 12px); font-family: 'Consolas', monospace; 
+          overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: bold;
         }
-        .dark-box { background-color: #151822; border: 1px inset #000; color: #aaa; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-        .empty-box { background-color: transparent; border: 1px dashed #555; color: #666; }
-        .text-green { color: #4CAF50; font-weight: bold; justify-content: flex-end; font-size: 0.85rem; text-shadow: 0 0 5px rgba(76,175,80,0.4); }
+        .dark-box { background-color: #0a0e17; border: 2px solid #333; border-top-color: #000; border-left-color: #000; color: #00bcd4; box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); text-shadow: 0 0 3px rgba(0,188,212,0.4); }
+        .empty-box { background-color: #111; border: 1px dashed #444; color: #555; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .text-green { background-color: #0a0e17; border: 2px solid #333; border-top-color: #000; border-left-color: #000; color: #00e676; font-size: clamp(10px, 1vw, 14px); text-shadow: 0 0 5px rgba(0,230,118,0.5); box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); }
+        
+        .popup-menu-btn { width: 100%; padding: 12px; background: transparent; color: white; border: none; cursor: pointer; font-weight: 900; font-size: 1rem; transition: 0.1s; text-transform: uppercase; }
+        .popup-menu-btn:hover { background: #4CAF50; color: #000; }
       `}</style>
 
       <div className="control-buttons-container">
         
-        {/* ROW 1: 6 Equal Columns */}
+        {/* ROW 1: 6 Columns */}
         <div className="btn-row">
           <button className={`btn ${servoOn ? 'btn-green' : 'btn-dark'}`} onClick={handleServoToggle}>⚡ SERVO: {servoOn ? 'ON' : 'OFF'}</button>
           <button className="btn btn-blue" onClick={handleHomeClick}>⌂ HOME</button>
@@ -96,43 +111,44 @@ const ControlButtons = () => {
           <div style={{ position: "relative", display: "flex", width: "100%" }}>
             <button className="btn btn-outline-green" style={{ width: "100%" }} onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}>{mode}</button>
             {isModeMenuOpen && (
-              <div style={{ position: "absolute", bottom: "100%", left: 0, width: "100%", zIndex: 100, backgroundColor: "#1a1e29", border: "1px solid #444", borderRadius: "4px", display: "flex", flexDirection: "column", marginBottom: "4px", overflow: 'hidden', boxShadow: '0 -4px 15px rgba(0,0,0,0.5)' }}>
-                <button onClick={() => handleModeSelect("SIM")} style={{ padding: "8px", background: "transparent", color: "white", border: "none", borderBottom: "1px solid #333", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem" }}>SIM</button>
-                <button onClick={() => handleModeSelect("REAL")} style={{ padding: "8px", background: "transparent", color: "white", border: "none", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem" }}>REAL</button>
+              <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '100%', background: '#111', border: '2px solid #4CAF50', zIndex: 1000, borderRadius: '6px', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.8)' }}>
+                <button className="popup-menu-btn" style={{ borderBottom: '1px solid #333' }} onClick={() => handleModeSelect('SIM')}>SIM</button>
+                <button className="popup-menu-btn" onClick={() => handleModeSelect('REAL')}>REAL</button>
               </div>
             )}
           </div>
         </div>
 
-        {/* ROW 2: 6 Equal Columns */}
+        {/* ROW 2: 6 Columns */}
         <div className="btn-row">
           <button className="btn btn-purple">📁 FILES</button>
-          <div className="info-box dark-box">Opened PR: mh_l1</div>
+          <div className="info-box dark-box">PR: mh_l1</div>
           <div className="info-box dark-box">TR: None</div>
-          <div className="info-box dark-box">Opened: ppp</div>
+          <div className="info-box dark-box">Op: ppp</div>
           <button className="btn btn-pink">+ TOOLS</button>
-          <div className="info-box empty-box">Tool Name...</div>
+          <div className="info-box empty-box">Tool...</div>
         </div>
 
-        {/* ROW 3: System OK spans 2 columns, others take 1 column each. Total = 6 */}
+        {/* ROW 3: SYSTEM OK takes 2 Columns, the rest take 1 (Total = 6) */}
         <div className="btn-row">
           <div className="span-2" style={{ position: "relative", display: "flex", width: "100%" }}>
             <button className={`btn ${hasError ? 'btn-orange' : 'btn-green-full'}`} style={{ width: "100%" }} onClick={() => setIsSystemOkOpen(!isSystemOkOpen)}>
               {hasError ? "⚠️ VIEW ERROR" : "✓ SYSTEM OK"}
             </button>
             {isSystemOkOpen && (
-              <div style={{ position: "absolute", bottom: "100%", left: 0, marginBottom: "4px", backgroundColor: "#282c34", border: "1px solid #555", borderRadius: "4px", padding: "8px", width: "100%", display: "flex", flexDirection: "column", zIndex: 100, boxShadow: "0px -4px 15px rgba(0,0,0,0.6)", boxSizing: "border-box" }}>
-                <div style={{ display: "flex", justifyContent: "flex-end" }}><button onClick={() => setIsSystemOkOpen(false)} style={{ background: "none", border: "none", color: "#ff4444", cursor: "pointer", fontWeight: "bold" }}>✖</button></div>
-                <div style={{ color: hasError ? "#FF9800" : "#4CAF50", textAlign: "center", fontWeight: "bold", paddingBottom: "5px", fontSize: "0.85rem" }}>{currentError}</div>
+              <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '200%', background: '#1e222b', border: hasError ? '2px solid #FF9800' : '2px solid #00E676', zIndex: 1000, borderRadius: '6px', padding: '15px', color: 'white', boxShadow: '0 10px 25px rgba(0,0,0,0.9)' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: hasError ? '#FF9800' : '#00E676', textTransform: 'uppercase', letterSpacing: '1px' }}>SYSTEM STATUS</h4>
+                <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1.1rem' }}>{currentError}</p>
+                <button style={{ marginTop: '15px', width: '100%', padding: '10px', background: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase' }} onClick={() => setIsSystemOkOpen(false)}>CLOSE</button>
               </div>
             )}
           </div>
-          
-          <button className="btn btn-red" onClick={handleErrorClear}>✕ Error Clear</button>
-          <button className="btn btn-yellow" onClick={handleMarkClear}>✕ Mark Clear</button>
+
+          {/* Abbreviated names to guarantee they never overlap in a 6 column grid! */}
+          <button className="btn btn-red" onClick={handleErrorClear}>✕ ERR CLR</button>
+          <button className="btn btn-yellow" onClick={handleMarkClear}>✕ MRK CLR</button>
           <button className="btn btn-purple-dark">⟳ RESET</button>
-          
-          <div className="info-box text-green">Speed: 0.0 %</div>
+          <div className="info-box text-green">Spd: 0.0%</div>
         </div>
       </div>
     </>
