@@ -11,7 +11,6 @@ const ControlButtons = () => {
   const mode = rs.mode || "MODE";
   const currentError = rs.error_message || "No error";
   
-  // Safely extract File lists from Backend
   const tpFiles = rs.tp_file_list || [];
   const prFiles = rs.pr_file_list || [];
   const currentTp = rs.current_tp_name || "None";
@@ -28,14 +27,15 @@ const ControlButtons = () => {
   const [selectedRadio, setSelectedRadio] = useState('');
   const [selectedChecks, setSelectedChecks] = useState({});
 
-  // Trigger Refresh automatically when Opening File views
+  // --- NEW: TRACK LAST ACTION STRINGS ---
+  const [lastAction, setLastAction] = useState({ TP: '', PR: '' });
+
   useEffect(() => {
       if (fileModalStep === 'OPEN' || fileModalStep === 'DELETE') {
           sendCommand(`REFRESH_${fileType}_FILES`, "");
       }
   }, [fileModalStep, fileType, sendCommand]);
 
-  // Basic Commands
   const handleServoToggle = () => sendCommand("TOGGLE_SERVO", "");
   const handleHomeClick = () => sendCommand("TRIGGER_HOME", "");
   const handleRunPauseToggle = () => sendCommand("TOGGLE_PAUSE", "");
@@ -45,7 +45,6 @@ const ControlButtons = () => {
   const handleErrorClear = () => sendCommand("CLEAR_ERRORS", "");
   const handleMarkClear = () => sendCommand("CLEAR_MARKS", "");
 
-  // --- FILE MODAL LOGIC ---
   const openFileMenu = () => {
       setFileModalStep('TYPE');
       sendCommand("REFRESH_TP_FILES", "");
@@ -58,11 +57,8 @@ const ControlButtons = () => {
       sendCommand(`REFRESH_${type}_FILES`, "");
   };
 
-  const forceRefresh = () => {
-      sendCommand(`REFRESH_${fileType}_FILES`, "");
-  };
+  const forceRefresh = () => sendCommand(`REFRESH_${fileType}_FILES`, "");
 
-  // --- PARSE BACKEND STRINGS ("filename|date") ---
   const activeRawList = fileType === 'TP' ? tpFiles : prFiles;
   const parsedList = (Array.isArray(activeRawList) ? activeRawList : []).map(item => {
       const parts = typeof item === 'string' ? item.split('|') : [item, ''];
@@ -73,9 +69,12 @@ const ControlButtons = () => {
   const fileExists = parsedList.some(f => f.name.toLowerCase() === fileNameInput.trim().toLowerCase());
   const canCreate = fileNameInput.trim().length > 0 && !fileExists;
 
+  // --- ACTION EXECUTORS & UI STRING UPDATERS ---
   const executeNewFile = () => {
       if (!canCreate) return;
-      sendCommand(`NEW_${fileType}_FILE`, fileNameInput.trim());
+      const cleanName = fileNameInput.trim();
+      sendCommand(`NEW_${fileType}_FILE`, cleanName);
+      setLastAction(prev => ({ ...prev, [fileType]: `Create ${fileType}: ${cleanName}` }));
       setFileModalStep('CLOSED');
       setFileNameInput('');
   };
@@ -83,6 +82,7 @@ const ControlButtons = () => {
   const executeOpenFile = () => {
       if (!selectedRadio) return;
       sendCommand(`OPEN_${fileType}_FILE`, selectedRadio);
+      setLastAction(prev => ({ ...prev, [fileType]: `Open ${fileType}: ${selectedRadio}` }));
       setFileModalStep('CLOSED');
       setSelectedRadio('');
       setSearchQuery('');
@@ -90,9 +90,13 @@ const ControlButtons = () => {
 
   const executeDeleteFiles = () => {
       const filesToDelete = Object.keys(selectedChecks).filter(k => selectedChecks[k]);
-      filesToDelete.forEach(file => {
-          sendCommand(`DELETE_${fileType}_FILE`, file);
-      });
+      if(filesToDelete.length === 0) return;
+
+      filesToDelete.forEach(file => sendCommand(`DELETE_${fileType}_FILE`, file));
+      
+      const statusName = filesToDelete.length === 1 ? filesToDelete[0] : `${filesToDelete.length} files`;
+      setLastAction(prev => ({ ...prev, [fileType]: `Deleted ${fileType}: ${statusName}` }));
+
       setTimeout(() => sendCommand(`REFRESH_${fileType}_FILES`, ""), 500);
       setSelectedChecks({});
       setFileModalStep('OPS');
@@ -106,8 +110,6 @@ const ControlButtons = () => {
 
       return (
           <div style={{ position: 'absolute', bottom: '110%', left: 0, width: '300px', background: '#151822', border: '2px solid #333', zIndex: 9999, borderRadius: '8px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.9)' }}>
-              
-              {/* STEP 1: SELECT TYPE */}
               {fileModalStep === 'TYPE' && (
                   <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ color: '#aaa', fontWeight: '900', textAlign: 'center', fontSize: '0.85rem', marginBottom: '5px', letterSpacing: '1px' }}>SELECT TYPE</div>
@@ -118,7 +120,6 @@ const ControlButtons = () => {
                   </div>
               )}
 
-              {/* STEP 2: SELECT OPERATION */}
               {fileModalStep === 'OPS' && (
                   <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ color: '#aaa', fontWeight: '900', textAlign: 'center', fontSize: '0.85rem', marginBottom: '5px', letterSpacing: '1px', textTransform: 'uppercase' }}>{fileType} OPERATIONS</div>
@@ -129,7 +130,6 @@ const ControlButtons = () => {
                   </div>
               )}
 
-              {/* STEP 3: NEW FILE */}
               {fileModalStep === 'NEW' && (
                   <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
                       <div style={{ color: '#00E676', fontWeight: '900', textAlign: 'center', fontSize: '1rem' }}>CREATE NEW {fileType}</div>
@@ -145,7 +145,6 @@ const ControlButtons = () => {
                   </div>
               )}
 
-              {/* STEP 3: OPEN FILE */}
               {fileModalStep === 'OPEN' && (
                   <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '400px' }}>
                       <div style={{ padding: '15px', borderBottom: '1px solid #333', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -174,7 +173,6 @@ const ControlButtons = () => {
                   </div>
               )}
 
-              {/* STEP 3: DELETE FILES */}
               {fileModalStep === 'DELETE' && (
                   <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '400px' }}>
                       <div style={{ padding: '15px', borderBottom: '1px solid #333', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -252,7 +250,6 @@ const ControlButtons = () => {
 
       <div className="control-buttons-container">
         
-        {/* ROW 1 */}
         <div className="btn-row">
           <button className={`btn ${servoOn ? 'btn-green' : 'btn-dark'}`} onClick={handleServoToggle}>⚡ SERVO: {servoOn ? 'ON' : 'OFF'}</button>
           <button className="btn btn-blue" onClick={handleHomeClick}>⌂ HOME</button>
@@ -270,20 +267,23 @@ const ControlButtons = () => {
           </div>
         </div>
 
-        {/* ROW 2: WITH FILE MODAL */}
+        {/* FIXED ROW 2: TP is now first, PR is second. Accurately shows actions! */}
         <div className="btn-row">
           <div style={{ position: "relative", display: "flex", width: "100%" }}>
               <button className="btn btn-purple" style={{ width: "100%" }} onClick={openFileMenu}>📁 FILES</button>
               {renderFileModal()}
           </div>
-          <div className="info-box dark-box">PR: {currentPr}</div>
-          <div className="info-box dark-box">TP: {currentTp}</div>
+          <div className="info-box dark-box" title={lastAction.TP || `Open TP: ${currentTp}`}>
+              {lastAction.TP || `Open TP: ${currentTp}`}
+          </div>
+          <div className="info-box dark-box" title={lastAction.PR || `Open PR: ${currentPr}`}>
+              {lastAction.PR || `Open PR: ${currentPr}`}
+          </div>
           <div className="info-box dark-box">Op: ppp</div>
           <button className="btn btn-pink">+ TOOLS</button>
           <div className="info-box empty-box">Tool...</div>
         </div>
 
-        {/* ROW 3 */}
         <div className="btn-row">
           <div className="span-2" style={{ position: "relative", display: "flex", width: "100%" }}>
             <button className={`btn ${hasError ? 'btn-orange' : 'btn-green-full'}`} style={{ width: "100%" }} onClick={() => setIsSystemOkOpen(!isSystemOkOpen)}>

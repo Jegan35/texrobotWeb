@@ -13,7 +13,6 @@ export const WebSocketProvider = ({ children }) => {
   const isAccessFullRef = useRef(false); 
   const isIntentionalDisconnect = useRef(false); 
 
-  // Initialize with empty arrays so the UI doesn't crash before the first update
   const [robotState, setRobotState] = useState({
     mode: "Sim",
     started: false,
@@ -27,7 +26,9 @@ export const WebSocketProvider = ({ children }) => {
     current_tp_name: "None",
     current_pr_name: "None",
     tp_list: [],
-    pr_program_data: []
+    pr_program_data: [],
+    program_count_output: "0",
+    is_calculating_trajectory: false
   });
 
   const connectWebSocket = () => {
@@ -76,7 +77,6 @@ export const WebSocketProvider = ({ children }) => {
           isAccessFullRef.current = true; 
         }
         else if (data.type === "status_update" || data.type === "motion_update") {
-          // PERFECT FUNCTIONAL STATE UPDATE: Merges all data safely!
           setRobotState(prevState => ({
             ...prevState, 
             mode: data.mode !== undefined ? data.mode : prevState.mode,
@@ -86,27 +86,14 @@ export const WebSocketProvider = ({ children }) => {
             error_message: data.error_message || prevState.error_message,
             cartesian: data.cartesian || prevState.cartesian,
             joints: data.joints || prevState.joints,
-            
-            // Grabbing file lists and names directly from your C++ broadcastState
             tp_file_list: data.tp_file_list || prevState.tp_file_list || [],
             pr_file_list: data.pr_file_list || prevState.pr_file_list || [],
             current_tp_name: data.current_tp_name || prevState.current_tp_name || "None",
             current_pr_name: data.current_pr_name || prevState.current_pr_name || "None",
-            
-            // Added these so your tables in Row 2 actually get the points!
             tp_list: data.tp_list || prevState.tp_list || [],
-            pr_program_data: data.pr_program_data || prevState.pr_program_data || []
-          }));
-        }
-        else if (data.type === "file_update") {
-          setRobotState(prevState => ({
-            ...prevState,
-            tp_file_list: data.tp_file_list || [],
-            pr_file_list: data.pr_file_list || [],
-            current_tp_name: data.current_tp_name || "None",
-            current_pr_name: data.current_pr_name || "None",
-            tp_list: data.tp_list || [],
-            pr_program_data: data.pr_program_data || []
+            pr_program_data: data.pr_program_data || prevState.pr_program_data || [],
+            program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
+            is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory
           }));
         }
       };
@@ -135,9 +122,14 @@ export const WebSocketProvider = ({ children }) => {
     setIsConnected(false);
   };
 
-  const sendCommand = (cmd, value = "") => {
+  // --- UPGRADED TO ACCEPT JSON DATA PAYLOADS ---
+  const sendCommand = (cmd, value = "", dataObj = null) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ command: cmd, value: value.toString() }));
+      const payload = { command: cmd, value: value.toString() };
+      if (dataObj) {
+          payload.data = dataObj; // Attaches the {name, x, y, z} object for the C++ backend!
+      }
+      wsRef.current.send(JSON.stringify(payload));
     }
   };
 
