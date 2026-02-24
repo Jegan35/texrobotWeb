@@ -28,7 +28,11 @@ export const WebSocketProvider = ({ children }) => {
     tp_list: [],
     pr_program_data: [],
     program_count_output: "0",
-    is_calculating_trajectory: false
+    is_calculating_trajectory: false,
+    
+    // --- LIVE TRAJECTORY ARRAYS ---
+    blueTrajectory: [], 
+    redTrajectory: []
   });
 
   const connectWebSocket = () => {
@@ -96,6 +100,31 @@ export const WebSocketProvider = ({ children }) => {
             is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory
           }));
         }
+        // =========================================================
+        // NEW: TRAJECTORY STREAMING (HIGH-PERFORMANCE PARSER)
+        // =========================================================
+        else if (data.type === "trajectory_chunk") {
+          const color = data.color; // "blue" or "red"
+          const flatPoints = data.points || [];
+          
+          // Re-assemble flat [x, y, z, x, y, z] array into [[x,y,z], [x,y,z]] tuples for Three.js
+          const newPts = [];
+          for (let i = 0; i < flatPoints.length; i += 3) {
+            newPts.push([flatPoints[i], flatPoints[i+1], flatPoints[i+2]]);
+          }
+
+          setRobotState(prevState => {
+            if (color === "blue") {
+              return { ...prevState, blueTrajectory: [...(prevState.blueTrajectory || []), ...newPts] };
+            } else if (color === "red") {
+              return { ...prevState, redTrajectory: [...(prevState.redTrajectory || []), ...newPts] };
+            }
+            return prevState;
+          });
+        }
+        else if (data.type === "clear_trajectories") {
+          setRobotState(prevState => ({ ...prevState, blueTrajectory: [], redTrajectory: [] }));
+        }
       };
     } catch (err) {
       console.error("INVALID IP OR NETWORK ERROR", err);
@@ -122,13 +151,10 @@ export const WebSocketProvider = ({ children }) => {
     setIsConnected(false);
   };
 
-  // --- UPGRADED TO ACCEPT JSON DATA PAYLOADS ---
   const sendCommand = (cmd, value = "", dataObj = null) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       const payload = { command: cmd, value: value.toString() };
-      if (dataObj) {
-          payload.data = dataObj; // Attaches the {name, x, y, z} object for the C++ backend!
-      }
+      if (dataObj) payload.data = dataObj;
       wsRef.current.send(JSON.stringify(payload));
     }
   };

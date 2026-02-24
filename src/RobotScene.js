@@ -1,6 +1,6 @@
 import React, { useMemo, Suspense } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard } from "@react-three/drei";
+import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard, Line } from "@react-three/drei";
 import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import HamburgerMenu from "./components/HamburgerMenu"; 
@@ -8,9 +8,6 @@ import { useWebSocket } from "./context/WebSocketContext";
 
 const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1", GRID: "#888888" };
 
-// ==========================================
-// KINEMATIC CHAIN
-// ==========================================
 const RealRobot = () => {
   const link0 = useLoader(STLLoader, "/meshes/link0.stl");
   const link1 = useLoader(STLLoader, "/meshes/link1.stl");
@@ -24,6 +21,7 @@ const RealRobot = () => {
   const rad = (deg) => (deg * Math.PI) / 180;
 
   return (
+    // Note: Robot model scaled by 1000 to match the world mm coordinate system
     <group position={[0, 0, 0]} scale={[1000, 1000, 1000]}>
       <mesh geometry={link0}><meshStandardMaterial color="#222222" /></mesh>
       <group position={[0, 0, 0]} rotation={[0, 0, rad(j.j1)]}>
@@ -48,9 +46,6 @@ const RealRobot = () => {
   );
 };
 
-// ==========================================
-// RESTORED: EXACT ORIGINAL GRID MATH
-// ==========================================
 const RawWebGLGridLines = () => {
   const vertices = useMemo(() => {
     const pts = []; const step = 100; const size = 2000; 
@@ -70,21 +65,22 @@ const RawWebGLGridLines = () => {
   );
 };
 
-// ==========================================
-// RESTORED: EXACT ORIGINAL COORDINATE MATH
-// ==========================================
 const WorldCoordinates = () => {
   const labels = [];
-  const step = 100; const fontSize = 35; const axisLabelSize = 120;
-  labels.push(<Billboard key="y" position={[0, -2250, 0]}><Text fontSize={axisLabelSize} color={COLORS.Y_GREEN} fontWeight="bold" outlineWidth={3}>Y</Text></Billboard>);
-  labels.push(<Billboard key="x" position={[2250, 0, 0]}><Text fontSize={axisLabelSize} color={COLORS.X_RED} fontWeight="bold" outlineWidth={3}>X</Text></Billboard>);
-  labels.push(<Billboard key="z" position={[2150, 2150, 1500]}><Text fontSize={axisLabelSize} color={COLORS.Z_BLUE} fontWeight="bold" outlineWidth={3}>Z</Text></Billboard>);
-  for (let i = -2000; i <= 2000; i += step) {
-    labels.push(<Billboard key={`yn-${i}`} position={[i, -2080, 0]}><Text fontSize={fontSize} color={COLORS.Y_GREEN} fontWeight="bold">{i}</Text></Billboard>);
-    if (i !== 0) labels.push(<Billboard key={`xn-${i}`} position={[2080, i, 0]}><Text fontSize={fontSize} color={COLORS.X_RED} fontWeight="bold">{i}</Text></Billboard>);
+  const step = 200; 
+  const fontSize = 45; 
+  const axisLabelSize = 130;
+  
+  labels.push(<Billboard key="y" position={[0, -1850, 0]}><Text fontSize={axisLabelSize} color={COLORS.Y_GREEN} fontWeight="bold" outlineWidth={3}>Y</Text></Billboard>);
+  labels.push(<Billboard key="x" position={[1850, 0, 0]}><Text fontSize={axisLabelSize} color={COLORS.X_RED} fontWeight="bold" outlineWidth={3}>X</Text></Billboard>);
+  labels.push(<Billboard key="z" position={[1850, 1850, 1500]}><Text fontSize={axisLabelSize} color={COLORS.Z_BLUE} fontWeight="bold" outlineWidth={3}>Z</Text></Billboard>);
+  
+  for (let i = -1800; i <= 1800; i += step) {
+    labels.push(<Billboard key={`yn-${i}`} position={[i, -1850, 0]}><Text fontSize={fontSize} color={COLORS.Y_GREEN} fontWeight="bold">{i}</Text></Billboard>);
+    if (i !== 0) labels.push(<Billboard key={`xn-${i}`} position={[1850, i, 0]}><Text fontSize={fontSize} color={COLORS.X_RED} fontWeight="bold">{i}</Text></Billboard>);
   }
-  for (let z = 100; z <= 3000; z += step) { 
-    labels.push(<Billboard key={`zn-${z}`} position={[2080, 2080, z]}><Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="bold">{z}</Text></Billboard>);
+  for (let z = 200; z <= 3000; z += step) { 
+    labels.push(<Billboard key={`zn-${z}`} position={[1850, 1850, z]}><Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="bold">{z}</Text></Billboard>);
   }
   return <group>{labels}</group>;
 };
@@ -94,19 +90,16 @@ const RobotScene = () => {
   const c = robotState?.cartesian || { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 };
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
 
+  // EXTRACT LIVE TRAJECTORY POINTS
+  const bluePts = robotState?.blueTrajectory || [];
+  const redPts = robotState?.redTrajectory || [];
+
   return (
     <div style={{ width: "100%", height: "100%", backgroundColor: "#b5c1ce", position: "relative" }}>
       
-      {/* HAMBURGER MENU */}
       <HamburgerMenu />
 
-      {/* JOINTS PANEL (Width: 110px) */}
-      <div style={{
-        position: 'absolute', top: 0, right: 0, width: '110px', bottom: 0,
-        backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', 
-        paddingTop: '15px', paddingBottom: '15px', justifyContent: 'space-evenly'
-      }}>
+      <div style={{ position: 'absolute', top: 0, right: 0, width: '110px', bottom: 0, backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '15px', paddingBottom: '15px', justifyContent: 'space-evenly' }}>
         <div style={{ color: '#00bcd4', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px' }}>JOINTS</div>
         {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
           const val = j[`j${idx+1}`];
@@ -121,12 +114,7 @@ const RobotScene = () => {
         })}
       </div>
 
-      {/* CARTESIAN PANEL (Height: 85px) */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: '110px', height: '85px',
-        backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10,
-        display: 'flex', alignItems: 'center', padding: '0 20px'
-      }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: '110px', height: '85px', backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10, display: 'flex', alignItems: 'center', padding: '0 20px' }}>
         <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1rem', letterSpacing: '1px', marginRight: '20px' }}>CARTESIAN</div>
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
           {[ {l: 'X (mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y (mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z (mm)', v: c.z, clr: '#00bcd4'},
@@ -142,25 +130,37 @@ const RobotScene = () => {
         </div>
       </div>
 
-      {/* THE MAGIC FIX: 
-          Instead of rendering the Canvas under the absolute panels, we wrap it in a div 
-          that stops exactly where the UI panels begin (right: 110px, bottom: 85px). 
-          This means the 3D grid and Gizmo will perfectly center in the visible area!
-      */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: '110px', bottom: '85px' }}>
         <Canvas camera={{ position: [0, -5000, 2500], up: [0, 0, 1], fov: 45, near: 1, far: 25000 }}>
           <ambientLight intensity={0.6} />
           <pointLight position={[2000, -2000, 5000]} intensity={1.5} />
           <directionalLight position={[-1000, -1000, 1000]} intensity={0.5} />
           
-          <OrbitControls makeDefault target={[0, 0, 500]} maxDistance={10000} minDistance={200} />
+          <OrbitControls makeDefault target={[-100, 0, 500]} maxDistance={10000} minDistance={200} />
           
           <group><RawWebGLGridLines /><WorldCoordinates /></group>
           <Suspense fallback={null}>
-            <group rotation={[0, 0, -Math.PI / 2]}><RealRobot /></group>
+            {/* Base rotation aligns the World coordinates with the Robot's Base coordinates */}
+            <group rotation={[0, 0, -Math.PI / 2]}>
+              <RealRobot />
+              
+              {/* ==========================================
+                  DYNAMIC HARDWARE ACCELERATED TRAJECTORY LINES 
+                  ========================================== */}
+                  
+              {/* Blue Line (Input) - Made thinner so Red can easily override it */}
+              {bluePts.length > 1 && (
+                 <Line points={bluePts} color="#039BE5" lineWidth={1} />
+              )}
+              
+              {/* Red Line (Feedback) - Made much thicker (denser) to completely cover the blue line */}
+              {redPts.length > 1 && (
+                 <Line points={redPts} color="#E53935" lineWidth={3} />
+              )}
+              
+            </group>
           </Suspense>
           
-          {/* Gizmo returns to standard margin because the Canvas itself is no longer covered! */}
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
             <GizmoViewport axisColors={[COLORS.X_RED, COLORS.Y_GREEN, COLORS.Z_BLUE]} labelColor="white" />
           </GizmoHelper>

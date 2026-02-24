@@ -46,7 +46,7 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <button className="rh-menu-btn" onClick={onMenuToggle}>
             {/* THIS ROTATES BASED ON THE MENU STATE */}
-            <span className="burger-icon" style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>|||</span> MENU
+            <span className="burger-icon" style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}> ☰ </span> MENU
           </button>
           <div className="rh-mode-label">
             <span className="green-dot"></span> {currentMode}
