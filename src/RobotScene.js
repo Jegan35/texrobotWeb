@@ -9,7 +9,7 @@ import { useWebSocket } from "./context/WebSocketContext";
 const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1", GRID: "#888888" };
 
 // ==========================================
-// CORRECTED KINEMATIC CHAIN
+// KINEMATIC CHAIN
 // ==========================================
 const RealRobot = () => {
   const link0 = useLoader(STLLoader, "/meshes/link0.stl");
@@ -48,6 +48,9 @@ const RealRobot = () => {
   );
 };
 
+// ==========================================
+// RESTORED: EXACT ORIGINAL GRID MATH
+// ==========================================
 const RawWebGLGridLines = () => {
   const vertices = useMemo(() => {
     const pts = []; const step = 100; const size = 2000; 
@@ -67,6 +70,9 @@ const RawWebGLGridLines = () => {
   );
 };
 
+// ==========================================
+// RESTORED: EXACT ORIGINAL COORDINATE MATH
+// ==========================================
 const WorldCoordinates = () => {
   const labels = [];
   const step = 100; const fontSize = 35; const axisLabelSize = 120;
@@ -94,26 +100,20 @@ const RobotScene = () => {
       {/* HAMBURGER MENU */}
       <HamburgerMenu />
 
-      {/* ==========================================
-          NEW: TECSONICS BRANDING WATERMARK
-          ========================================== */}
-      
-
-      {/* PREMIUM JOINTS DATA */}
+      {/* JOINTS PANEL (Width: 110px) */}
       <div style={{
-        position: 'absolute', top: 0, right: 0, width: '100px', bottom: '80px',
-        backgroundColor: 'rgba(26, 30, 41, 0.85)', backdropFilter: 'blur(5px)',
-        borderLeft: '1px solid rgba(255,255,255,0.1)', zIndex: 10,
+        position: 'absolute', top: 0, right: 0, width: '110px', bottom: 0,
+        backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10,
         display: 'flex', flexDirection: 'column', alignItems: 'center', 
-        paddingTop: '20px', paddingBottom: '10px', justifyContent: 'space-evenly'
+        paddingTop: '15px', paddingBottom: '15px', justifyContent: 'space-evenly'
       }}>
-        <div style={{ color: '#00bcd4', fontSize: '0.9rem', fontWeight: 'bold', letterSpacing: '1px' }}>JOINTS</div>
+        <div style={{ color: '#00bcd4', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px' }}>JOINTS</div>
         {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
           const val = j[`j${idx+1}`];
           return (
             <div key={label} style={{ textAlign: 'center', width: '100%' }}>
               <div style={{ color: '#aaa', fontSize: '0.8rem', fontWeight: 'bold' }}>{label}</div>
-              <div style={{ color: '#4CAF50', fontSize: '1rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+              <div style={{ color: '#4CAF50', fontSize: '1.1rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
                 {val !== undefined ? val.toFixed(2) : "0.00"}°
               </div>
             </div>
@@ -121,21 +121,20 @@ const RobotScene = () => {
         })}
       </div>
 
-      {/* PREMIUM CARTESIAN DATA */}
+      {/* CARTESIAN PANEL (Height: 85px) */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px',
-        backgroundColor: 'rgba(26, 30, 41, 0.85)', backdropFilter: 'blur(5px)',
-        borderTop: '1px solid rgba(255,255,255,0.1)', zIndex: 10,
-        display: 'flex', alignItems: 'center', padding: '0 25px'
+        position: 'absolute', bottom: 0, left: 0, right: '110px', height: '85px',
+        backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10,
+        display: 'flex', alignItems: 'center', padding: '0 20px'
       }}>
-        <div style={{ color: '#00bcd4', fontWeight: 'bold', fontSize: '1rem', letterSpacing: '1px', marginRight: '40px' }}>CARTESIAN</div>
+        <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1rem', letterSpacing: '1px', marginRight: '20px' }}>CARTESIAN</div>
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
           {[ {l: 'X (mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y (mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z (mm)', v: c.z, clr: '#00bcd4'},
              {l: 'A (°)', v: c.rx, clr: '#fff'}, {l: 'B (°)', v: c.ry, clr: '#fff'}, {l: 'C (°)', v: c.rz, clr: '#fff'} 
           ].map(item => (
             <div key={item.l} style={{ textAlign: 'center' }}>
               <div style={{ color: '#aaa', fontSize: '0.75rem', marginBottom: '6px', fontWeight: 'bold' }}>{item.l}</div>
-              <div style={{ color: item.clr, fontSize: '1.3rem', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+              <div style={{ color: item.clr, fontSize: '1.3rem', fontWeight: '900', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
                 {item.v !== undefined ? item.v.toFixed(3) : "0.000"}
               </div>
             </div>
@@ -143,19 +142,31 @@ const RobotScene = () => {
         </div>
       </div>
 
-      <Canvas camera={{ position: [0, -5000, 2500], up: [0, 0, 1], fov: 45, near: 1, far: 25000 }}>
-        <ambientLight intensity={0.6} />
-        <pointLight position={[2000, -2000, 5000]} intensity={1.5} />
-        <directionalLight position={[-1000, -1000, 1000]} intensity={0.5} />
-        <OrbitControls makeDefault target={[0, 0, 500]} maxDistance={10000} minDistance={200} />
-        <group><RawWebGLGridLines /><WorldCoordinates /></group>
-        <Suspense fallback={null}>
-          <group rotation={[0, 0, -Math.PI / 2]}><RealRobot /></group>
-        </Suspense>
-        <GizmoHelper alignment="bottom-right" margin={[120, 120]}>
-          <GizmoViewport axisColors={[COLORS.X_RED, COLORS.Y_GREEN, COLORS.Z_BLUE]} labelColor="white" />
-        </GizmoHelper>
-      </Canvas>
+      {/* THE MAGIC FIX: 
+          Instead of rendering the Canvas under the absolute panels, we wrap it in a div 
+          that stops exactly where the UI panels begin (right: 110px, bottom: 85px). 
+          This means the 3D grid and Gizmo will perfectly center in the visible area!
+      */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: '110px', bottom: '85px' }}>
+        <Canvas camera={{ position: [0, -5000, 2500], up: [0, 0, 1], fov: 45, near: 1, far: 25000 }}>
+          <ambientLight intensity={0.6} />
+          <pointLight position={[2000, -2000, 5000]} intensity={1.5} />
+          <directionalLight position={[-1000, -1000, 1000]} intensity={0.5} />
+          
+          <OrbitControls makeDefault target={[0, 0, 500]} maxDistance={10000} minDistance={200} />
+          
+          <group><RawWebGLGridLines /><WorldCoordinates /></group>
+          <Suspense fallback={null}>
+            <group rotation={[0, 0, -Math.PI / 2]}><RealRobot /></group>
+          </Suspense>
+          
+          {/* Gizmo returns to standard margin because the Canvas itself is no longer covered! */}
+          <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+            <GizmoViewport axisColors={[COLORS.X_RED, COLORS.Y_GREEN, COLORS.Z_BLUE]} labelColor="white" />
+          </GizmoHelper>
+        </Canvas>
+      </div>
+      
     </div>
   );
 };

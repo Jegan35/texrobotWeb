@@ -8,7 +8,7 @@ const DEG_OPTIONS = ["deg", "20", "15", "10", "5", "2", "1", "0.1", "0.01", "0.0
 const FRAME_OPTIONS = ["frames", "Base", "Tool", "User"];
 
 const RightPart = () => {
-  const { sendCommand } = useWebSocket();
+  const { sendCommand, robotState } = useWebSocket();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
@@ -23,6 +23,11 @@ const RightPart = () => {
   const isJog = currentView.includes('JOG');
   const isJoints = currentView.includes('JOINTS');
   const motionType = isJog ? 'JOG' : 'MOVE';
+
+  // --- FILE DATA FROM BACKEND ---
+  const rs = robotState || {};
+  const tpList = rs.tp_list || [];
+  const prList = rs.pr_program_data || [];
 
   const handlePointerDown = (axis) => sendCommand(motionType === 'JOG' ? "BTN_PRESS" : "BTN_CLICK", axis);
   const handlePointerUp = (axis) => { if (motionType === 'JOG') sendCommand("BTN_RELEASE", axis); };
@@ -135,16 +140,15 @@ const RightPart = () => {
         .dark-tab { padding: 6px 1cqw; color: #aaa; font-weight: bold; font-size: clamp(8px, 1.4cqw, 12px); cursor: pointer; border-radius: 4px 4px 0 0; white-space: nowrap; }
         .dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-bottom: none; }
 
-        /* FIXED: Set to overflow: auto and allow horizontal scrolling if it gets incredibly small */
         .table-container { flex: 1; overflow: auto; padding: 5px 1cqw; display: flex; flex-direction: column; min-height: 0; }
         
-        .data-table { width: 100%; height: 100%; border-collapse: collapse; font-weight: bold; background: white; border: 1px solid #ccc; text-align: center; table-layout: fixed; }
+        .data-table { width: 100%; border-collapse: collapse; font-weight: bold; background: white; border: 1px solid #ccc; text-align: center; }
         .data-table th, .data-table td { padding: 4px 0.5cqw; font-size: clamp(7px, 1.3cqw, 12px); border: 1px solid #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .data-table th { background: #e0e0e0; color: #111; }
+        .data-table th { background: #e0e0e0; color: #111; position: sticky; top: 0; z-index: 5; }
         .data-table td { color: #333; }
         .tr-blue { background-color: #bbdefb; }
+        .empty-table-text { color: #aaa; font-style: italic; font-weight: normal; padding: 20px !important; }
 
-        /* FIXED: Shrunk gaps to 2px/4px and used tight font sizes so the 7 columns NEVER hide */
         .var-grid { 
             display: grid; 
             grid-template-columns: repeat(7, max-content minmax(15px, 1fr)); 
@@ -175,6 +179,8 @@ const RightPart = () => {
 
       <div className="rp-master-container">
         <div className="rp-main-content">
+            
+            {/* ROW 1 */}
             <div className="rp-row-1">
                 <div style={{ flex: '0 0 15%', minHeight: 0, overflow: 'hidden' }}>
                     <RightHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} currentMode={currentView} isOpen={isSidebarOpen} />
@@ -184,7 +190,6 @@ const RightPart = () => {
                     <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column', borderRight: '2px solid #111', background: currentView === 'SPEED CONFIG' ? '#1a1e29' : '#151822', overflowY: 'auto', overflowX: 'hidden' }}>
                         {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
                     </div>
-                    
                     <div style={{ flex: '0 0 70%', display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
                         <div className="dark-tabs">
                             <div className="dark-tab active">Error Pos</div>
@@ -211,6 +216,7 @@ const RightPart = () => {
                 </div>
             </div>
 
+            {/* ROW 2: DYNAMICALLY READS FROM BACKEND! */}
             <div className="rp-row-2">
                 <div className="dark-tabs" style={{ background: '#202430' }}>
                     <div className="dark-tab active">Programs File</div>
@@ -219,28 +225,55 @@ const RightPart = () => {
                     <div className="dark-tab">Data Variable</div>
                     <div className="dark-tab">Axis Limit</div>
                 </div>
-                <div className="table-container" style={{ display: 'flex', gap: '1cqw', flexDirection: 'row' }}>
-                    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex' }}>
+                <div className="table-container" style={{ display: 'flex', gap: '1cqw', flexDirection: 'row', padding: 0 }}>
+                    
+                    {/* LEFT TABLE: Target Points (tp_list) */}
+                    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', overflowY: 'auto' }}>
                         <table className="data-table">
                             <thead><tr><th>S.No</th><th>Name</th><th>Value</th><th style={{background:'#2196f3', color:'white'}}>[]</th></tr></thead>
                             <tbody>
-                                <tr className="tr-blue"><td>1</td><td>tp1</td><td>x:939 z:1151</td><td>a:0</td></tr>
-                                <tr><td>2</td><td>tp2</td><td>x:939 z:1151</td><td>a:0</td></tr>
+                                {tpList.length === 0 ? (
+                                    <tr><td colSpan="4" className="empty-table-text">Please open a TP file</td></tr>
+                                ) : (
+                                    tpList.map((item, i) => (
+                                        <tr key={i} className={i === 0 ? "tr-blue" : ""}>
+                                            <td>{i + 1}</td>
+                                            <td>{item.name || `tp${i+1}`}</td>
+                                            <td>x:{(Number(item.x)||0).toFixed(2)} z:{(Number(item.z)||0).toFixed(2)}</td>
+                                            <td>a:{(Number(item.rx)||0).toFixed(2)}</td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex' }}>
+
+                    {/* RIGHT TABLE: Program Instructions (pr_program_data) */}
+                    <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', overflowY: 'auto' }}>
                         <table className="data-table">
                             <thead><tr><th>S.No</th><th>Inst</th><th>Name</th><th>Value</th><th style={{background:'#2196f3', color:'white'}}>[]</th></tr></thead>
                             <tbody>
-                                <tr className="tr-blue"><td>1</td><td>MOVL</td><td>tp1</td><td></td><td></td></tr>
-                                <tr><td>2</td><td>MOVL</td><td>tp2</td><td></td><td></td></tr>
+                                {prList.length === 0 ? (
+                                    <tr><td colSpan="5" className="empty-table-text">Please open a Program file</td></tr>
+                                ) : (
+                                    prList.map((item, i) => (
+                                        <tr key={i} className={i === 0 ? "tr-blue" : ""}>
+                                            <td>{i + 1}</td>
+                                            <td>{item.inst || 'MOVL'}</td>
+                                            <td>{item.name || `tp${i+1}`}</td>
+                                            <td>{item.value || ''}</td>
+                                            <td>{item.deg || ''}</td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
+
                 </div>
             </div>
 
+            {/* ROW 3 */}
             <div className="rp-row-3">
                 <div className="btn-row-flex">
                     <button className="tp-btn cyan">⚙ MOVL</button>
@@ -258,6 +291,7 @@ const RightPart = () => {
                 </div>
             </div>
 
+            {/* ROW 4 */}
             <div className="rp-row-4">
                 <div className="dark-tabs" style={{ background: '#202430' }}>
                     <div className="dark-tab active">Inst</div>
@@ -272,6 +306,7 @@ const RightPart = () => {
                 </div>
             </div>
 
+            {/* ROW 5 */}
             <div className="rp-row-5">
                 <div className="btn-row-flex">
                     <select className="ft-select"><option>Inst</option></select>
