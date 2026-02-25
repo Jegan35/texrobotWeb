@@ -1,34 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
 import RightHeader from './RightHeader';
 import RightMenuSidebar from './RightMenuSidebar';
 
+// --- DATA MODELS ---
+const INST_OPTIONS = ["Inst", "MOVJ", "MOVJ_dg", "MOVL", "MOVC", "MVLEX_Deg", "MVLEX_mm", "Pallet_Matrix", "Num_of_row", "Num_of_colm", "pos_add_x", "pos_add_y", "pos_add_z", "delay_ms", "go_to", "loop", "Start If", "End If", "Start-Con", "End-Con", "Wait", "DI-1", "DI-2", "DI-3", "DI-4", "DI-5", "DI-6", "DI-7", "DI-8", "DI-9", "DI-10", "DI-11", "DI-12", "DI-13", "DI-14", "DI-15", "DI-16", "DO-1", "DO-2", "DO-3", "DO-4", "DO-5", "DO-6", "DO-7", "DO-8", "DO-9", "DO-10", "DO-11", "DO-12", "DO-13", "DO-14", "DO-15", "DO-16", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4", "DI-1 Chk", "DI-2 Chk", "DI-3 Chk", "DI-4 Chk", "DI-5 Chk", "DI-6 Chk", "DI-7 Chk", "DI-8 Chk", "DI-9 Chk", "DI-10 Chk", "DI-11 Chk", "DI-12 Chk", "DI-13 Chk", "DI-14 Chk", "DI-15 Chk", "DI-16 Chk", "DI-1 Un Chk", "DI-2 Un Chk", "DI-3 Un Chk", "DI-4 Un Chk", "DI-5 Un Chk", "DI-6 Un Chk", "DI-7 Un Chk", "DI-8 Un Chk", "DI-9 Un Chk", "DI-10 Un Chk", "DI-11 Un Chk", "DI-12 Un Chk", "DI-13 Un Chk", "DI-14 Un Chk", "DI-15 Un Chk", "DI-16 Un Chk", "= Assign", "== Equal", "!= Not Eql", "<", ">", "<=", ">=", "+", "-", "&", "stop", "Servo off"];
+const DI_OPTIONS = ["Di-1", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
+const DI2_OPTIONS = ["Di-2", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
+const DIG_STATE_OPTIONS = ["Dig-state", "High", "Low"];
+const VAR1_OPTIONS = ["Vr_1", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
+const VAR2_OPTIONS = ["Vr_2", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
 const MM_OPTIONS = ["mm", "50", "25", "15", "10", "5", "2", "1", "0.1", "0.01", "0.001"];
 const DEG_OPTIONS = ["deg", "20", "15", "10", "5", "2", "1", "0.1", "0.01", "0.001", "0.0001"];
 const FRAME_OPTIONS = ["frames", "Base", "Tool", "User"];
+
+const MemoizedTpTableBody = memo(({ tpList, expandedTable, selectedTpIndex, onRowClick }) => {
+    if (tpList.length === 0) {
+        return <tbody><tr><td colSpan={expandedTable === 'TP' ? "7" : "4"} className="empty-table-text">Please open a Target Point file</td></tr></tbody>;
+    }
+    return (
+        <tbody>
+            {tpList.map((item, i) => (
+                <tr key={i} className={`tr-hover ${i === selectedTpIndex ? "tr-blue" : ""}`} onClick={() => onRowClick(i)}>
+                    <td>{i + 1}</td>
+                    <td>{item.name || `tp${i+1}`}</td>
+                    <td>{item.value || ''}</td>
+                    {expandedTable === 'TP' && (
+                        <>
+                            <td>{item.deg || '--'}</td>
+                            <td>{item.tool !== undefined ? item.tool : '--'}</td>
+                            <td>{item.frame !== undefined ? item.frame : '--'}</td>
+                        </>
+                    )}
+                    <td></td> 
+                </tr>
+            ))}
+        </tbody>
+    );
+});
+
+const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, onRowClick }) => {
+    if (prList.length === 0) {
+        return <tbody><tr><td colSpan={expandedTable === 'PR' ? "13" : "5"} className="empty-table-text">Please open a Program file</td></tr></tbody>;
+    }
+    return (
+        <tbody>
+            {prList.map((item, i) => (
+                <tr key={i} className={`tr-hover ${i === selectedPrIndex ? "tr-blue" : ""}`} onClick={() => onRowClick(i)}>
+                    <td>{i + 1}</td>
+                    <td>{item.inst || 'MOVL'}</td>
+                    <td>{item.name || ''}</td>
+                    <td>{item.value || ''}</td>
+                    {expandedTable === 'PR' && (
+                        <>
+                            <td>{item.speed || '--'}</td>
+                            <td>{item.deg || '--'}</td>
+                            <td>{item.rad || '--'}</td>
+                            <td>{item.tool || '--'}</td>
+                            <td>{item.frame || '--'}</td>
+                            <td>{item.comt || '--'}</td>
+                            <td>{item.dist || '--'}</td>
+                            <td>{item.time || '--'}</td>
+                        </>
+                    )}
+                    <td></td>
+                </tr>
+            ))}
+        </tbody>
+    );
+});
 
 const RightPart = () => {
   const { sendCommand, robotState } = useWebSocket();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
-  // --- MAXIMIZE & ROW 3 STATES ---
   const [expandedTable, setExpandedTable] = useState('NONE'); 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [instInput, setInstInput] = useState('');
-
-  // --- NEW: ROW SELECTION STATES ---
+  const [displayTpMode, setDisplayTpMode] = useState('TP Mode');
   const [selectedTpIndex, setSelectedTpIndex] = useState(0);
   const [selectedPrIndex, setSelectedPrIndex] = useState(0);
-
-  // --- MODIFY TP MODAL STATES ---
   const [showModTpModal, setShowModTpModal] = useState(false);
   const [modTpData, setModTpData] = useState({ name: '', x: '', y: '', z: '' });
+  const [activeRow2Tab, setActiveRow2Tab] = useState('Programs File');
 
-  // --- ROW 3 INPUT STATES ---
   const [ipPgInput, setIpPgInput] = useState('0');
   const [tpNameVal, setTpNameVal] = useState('0');
   const [comVal, setComVal] = useState('0');
+  
+  const [delayVal, setDelayVal] = useState('0');
+  const [gotoVal, setGotoVal] = useState('0');
+  const [loopVal, setLoopVal] = useState('0');
+  const [progSpeedVal, setProgSpeedVal] = useState('0');
+  const [radiusVal, setRadiusVal] = useState('0');
+  const [varInputVal, setVarInputVal] = useState('0');
+  const [anIpVal, setAnIpVal] = useState('0');
+  const [anOpVal, setAnOpVal] = useState('0');
 
   const [globalSpeed, setGlobalSpeed] = useState(50);
   const [frameVal, setFrameVal] = useState(FRAME_OPTIONS[0]);
@@ -41,64 +109,161 @@ const RightPart = () => {
   const isJoints = currentView.includes('JOINTS');
   const motionType = isJog ? 'JOG' : 'MOVE';
 
-  // --- FILE DATA FROM BACKEND ---
   const rs = robotState || {};
   const tpList = rs.tp_list || [];
   const prList = rs.pr_program_data || [];
-  const tpRunMode = rs.tp_run_mode || 'TP Mode';
+  const staging = rs.staging_data || {};
+  
+  // --- ADDED MISSING VARIABLE ---
+  const isCalculating = rs.is_calculating_trajectory === true;
 
-  useEffect(() => {
-      if (rs.current_tp_name && rs.current_tp_name !== "None") {
-          setTpNameVal(rs.current_tp_name);
-      }
-  }, [rs.current_tp_name]);
+  useEffect(() => { if (rs.tp_run_mode) setDisplayTpMode(rs.tp_run_mode); }, [rs.tp_run_mode]);
+  useEffect(() => { if (rs.current_tp_name && rs.current_tp_name !== "None") setTpNameVal(rs.current_tp_name); }, [rs.current_tp_name]);
 
   const handlePointerDown = (axis) => sendCommand(motionType === 'JOG' ? "BTN_PRESS" : "BTN_CLICK", axis);
   const handlePointerUp = (axis) => { if (motionType === 'JOG') sendCommand("BTN_RELEASE", axis); };
-
   const handleGlobalSpeedChange = (e) => { setGlobalSpeed(e.target.value); sendCommand("SET_GLOBAL_SPEED", e.target.value); };
   const applyMmSpeed = () => sendCommand("SET_MM_SPEED", mmSpeedText);
   const applyDegSpeed = () => sendCommand("SET_DEG_SPEED", degSpeedText);
+  const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
+  
+  const handleTpModeSelect = (uiLabel, backendCmd) => { setDisplayTpMode(uiLabel); sendCommand('SET_TP_RUN_MODE', backendCmd); setOpenDropdown(null); };
 
-  const toggleDropdown = (menu) => {
-      setOpenDropdown(openDropdown === menu ? null : menu);
-  };
+  const handleTpRowClick = useCallback((index) => { setSelectedTpIndex(index); sendCommand('SELECT_TP_INDEX', index); }, [sendCommand]);
+  const handlePrRowClick = useCallback((index) => { setSelectedPrIndex(index); sendCommand('SELECT_PR_ROW', index); }, [sendCommand]);
 
-  // --- NEW: ROW CLICK HANDLERS ---
-  const handleTpRowClick = (index) => {
-      setSelectedTpIndex(index);
-      sendCommand('SELECT_TP_INDEX', index);
-  };
-
-  const handlePrRowClick = (index) => {
-      setSelectedPrIndex(index);
-      sendCommand('SELECT_PR_ROW', index);
-  };
-
-  // --- SMART MODIFY TP HANDLER ---
   const openModifyTpModal = () => {
       const item = tpList[selectedTpIndex] || {};
       let cx = '', cy = '', cz = '';
-      
-      // Extract X, Y, Z from the backend string (e.g., "x:100.0 y:200.0 z:300.0")
       if (item.value) {
           const matchX = item.value.match(/x:([-\d.]+)/);
           const matchY = item.value.match(/y:([-\d.]+)/);
           const matchZ = item.value.match(/z:([-\d.]+)/);
-          if (matchX) cx = matchX[1];
-          if (matchY) cy = matchY[1];
-          if (matchZ) cz = matchZ[1];
+          if (matchX) cx = matchX[1]; if (matchY) cy = matchY[1]; if (matchZ) cz = matchZ[1];
       }
-      
       setModTpData({ name: item.name || '', x: cx, y: cy, z: cz });
-      setShowModTpModal(true);
-      setOpenDropdown(null);
+      setShowModTpModal(true); setOpenDropdown(null);
   };
 
   const handleModifyConfirm = () => {
       sendCommand('MODIFY_TP', '', { name: modTpData.name, x: modTpData.x, y: modTpData.y, z: modTpData.z });
       setShowModTpModal(false);
   };
+
+  // --- FIXED: ENCODER OFFSET VIEW ---
+  const renderEncoderOffset = () => (
+      <div className="light-panel" style={{ padding: '15px 25px', overflowX: 'auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(80px, 1fr) max-content minmax(80px, 1fr) max-content minmax(80px, 1fr)', gap: '12px 25px', alignItems: 'center', minWidth: '700px' }}>
+              {[1,2,3,4,5,6].map(i => (
+                  <React.Fragment key={i}>
+                      <span className="light-label" style={{textAlign: 'left'}}>J{i}-Encoder Pos</span>
+                      <input className="light-input" readOnly placeholder="0" />
+                      <span className="light-label" style={{textAlign: 'left'}}>J{i}-Encoder Offset</span>
+                      <input className="light-input" placeholder="0" />
+                      <button className="light-btn" onClick={() => sendCommand('ZERO_AXIS', i)}>J{i} - Zero</button>
+                      <input className="light-input" placeholder="0" />
+                  </React.Fragment>
+              ))}
+          </div>
+      </div>
+  );
+
+  const renderSettingsView = () => (
+      <div className="light-panel">
+          <div style={{ display: 'grid', gridTemplateColumns: 'auto 100px auto 100px', gap: '15px 30px', alignItems: 'center' }}>
+              <span className="light-label">Ace_tm %</span><input className="light-input" style={{background: '#00E676', color: '#000'}} defaultValue="50"/>
+              <span className="light-label">Dec sp %</span><input className="light-input" defaultValue="100"/>
+              
+              <span className="light-label">Dec_tm %</span><input className="light-input" defaultValue="50"/>
+              <span className="light-label">Init_vel %</span><input className="light-input" defaultValue="0"/>
+              
+              <span className="light-label">Ace sp %</span><input className="light-input" defaultValue="100"/>
+              <span className="light-label">end_vel %</span><input className="light-input" defaultValue="0"/>
+          </div>
+          <button className="light-btn" style={{marginTop: '25px', width: '120px', padding: '8px'}}>Ok</button>
+      </div>
+  );
+
+  const renderDataVariable = () => (
+      <div className="light-panel" style={{ display: 'flex', gap: '20px', justifyContent: 'space-between' }}>
+          <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: '15px' }}>
+              <div style={{ fontWeight: '900', marginBottom: '15px', textAlign: 'center', color: '#333' }}>Output Monitor</div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                  <select className="light-input"><option>V-1</option></select>
+                  <input className="light-input" style={{ color: 'blue', background: '#e0e0e0', textAlign: 'center' }} value="0" readOnly />
+              </div>
+          </div>
+          <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: '15px' }}>
+              <div style={{ fontWeight: '900', marginBottom: '15px', textAlign: 'center', color: '#333' }}>Input Control</div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                  <select className="light-input"><option>V-1</option></select>
+                  <input className="light-input" placeholder="Value" />
+              </div>
+          </div>
+          <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: '900', marginBottom: '15px', textAlign: 'center', color: '#333' }}>Instruction No.</div>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#555' }}>Inst #</span>
+                  <input className="light-input" placeholder="#" />
+              </div>
+          </div>
+      </div>
+  );
+
+  const renderAxisLimit = () => (
+      <div className="light-panel" style={{ display: 'flex', gap: '15px', justifyContent: 'space-between' }}>
+          <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: '10px' }}>
+              <div style={{ fontWeight: '900', marginBottom: '15px', color: '#333' }}>Digital Outputs</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px', alignItems: 'center' }}>
+                  <span className="light-label">Digital Out</span><input className="light-input" />
+                  <span className="light-label">Analog 1</span><input className="light-input" />
+                  <span className="light-label">Analog 2</span><input className="light-input" />
+              </div>
+          </div>
+          <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: '10px' }}>
+              <div style={{ fontWeight: '900', marginBottom: '15px', color: '#333' }}>Digital Inputs</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <button className="light-btn">High_1</button><button className="light-btn">low_1</button>
+                  <button className="light-btn">High_2</button><button className="light-btn">low_2</button>
+                  <button className="light-btn">test_1</button>
+              </div>
+          </div>
+          <div style={{ flex: 1.2 }}>
+              <div style={{ fontWeight: '900', marginBottom: '15px', color: '#333' }}>Simulation</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', gap: '8px', alignItems: 'center' }}>
+                  <span className="light-label">DI Sim:</span><select className="light-input"><option>DI</option></select><select className="light-input"><option>State</option></select>
+                  <span className="light-label">DO Sim:</span><select className="light-input"><option>DO</option></select><select className="light-input"><option>State</option></select>
+                  <span className="light-label">Remote:</span><button className="light-btn">rem_h</button><button className="light-btn">rem_l</button>
+              </div>
+          </div>
+      </div>
+  );
+
+  const renderMechSettings = () => (
+      <div className="light-panel" style={{ padding: 0 }}>
+          <table className="mech-table">
+              <thead>
+                  <tr>
+                      <th></th><th>Dh-nal</th><th>Encod</th><th>Gear R</th><th>deg c</th><th>couple</th><th>joint min</th><th>joint max</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {['l1', 'l2', 'l3', 'l4', 'l5', 'l6'].map(row => (
+                      <tr key={row}>
+                          <td style={{fontWeight: '900', fontSize: '0.8rem'}}>{row}</td>
+                          <td><input className="light-input" /></td>
+                          <td><input className="light-input" /></td>
+                          <td><input className="light-input" /></td>
+                          <td><input className="light-input" /></td>
+                          <td><input className="light-input" /></td>
+                          <td><input className="light-input" /></td>
+                          <td><input className="light-input" /></td>
+                      </tr>
+                  ))}
+              </tbody>
+          </table>
+      </div>
+  );
 
   const renderSpeedConfig = () => (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', minHeight: '100%', background: '#1a1e29', padding: '15px 10px', color: 'white', boxSizing: 'border-box' }}>
@@ -147,10 +312,23 @@ const RightPart = () => {
         .rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; container-type: size; overflow: hidden; }
 
         .rp-row-1 { flex: 30 1 0; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; }
-        .rp-row-2 { flex: 38 1 0; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; }
+        .rp-row-2 { flex: 30 1 0; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; } 
         .rp-row-3 { flex: 10 1 0; display: flex; flex-direction: column; justify-content: center; background: #202430; padding: 4px 1cqw; overflow: visible; min-height: 0; position: relative; z-index: 50; }
-        .rp-row-4 { flex: 13 1 0; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; position: relative; z-index: 10; }
+        .rp-row-4 { flex: 21 1 0; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; position: relative; z-index: 10; } 
         .rp-row-5 { flex: 9 1 0; display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 0.5cqh 1cqw; overflow: hidden; min-height: 0; }
+
+        .row2-content { flex: 1; overflow: auto; background: #f4f3ef; color: #111; }
+        .light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; }
+        .light-input { border: 1px solid #aaa; padding: 4px 6px; border-radius: 2px; width: 100%; box-sizing: border-box; font-weight: 900; font-size: 0.75rem; color: #111; background: #fff; outline: none; }
+        .light-input:focus { border-color: #039BE5; background: #e3f2fd; }
+        .light-btn { background: #fff; border: 1px solid #888; padding: 4px 10px; cursor: pointer; font-weight: 900; text-align: center; border-radius: 4px; box-shadow: 0 2px 0 rgba(0,0,0,0.1); color: #333; font-size: 0.75rem; transition: 0.1s; white-space: nowrap; }
+        .light-btn:active { transform: translateY(2px); box-shadow: none; }
+        .light-label { font-weight: 900; text-align: right; padding-right: 5px; white-space: nowrap; align-self: center; color: #333; font-size: 0.75rem; }
+        
+        .mech-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .mech-table th { border: 1px solid #ccc; padding: 6px; font-size: 0.75rem; background: #e0e0e0; color: #111; position: sticky; top: 0; }
+        .mech-table td { padding: 3px 5px; border: 1px solid #ddd; }
+        .mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #ccc; padding: 4px; font-weight: 900; font-size: 0.75rem; }
 
         .fluid-speed-row { display: flex; align-items: center; justify-content: space-between; flex: 1; min-height: 25px; }
         .fluid-speed-label { font-size: clamp(10px, 1.5cqw, 14px); font-weight: bold; color: #ccc; white-space: nowrap; }
@@ -164,28 +342,26 @@ const RightPart = () => {
         .btn-sym { font-size: 1.2em; font-weight: 900; text-shadow: 0 2px 2px rgba(0,0,0,0.3); }
 
         .dark-tabs { display: flex; background: #1a1e29; padding-top: 5px; padding-left: 0.5cqw; border-bottom: 2px solid #00bcd4; overflow: hidden; flex-shrink: 0; }
-        .dark-tab { padding: 6px 1cqw; color: #aaa; font-weight: bold; font-size: clamp(10px, 1.4cqw, 14px); cursor: pointer; border-radius: 4px 4px 0 0; white-space: nowrap; }
+        .dark-tab { padding: 6px 1cqw; color: #aaa; font-weight: bold; font-size: clamp(9px, 1.2cqw, 13px); cursor: pointer; border-radius: 4px 4px 0 0; white-space: nowrap; }
         .dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-bottom: none; }
 
         .table-container { flex: 1; display: flex; flexDirection: row; min-height: 0; padding: 0; background: #2b303b; }
-        .table-wrapper { flex: 1; overflow: auto; display: block; background: #fff; }
+        .table-wrapper { flex: 1; overflow-y: auto; overflow-x: auto; display: block; background: #fff; width: 100%; }
         .table-wrapper::-webkit-scrollbar { width: 14px; height: 14px; }
         .table-wrapper::-webkit-scrollbar-track { background: #1a1e29; border-radius: 0px; }
         .table-wrapper::-webkit-scrollbar-thumb { background: #00bcd4; border-radius: 7px; border: 2px solid #1a1e29; }
         .table-wrapper::-webkit-scrollbar-thumb:hover { background: #039BE5; }
         
-        .data-table { width: 100%; border-collapse: collapse; font-weight: bold; background: white; border: 1px solid #ccc; text-align: center; }
-        .data-table th, .data-table td { padding: 5px 6px; font-size: clamp(9px, 1vw, 13px); border: 1px solid #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 65px; height: 35px; }
+        .data-table { width: 100%; min-width: max-content; border-collapse: collapse; font-weight: bold; background: white; border: 1px solid #ccc; text-align: center; }
+        .data-table th, .data-table td { padding: 8px 10px; font-size: clamp(10px, 1.2vw, 15px); border: 1px solid #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 80px; height: 40px; }
         .data-table th { background: #e0e0e0; color: #111; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 2px rgba(0,0,0,0.1); }
         .data-table td { color: #333; }
-        
-        /* THE ROW HIGHLIGHT COLOR (Active Selection) */
         .tr-blue { background-color: #bbdefb !important; }
         .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
         
-        .empty-table-text { color: #aaa; font-style: italic; font-weight: normal; padding: 20px !important; height: auto !important; }
-        .data-table th:first-child, .data-table td:first-child { min-width: 40px; width: 40px; }
-        .min-max-btn { background: #2196f3 !important; color: white !important; cursor: pointer; transition: 0.2s; font-weight: 900; position: sticky; right: 0; z-index: 10 !important; width: 45px; min-width: 45px; text-align: center; box-shadow: -2px 0 5px rgba(0,0,0,0.2); }
+        .empty-table-text { color: #aaa; font-style: italic; font-weight: normal; padding: 30px !important; height: auto !important; }
+        .data-table th:first-child, .data-table td:first-child { min-width: 45px; width: 45px; }
+        .min-max-btn { background: #2196f3 !important; color: white !important; cursor: pointer; transition: 0.2s; font-weight: 900; position: sticky; right: 0; z-index: 10 !important; width: 50px; min-width: 50px; text-align: center; box-shadow: -2px 0 5px rgba(0,0,0,0.2); }
         .min-max-btn:hover { background: #0b7dda !important; }
 
         .var-grid { display: grid; grid-template-columns: repeat(7, max-content minmax(15px, 1fr)); gap: 2px 4px; align-items: center; height: 100%; padding-right: 5px; }
@@ -209,16 +385,17 @@ const RightPart = () => {
         .btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); box-shadow: 0 2px 0 #003300, 0 3px 3px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
         .btn-teal { background: linear-gradient(180deg, #26A69A 0%, #00695C 100%); box-shadow: 0 2px 0 #003D33, 0 3px 3px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
         .btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); box-shadow: 0 2px 0 #151822, 0 3px 3px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+        .btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); box-shadow: 0 2px 0 #7F0000, 0 3px 3px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
 
         .tp-standalone-input {
             flex: 1; min-width: 0; height: 100%; min-height: 26px;
             background: #fff; border: 2px solid rgba(0,0,0,0.8); border-radius: 4px;
             text-align: center; font-weight: 900; font-size: clamp(8px, 1vw, 12px);
             color: #111; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-            transition: 0.2s;
+            transition: 0.2s; padding: 0 2px; cursor: pointer;
         }
         .tp-standalone-input:focus { border-color: #039BE5; background: #e1f5fe; }
-
+        
         .dropdown-menu {
             position: absolute; bottom: 120%; left: 0; width: 100%; min-width: 140px; 
             background: #1e222b; border: 2px solid #333; z-index: 2000; border-radius: 6px; 
@@ -235,16 +412,14 @@ const RightPart = () => {
         .dd-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); }
         .dd-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); }
         .dd-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); }
-
-        .ft-select { flex: 1; min-width: 0; height: 100%; background: #333; color: white; border: 1px solid #555; padding: 0 0.5cqw; border-radius: 4px; font-size: clamp(7px, 1.3cqw, 12px); font-weight: bold; outline: none; }
-        .ft-group { flex: 1; min-width: 0; height: 100%; display: flex; background: #333; border: 1px solid #555; border-radius: 4px; overflow: hidden; }
-        .ft-label { padding: 0 0.5cqw; color: white; font-size: clamp(7px, 1.3cqw, 12px); font-weight: bold; background: #4b5563; white-space: nowrap; display: flex; align-items: center; }
-        .ft-input { flex: 1; min-width: 0; height: 100%; border: none; text-align: center; font-size: clamp(7px, 1.3cqw, 12px); font-weight: bold; outline: none; }
+        
+        @keyframes spinClockwise { 100% { transform: rotate(360deg); } }
+        @keyframes spinCounter { 100% { transform: rotate(-360deg); } }
+        
+        .spinner-outer { width: 64px; height: 64px; border-radius: 50%; border: 4px solid transparent; border-top-color: #039BE5; border-right-color: #039BE5; animation: spinClockwise 1s linear infinite; position: relative; }
+        .spinner-inner { position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px; border-radius: 50%; border: 4px solid transparent; border-bottom-color: #4CAF50; border-left-color: #4CAF50; animation: spinCounter 1.5s linear infinite; }
       `}</style>
 
-      {/* ==========================================
-          MODIFY TP MODAL OVERLAY
-          ========================================== */}
       {showModTpModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ backgroundColor: '#202430', borderTop: '4px solid #8e24aa', borderRadius: '8px', padding: '20px', width: '320px', display: 'flex', flexDirection: 'column', gap: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)' }}>
@@ -264,6 +439,20 @@ const RightPart = () => {
         </div>
       )}
 
+      {isCalculating && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ backgroundColor: '#202430', border: '1px solid #3B3B50', borderRadius: '12px', padding: '30px', width: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', boxShadow: '0 0 20px rgba(3,155,229,0.3)', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: -1, left: -1, right: -1, bottom: -1, border: '2px solid #039BE5', borderRadius: '13px', opacity: 0.5, pointerEvents: 'none' }}></div>
+                <div className="spinner-outer"><div className="spinner-inner"></div></div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ color: 'white', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1.5px' }}>CALCULATING TRAJECTORY</div>
+                    <div style={{ color: '#90A4AE', fontSize: '0.85rem', textAlign: 'center', lineHeight: '1.4' }}>Please wait while the robotic<br/>path is being generated...</div>
+                </div>
+                <button className="tp-btn btn-red" style={{ width: '150px', height: '40px', marginTop: '10px' }} onClick={() => sendCommand('CANCEL_CALCULATION')}>FORCE CANCEL</button>
+            </div>
+        </div>
+      )}
+
       <div className="rp-master-container">
         <div className="rp-main-content">
             
@@ -271,7 +460,6 @@ const RightPart = () => {
                 <div style={{ flex: '0 0 15%', minHeight: 0, overflow: 'hidden' }}>
                     <RightHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} currentMode={currentView} isOpen={isSidebarOpen} />
                 </div>
-                
                 <div style={{ flex: '0 0 85%', display: 'flex', minHeight: 0, overflow: 'hidden' }}>
                     <div style={{ flex: '0 0 30%', minWidth: 0, display: 'flex', flexDirection: 'column', borderRight: '2px solid #111', background: currentView === 'SPEED CONFIG' ? '#1a1e29' : '#151822', overflowY: 'auto', overflowX: 'hidden' }}>
                         {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
@@ -304,158 +492,80 @@ const RightPart = () => {
 
             <div className="rp-row-2">
                 <div className="dark-tabs" style={{ background: '#202430' }}>
-                    <div className="dark-tab active">Programs File</div>
-                    <div className="dark-tab">Encoder Offset</div>
-                    <div className="dark-tab">Settings View</div>
-                    <div className="dark-tab">Data Variable</div>
-                    <div className="dark-tab">Axis Limit</div>
+                    {['Programs File', 'Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings'].map(tab => (
+                        <div key={tab} className={`dark-tab ${activeRow2Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow2Tab(tab)}>
+                            {tab}
+                        </div>
+                    ))}
                 </div>
                 
-                <div className="table-container" style={{ gap: expandedTable === 'NONE' ? '4px' : '0' }}>
-                    
-                    {/* LEFT TABLE: Target Points (NOW CLICKABLE WITH STATE SELECTION) */}
-                    {(expandedTable === 'NONE' || expandedTable === 'TP') && (
-                        <div className="table-wrapper">
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>S.No</th>
-                                        <th>Name</th>
-                                        <th>Value</th>
-                                        {expandedTable === 'TP' && (
-                                            <>
-                                                <th>Deg</th>
-                                                <th>Tool</th>
-                                                <th>Frame</th>
-                                            </>
-                                        )}
-                                        <th className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'TP' ? 'NONE' : 'TP')} title={expandedTable === 'TP' ? "Minimize" : "Maximize"}>
-                                            {expandedTable === 'TP' ? '><' : '[ ]'}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {tpList.length === 0 ? (
-                                        <tr><td colSpan={expandedTable === 'TP' ? "7" : "4"} className="empty-table-text">Please open a Target Point file</td></tr>
-                                    ) : (
-                                        tpList.map((item, i) => (
-                                            <tr key={i} 
-                                                className={`tr-hover ${i === selectedTpIndex ? "tr-blue" : ""}`} 
-                                                onClick={() => handleTpRowClick(i)}>
-                                                <td>{i + 1}</td>
-                                                <td>{item.name || `tp${i+1}`}</td>
-                                                <td>{item.value || ''}</td>
-                                                {expandedTable === 'TP' && (
-                                                    <>
-                                                        <td>{item.deg || '--'}</td>
-                                                        <td>{item.tool !== undefined ? item.tool : '--'}</td>
-                                                        <td>{item.frame !== undefined ? item.frame : '--'}</td>
-                                                    </>
-                                                )}
-                                                <td></td> 
+                <div className="row2-content" style={{ display: 'flex', flexDirection: 'column' }}>
+                    {activeRow2Tab === 'Programs File' && (
+                        <div className="table-container" style={{ gap: expandedTable === 'NONE' ? '4px' : '0' }}>
+                            {(expandedTable === 'NONE' || expandedTable === 'TP') && (
+                                <div className="table-wrapper">
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th><th>Name</th><th>Value</th>
+                                                {expandedTable === 'TP' && (<><th>Deg</th><th>Tool</th><th>Frame</th></>)}
+                                                <th className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'TP' ? 'NONE' : 'TP')}> {expandedTable === 'TP' ? '><' : '[ ]'} </th>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                        </thead>
+                                        <MemoizedTpTableBody tpList={tpList} expandedTable={expandedTable} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
+                                    </table>
+                                </div>
+                            )}
+
+                            {(expandedTable === 'NONE' || expandedTable === 'PR') && (
+                                <div className="table-wrapper" style={{ borderLeft: expandedTable === 'NONE' ? '2px solid #202430' : 'none' }}>
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th><th>Inst</th><th>Name</th><th>Value</th>
+                                                {expandedTable === 'PR' && (<><th>Speed</th><th>Deg</th><th>Rad</th><th>Tool</th><th>Frame</th><th>Com</th><th>Dist</th><th>Time</th></>)}
+                                                <th className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'PR' ? 'NONE' : 'PR')}> {expandedTable === 'PR' ? '><' : '[ ]'} </th>
+                                            </tr>
+                                        </thead>
+                                        <MemoizedPrTableBody prList={prList} expandedTable={expandedTable} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     )}
-
-                    {/* RIGHT TABLE: Program Instructions (NOW CLICKABLE WITH STATE SELECTION) */}
-                    {(expandedTable === 'NONE' || expandedTable === 'PR') && (
-                        <div className="table-wrapper" style={{ borderLeft: expandedTable === 'NONE' ? '2px solid #202430' : 'none' }}>
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>S.No</th>
-                                        <th>Inst</th>
-                                        <th>Name</th>
-                                        <th>Value</th>
-                                        {expandedTable === 'PR' && (
-                                            <>
-                                                <th>Speed</th>
-                                                <th>Deg</th>
-                                                <th>Rad</th>
-                                                <th>Tool</th>
-                                                <th>Frame</th>
-                                                <th>Com</th>
-                                                <th>Dist</th>
-                                                <th>Time</th>
-                                            </>
-                                        )}
-                                        <th className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'PR' ? 'NONE' : 'PR')} title={expandedTable === 'PR' ? "Minimize" : "Maximize"}>
-                                            {expandedTable === 'PR' ? '><' : '[ ]'}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {prList.length === 0 ? (
-                                        <tr><td colSpan={expandedTable === 'PR' ? "13" : "5"} className="empty-table-text">Please open a Program file</td></tr>
-                                    ) : (
-                                        prList.map((item, i) => (
-                                            <tr key={i} 
-                                                className={`tr-hover ${i === selectedPrIndex ? "tr-blue" : ""}`} 
-                                                onClick={() => handlePrRowClick(i)}>
-                                                <td>{i + 1}</td>
-                                                <td>{item.inst || 'MOVL'}</td>
-                                                <td>{item.name || ''}</td>
-                                                <td>{item.value || ''}</td>
-                                                {expandedTable === 'PR' && (
-                                                    <>
-                                                        <td>{item.speed || '--'}</td>
-                                                        <td>{item.deg || '--'}</td>
-                                                        <td>{item.rad || '--'}</td>
-                                                        <td>{item.tool || '--'}</td>
-                                                        <td>{item.frame || '--'}</td>
-                                                        <td>{item.comt || '--'}</td>
-                                                        <td>{item.dist || '--'}</td>
-                                                        <td>{item.time || '--'}</td>
-                                                    </>
-                                                )}
-                                                <td></td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
+                    {activeRow2Tab === 'Encoder Offset' && renderEncoderOffset()}
+                    {activeRow2Tab === 'Settings View' && renderSettingsView()}
+                    {activeRow2Tab === 'Data Variable' && renderDataVariable()}
+                    {activeRow2Tab === 'Axis Limit' && renderAxisLimit()}
+                    {activeRow2Tab === 'Mech Settings' && renderMechSettings()}
                 </div>
             </div>
 
             <div className="rp-row-3">
-                
-                {/* 1ST ROW */}
                 <div className="btn-row-flex">
                     <div style={{ position: 'relative', flex: 1, display: 'flex', minWidth: 0 }}>
-                        <button className="tp-btn btn-blue" onClick={() => toggleDropdown('TP_MODE')}>⚙ {tpRunMode}</button>
+                        <button className="tp-btn btn-blue" onClick={() => toggleDropdown('TP_MODE')}>⚙ {displayTpMode}</button>
                         {openDropdown === 'TP_MODE' && (
                             <div className="dropdown-menu">
-                                <button className="dd-btn dd-blue" onClick={() => { sendCommand('SET_TP_RUN_MODE', 'Tp'); setOpenDropdown(null); }}>⚙ TP Mode</button>
-                                <button className="dd-btn dd-blue" onClick={() => { sendCommand('SET_TP_RUN_MODE', 'MOVJ'); setOpenDropdown(null); }}>⚙ MOVJ</button>
-                                <button className="dd-btn dd-blue" onClick={() => { sendCommand('SET_TP_RUN_MODE', 'MOVL'); setOpenDropdown(null); }}>⚙ MOVL</button>
+                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('TP Mode', 'Tp')}>⚙ TP Mode</button>
+                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVJ', 'MOVJ')}>⚙ MOVJ</button>
+                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVL', 'MOVL')}>⚙ MOVL</button>
                             </div>
                         )}
                     </div>
-
                     <div style={{ position: 'relative', flex: 1, display: 'flex', minWidth: 0 }}>
                         <button className="tp-btn btn-purple" onClick={() => toggleDropdown('TP')}>⚙ TP</button>
                         {openDropdown === 'TP' && (
                             <div className="dropdown-menu">
                                 <button className="dd-btn dd-purple" onClick={() => { sendCommand('INSERT_TP'); setOpenDropdown(null); }}>⚙ Insert TP</button>
                                 <button className="dd-btn dd-purple" onClick={openModifyTpModal}>📄 Modify TP</button>
-                                {/* NEW: Delete sends exact selected index! */}
                                 <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_TP_INDEX', selectedTpIndex); setOpenDropdown(null); }}>⎋ Delete TP</button>
                             </div>
                         )}
                     </div>
-
                     <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_TP')}>▶ Run TP</button>
-                    
-                    <button className="tp-btn btn-dark" onClick={() => { /* Script placeholder */ }}>📄 Op Pg</button>
+                    <button className="tp-btn btn-dark" onClick={() => {}}>📄 Op Pg</button>
                     <input className="tp-standalone-input" value={rs.program_count_output || '0'} readOnly />
-                    
                     <div style={{ position: 'relative', flex: 1, display: 'flex', minWidth: 0 }}>
                         <button className="tp-btn btn-purple" onClick={() => toggleDropdown('INST')}>📄 Inst</button>
                         {openDropdown === 'INST' && (
@@ -469,21 +579,15 @@ const RightPart = () => {
                             </div>
                         )}
                     </div>
-
                     <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>▶ Run Inst</button>
                 </div>
-
-                {/* 2ND ROW */}
                 <div className="btn-row-flex">
                     <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_INPUT", ipPgInput)}>📄 Ip Pg</button>
                     <input className="tp-standalone-input" value={ipPgInput} onChange={(e) => setIpPgInput(e.target.value)} />
-
                     <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_TP_NAME", tpNameVal)}>🏷 Tp name</button>
                     <input className="tp-standalone-input" value={tpNameVal} onChange={(e) => setTpNameVal(e.target.value)} />
-
                     <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_COMMENT", comVal)}>🌍 Com</button>
                     <input className="tp-standalone-input" value={comVal} onChange={(e) => setComVal(e.target.value)} />
-
                     <button className="tp-btn btn-teal" onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>🧮 Calc Traj</button>
                 </div>
             </div>
@@ -496,38 +600,77 @@ const RightPart = () => {
                 </div>
                 <div className="table-wrapper">
                     <table className="data-table">
-                        <thead><tr><th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th></tr></thead>
-                        <tbody><tr><td>1</td><td>--</td><td>--</td><td>--</td><td>--</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
+                                <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
+                                <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>{staging.instruction || '--'}</td>
+                                <td>{staging.name1 || '--'}</td>
+                                <td>{staging.value1 || '--'}</td>
+                                <td>{staging.deg1 || '--'}</td>
+                                <td>{staging.name2 || '--'}</td>
+                                <td>{staging.value2 || '--'}</td>
+                                <td>{staging.deg2 || '--'}</td>
+                                <td>{staging.speed || '--'}</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>--</td>
+                                <td>{staging.comment || '--'}</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
 
-            <div className="rp-row-5">
-                <div className="btn-row-flex">
-                    <select className="ft-select"><option>Inst</option></select>
-                    <select className="ft-select"><option>Di-1</option></select>
-                    <select className="ft-select"><option>Di-2</option></select>
-                    <button className="tp-btn" style={{ background: '#555' }}># H/L</button>
-                    <select className="ft-select"><option>Dig...</option></select>
-                    <div className="ft-group"><span className="ft-label">⏱ delay</span><input className="ft-input" defaultValue="0"/></div>
-                    <div className="ft-group"><span className="ft-label">→ go to</span><input className="ft-input" defaultValue="0"/></div>
-                    <div className="ft-group"><span className="ft-label">↺ loop</span><input className="ft-input" defaultValue="0"/></div>
+            <div className="rp-row-5" style={{ padding: '4px 1cqw', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div className="btn-row-flex" style={{ gap: '4px' }}>
+                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_INSTRUCTION_TYPE", e.target.value)}>
+                        {INST_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_DIGI_1", e.target.value)}>
+                        {DI_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_DIGI_2", e.target.value)}>
+                        {DI2_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    <button className="tp-btn btn-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
+                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_HIGH_LOW", e.target.value)}>
+                        {DIG_STATE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_DELAY', delayVal)}>⏱ delay</button>
+                    <input className="tp-standalone-input" value={delayVal} onChange={e => setDelayVal(e.target.value)} />
+                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_GOTO_PROGRAM', gotoVal)}>→ go to</button>
+                    <input className="tp-standalone-input" value={gotoVal} onChange={e => setGotoVal(e.target.value)} />
+                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_LOOP', loopVal)}>↺ loop</button>
+                    <input className="tp-standalone-input" value={loopVal} onChange={e => setLoopVal(e.target.value)} />
                 </div>
-                <div className="btn-row-flex">
-                    <div className="ft-group"><span className="ft-label">⏱ mm/s</span><input className="ft-input" defaultValue="0"/></div>
-                    <div className="ft-group"><span className="ft-label">🎯 Radius</span><input className="ft-input" defaultValue="0"/></div>
-                    <select className="ft-select"><option>Vr_1</option></select>
-                    <input className="ft-input" style={{ flex: '0 0 10cqw', borderRadius:'4px' }} defaultValue="0"/>
-                    <select className="ft-select"><option>Vr_2</option></select>
-                    <div className="ft-group"><span className="ft-label">🌍 AN ip</span><input className="ft-input" defaultValue="0"/></div>
-                    <div className="ft-group"><span className="ft-label">🌍 AN op</span><input className="ft-input" defaultValue="0"/></div>
+                <div className="btn-row-flex" style={{ gap: '4px' }}>
+                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_PROGRAM_SPEED', progSpeedVal)}>⏱ mm/s</button>
+                    <input className="tp-standalone-input" value={progSpeedVal} onChange={e => setProgSpeedVal(e.target.value)} />
+                    <button className="tp-btn btn-dark" onClick={() => {}}>🎯 Radius</button>
+                    <input className="tp-standalone-input" value={radiusVal} onChange={e => setRadiusVal(e.target.value)} />
+                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_VAR1", e.target.value)}>
+                        {VAR1_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    <input className="tp-standalone-input" value={varInputVal} onChange={e => setVarInputVal(e.target.value)} onBlur={(e) => sendCommand('SET_VAR_VAL', e.target.value)} />
+                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_VAR2", e.target.value)}>
+                        {VAR2_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                    <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN ip</button>
+                    <input className="tp-standalone-input" value={anIpVal} onChange={e => setAnIpVal(e.target.value)} />
+                    <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN op</button>
+                    <input className="tp-standalone-input" value={anOpVal} onChange={e => setAnOpVal(e.target.value)} />
                 </div>
             </div>
 
         </div>
-
         <RightMenuSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onSelectView={setCurrentView} />
-
       </div>
     </>
   );

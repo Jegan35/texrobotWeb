@@ -13,6 +13,7 @@ export const WebSocketProvider = ({ children }) => {
   const isAccessFullRef = useRef(false); 
   const isIntentionalDisconnect = useRef(false); 
 
+  // Initialize all states so the UI never crashes while waiting for the first backend payload
   const [robotState, setRobotState] = useState({
     mode: "Sim",
     started: false,
@@ -30,7 +31,10 @@ export const WebSocketProvider = ({ children }) => {
     program_count_output: "0",
     is_calculating_trajectory: false,
     
-    // --- LIVE TRAJECTORY ARRAYS ---
+    // FOR ROW 4 (Instruction Staging)
+    staging_data: {}, 
+    
+    // FOR 3D SCENE (Trajectories)
     blueTrajectory: [], 
     redTrajectory: []
   });
@@ -97,17 +101,20 @@ export const WebSocketProvider = ({ children }) => {
             tp_list: data.tp_list || prevState.tp_list || [],
             pr_program_data: data.pr_program_data || prevState.pr_program_data || [],
             program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
-            is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory
+            is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory,
+            speed_op: data.speed_op !== undefined ? data.speed_op : prevState.speed_op,
+            // MAP STAGING DATA FROM C++
+            staging_data: data.staging_data !== undefined ? data.staging_data : prevState.staging_data
           }));
         }
         // =========================================================
-        // NEW: TRAJECTORY STREAMING (HIGH-PERFORMANCE PARSER)
+        // TRAJECTORY STREAMING (HIGH-PERFORMANCE PARSER)
         // =========================================================
         else if (data.type === "trajectory_chunk") {
           const color = data.color; // "blue" or "red"
           const flatPoints = data.points || [];
           
-          // Re-assemble flat [x, y, z, x, y, z] array into [[x,y,z], [x,y,z]] tuples for Three.js
+          // Decode 1D C++ Array [x, y, z, x, y, z] into 2D JS Array [[x,y,z], [x,y,z]]
           const newPts = [];
           for (let i = 0; i < flatPoints.length; i += 3) {
             newPts.push([flatPoints[i], flatPoints[i+1], flatPoints[i+2]]);
@@ -151,10 +158,13 @@ export const WebSocketProvider = ({ children }) => {
     setIsConnected(false);
   };
 
+  // Upgraded to handle generic commands AND nested JSON object payloads
   const sendCommand = (cmd, value = "", dataObj = null) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       const payload = { command: cmd, value: value.toString() };
-      if (dataObj) payload.data = dataObj;
+      if (dataObj) {
+          payload.data = dataObj; 
+      }
       wsRef.current.send(JSON.stringify(payload));
     }
   };

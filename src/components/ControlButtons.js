@@ -11,6 +11,9 @@ const ControlButtons = () => {
   const mode = rs.mode || "MODE";
   const currentError = rs.error_message || "No error";
   
+  // LIVE SPEED FROM BACKEND
+  const speedOp = rs.speed_op !== undefined ? Number(rs.speed_op).toFixed(1) : "0.0";
+  
   const tpFiles = rs.tp_file_list || [];
   const prFiles = rs.pr_file_list || [];
   const currentTp = rs.current_tp_name || "None";
@@ -27,7 +30,7 @@ const ControlButtons = () => {
   const [selectedRadio, setSelectedRadio] = useState('');
   const [selectedChecks, setSelectedChecks] = useState({});
 
-  // --- NEW: TRACK LAST ACTION STRINGS ---
+  // --- TRACK LAST ACTION STRINGS ---
   const [lastAction, setLastAction] = useState({ TP: '', PR: '' });
 
   useEffect(() => {
@@ -267,7 +270,6 @@ const ControlButtons = () => {
           </div>
         </div>
 
-        {/* FIXED ROW 2: TP is now first, PR is second. Accurately shows actions! */}
         <div className="btn-row">
           <div style={{ position: "relative", display: "flex", width: "100%" }}>
               <button className="btn btn-purple" style={{ width: "100%" }} onClick={openFileMenu}>📁 FILES</button>
@@ -301,7 +303,9 @@ const ControlButtons = () => {
           <button className="btn btn-red" onClick={handleErrorClear}>✕ ERR CLR</button>
           <button className="btn btn-yellow" onClick={handleMarkClear}>✕ MRK CLR</button>
           <button className="btn btn-purple-dark">⟳ RESET</button>
-          <div className="info-box text-green">Spd: 0.0%</div>
+          
+          {/* FINALLY: THE LIVE BACKEND SPEED READOUT */}
+          <div className="info-box text-green">Spd: {speedOp}%</div>
         </div>
       </div>
     </>
