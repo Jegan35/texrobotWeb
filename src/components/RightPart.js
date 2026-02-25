@@ -92,7 +92,6 @@ const RightPart = () => {
   // --- TABS STATE ---
   const [activeRow1Tab, setActiveRow1Tab] = useState('Error Pos');
   const [activeRow2Tab, setActiveRow2Tab] = useState('Programs File');
-  // --- NEW ROW 4 TAB STATE ---
   const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
 
   const [ipPgInput, setIpPgInput] = useState('0');
@@ -321,7 +320,6 @@ const RightPart = () => {
                   <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DI_STATE", e.target.value)}>
                        {SIM_STATE_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
-
                   <span className="light-label">DO Sim:</span>
                   <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DO_NUMBER", e.target.value)}>
                        {DO_SIM_NUM_LIST.map(o => <option key={o} value={o}>{o}</option>)}
@@ -329,7 +327,6 @@ const RightPart = () => {
                   <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DO_STATE", e.target.value)}>
                        {SIM_STATE_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
-                  
                   <span className="light-label">Remote:</span><button className="light-btn">rem_h</button><button className="light-btn">rem_l</button>
               </div>
           </div>
@@ -348,13 +345,13 @@ const RightPart = () => {
                   {['l1', 'l2', 'l3', 'l4', 'l5', 'l6'].map((row, rIndex) => (
                       <tr key={row}>
                           <td style={{fontWeight: '900', fontSize: '0.8rem'}}>{row}</td>
-                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "dh", row_index: rIndex, value: e.target.value})} /></td>
-                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "enc", row_index: rIndex, value: e.target.value})} /></td>
-                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "gear", row_index: rIndex, value: e.target.value})} /></td>
-                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "degc", row_index: rIndex, value: e.target.value})} /></td>
-                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "couple", row_index: rIndex, value: e.target.value})} /></td>
-                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "jmin", row_index: rIndex, value: e.target.value})} /></td>
-                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "jmax", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" defaultValue={mechData[`dh_${rIndex}`] || ''} onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "dh", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" defaultValue={mechData[`enc_${rIndex}`] || ''} onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "enc", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" defaultValue={mechData[`gear_${rIndex}`] || ''} onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "gear", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" defaultValue={mechData[`degc_${rIndex}`] || ''} onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "degc", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" defaultValue={mechData[`couple_${rIndex}`] || ''} onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "couple", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" defaultValue={mechData[`jmin_${rIndex}`] || ''} onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "jmin", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" defaultValue={mechData[`jmax_${rIndex}`] || ''} onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "jmax", row_index: rIndex, value: e.target.value})} /></td>
                       </tr>
                   ))}
               </tbody>
@@ -697,7 +694,6 @@ const RightPart = () => {
             </div>
 
             <div className="rp-row-4">
-                {/* --- NEW ROW 4 TABS --- */}
                 <div className="dark-tabs" style={{ background: '#202430' }}>
                     {['Inst', 'Debug', 'Jog Deg'].map(tab => (
                         <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>
@@ -707,7 +703,6 @@ const RightPart = () => {
                 </div>
                 
                 <div className="row2-content">
-                    {/* INST TAB (Default) */}
                     {activeRow4Tab === 'Inst' && (
                         <div className="table-wrapper">
                             <table className="data-table">
@@ -729,14 +724,13 @@ const RightPart = () => {
                         </div>
                     )}
 
-                    {/* DEBUG TAB (Matches Screenshot Exactly) */}
                     {activeRow4Tab === 'Debug' && (
                         <div className="light-panel" style={{ display: 'flex', gap: '8px', padding: '10px' }}>
                              <button className="debug-btn debug-red" style={{width: '90px'}} onClick={() => sendCommand('TOGGLE_START')}>Start_Stop</button>
                              <button className="debug-btn" style={{width: '70px'}} onClick={() => {}}>Step</button>
                              <button className="debug-btn" style={{width: '70px'}} onClick={() => sendCommand('EXIT')}>Exit</button>
                              
-                             <div style={{width: '10px'}}></div> {/* Spacer */}
+                             <div style={{width: '10px'}}></div>
                              
                              <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump In</button>
                              <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump Out</button>
@@ -748,7 +742,6 @@ const RightPart = () => {
                         </div>
                     )}
 
-                    {/* JOG DEG TAB */}
                     {activeRow4Tab === 'Jog Deg' && (
                         <div className="light-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666', fontStyle: 'italic' }}>
                             Jog Degrees not set
