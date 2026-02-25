@@ -13,7 +13,6 @@ export const WebSocketProvider = ({ children }) => {
   const isAccessFullRef = useRef(false); 
   const isIntentionalDisconnect = useRef(false); 
 
-  // Initialize all states so the UI never crashes while waiting for the first backend payload
   const [robotState, setRobotState] = useState({
     mode: "Sim",
     started: false,
@@ -22,19 +21,36 @@ export const WebSocketProvider = ({ children }) => {
     error_message: "No error",
     cartesian: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 },
     joints: { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 },
+    
+    // Files
     tp_file_list: [],
     pr_file_list: [],
     current_tp_name: "None",
     current_pr_name: "None",
+    
+    // Data Tables
     tp_list: [],
     pr_program_data: [],
+    
+    // Status
     program_count_output: "0",
     is_calculating_trajectory: false,
+    speed_op: 0,
     
-    // FOR ROW 4 (Instruction Staging)
+    // IO & Simulation
+    di_val: 0,
+    do_val: 0,
+    
+    // Staging (Row 4)
     staging_data: {}, 
     
-    // FOR 3D SCENE (Trajectories)
+    // --- NEW: Row 1 & 2 Data Maps ---
+    error_pos_data: {},
+    ether_cat_data: {},
+    variable_data: {},
+    mech_data: {},
+
+    // Trajectories
     blueTrajectory: [], 
     redTrajectory: []
   });
@@ -54,78 +70,84 @@ export const WebSocketProvider = ({ children }) => {
       wsRef.current = new WebSocket(`ws://${ipAddress}:8080`);
 
       wsRef.current.onopen = () => console.log("ATTEMPTING CONNECTION...");
-      
-      wsRef.current.onclose = () => {
-        setIsConnected(false);
-        if (!isAccessFullRef.current && !isIntentionalDisconnect.current) {
-          setConnectionFailed(true);
-        }
-      };
-      
-      wsRef.current.onerror = () => {
-        setIsConnected(false);
-        if (!isAccessFullRef.current && !isIntentionalDisconnect.current) {
-          setConnectionFailed(true); 
-        }
-      };
+      wsRef.current.onclose = () => { setIsConnected(false); if (!isAccessFullRef.current && !isIntentionalDisconnect.current) setConnectionFailed(true); };
+      wsRef.current.onerror = () => { setIsConnected(false); if (!isAccessFullRef.current && !isIntentionalDisconnect.current) setConnectionFailed(true); };
 
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
         if (data.type === "connection_accepted") {
-          setIsConnected(true);
-          setAccessFull(false);
-          setConnectionFailed(false);
-          isAccessFullRef.current = false;
-          isIntentionalDisconnect.current = false;
+          setIsConnected(true); setAccessFull(false); setConnectionFailed(false);
+          isAccessFullRef.current = false; isIntentionalDisconnect.current = false;
         } 
         else if (data.type === "access_full") {
-          setIsConnected(false);
-          setAccessFull(true);
-          isAccessFullRef.current = true; 
+          setIsConnected(false); setAccessFull(true); isAccessFullRef.current = true; 
         }
         else if (data.type === "status_update" || data.type === "motion_update") {
-          setRobotState(prevState => ({
-            ...prevState, 
-            mode: data.mode !== undefined ? data.mode : prevState.mode,
-            started: data.started !== undefined ? data.started : prevState.started,
-            paused: data.paused !== undefined ? data.paused : prevState.paused,
-            servo_on: data.servo_on !== undefined ? data.servo_on : prevState.servo_on,
-            error_message: data.error_message || prevState.error_message,
-            cartesian: data.cartesian || prevState.cartesian,
-            joints: data.joints || prevState.joints,
-            tp_file_list: data.tp_file_list || prevState.tp_file_list || [],
-            pr_file_list: data.pr_file_list || prevState.pr_file_list || [],
-            current_tp_name: data.current_tp_name || prevState.current_tp_name || "None",
-            current_pr_name: data.current_pr_name || prevState.current_pr_name || "None",
-            tp_list: data.tp_list || prevState.tp_list || [],
-            pr_program_data: data.pr_program_data || prevState.pr_program_data || [],
-            program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
-            is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory,
-            speed_op: data.speed_op !== undefined ? data.speed_op : prevState.speed_op,
-            // MAP STAGING DATA FROM C++
-            staging_data: data.staging_data !== undefined ? data.staging_data : prevState.staging_data
-          }));
+          setRobotState(prevState => {
+            
+            // OPTIMIZATION: Deep string comparison to prevent table re-renders
+            const newTpStr = JSON.stringify(data.tp_list || []);
+            const oldTpStr = prevState._tpStr || "";
+            const finalTpList = newTpStr !== oldTpStr ? data.tp_list : prevState.tp_list;
+
+            const newPrStr = JSON.stringify(data.pr_program_data || []);
+            const oldPrStr = prevState._prStr || "";
+            const finalPrList = newPrStr !== oldPrStr ? data.pr_program_data : prevState.pr_program_data;
+
+            const newStgStr = JSON.stringify(data.staging_data || {});
+            const oldStgStr = prevState._stgStr || "";
+            const finalStg = newStgStr !== oldStgStr ? data.staging_data : prevState.staging_data;
+
+            return {
+                ...prevState, 
+                mode: data.mode !== undefined ? data.mode : prevState.mode,
+                started: data.started !== undefined ? data.started : prevState.started,
+                paused: data.paused !== undefined ? data.paused : prevState.paused,
+                servo_on: data.servo_on !== undefined ? data.servo_on : prevState.servo_on,
+                error_message: data.error_message || prevState.error_message,
+                cartesian: data.cartesian || prevState.cartesian,
+                joints: data.joints || prevState.joints,
+                
+                tp_file_list: data.tp_file_list || prevState.tp_file_list || [],
+                pr_file_list: data.pr_file_list || prevState.pr_file_list || [],
+                current_tp_name: data.current_tp_name || prevState.current_tp_name || "None",
+                current_pr_name: data.current_pr_name || prevState.current_pr_name || "None",
+                
+                program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
+                is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory,
+                speed_op: data.speed_op !== undefined ? data.speed_op : prevState.speed_op,
+                
+                // IO Values
+                di_val: data.di_val !== undefined ? data.di_val : prevState.di_val,
+                do_val: data.do_val !== undefined ? data.do_val : prevState.do_val,
+
+                // --- NEW DATA MAPS ---
+                error_pos_data: data.error_pos_data || prevState.error_pos_data || {},
+                ether_cat_data: data.ether_cat_data || prevState.ether_cat_data || {},
+                variable_data: data.variable_data || prevState.variable_data || {},
+                mech_data: data.mech_data || prevState.mech_data || {},
+                
+                // Optimized Array References
+                tp_list: finalTpList,
+                _tpStr: newTpStr,
+                pr_program_data: finalPrList,
+                _prStr: newPrStr,
+                staging_data: finalStg,
+                _stgStr: newStgStr
+            };
+          });
         }
-        // =========================================================
-        // TRAJECTORY STREAMING (HIGH-PERFORMANCE PARSER)
-        // =========================================================
         else if (data.type === "trajectory_chunk") {
-          const color = data.color; // "blue" or "red"
+          const color = data.color; 
           const flatPoints = data.points || [];
-          
-          // Decode 1D C++ Array [x, y, z, x, y, z] into 2D JS Array [[x,y,z], [x,y,z]]
           const newPts = [];
           for (let i = 0; i < flatPoints.length; i += 3) {
             newPts.push([flatPoints[i], flatPoints[i+1], flatPoints[i+2]]);
           }
-
           setRobotState(prevState => {
-            if (color === "blue") {
-              return { ...prevState, blueTrajectory: [...(prevState.blueTrajectory || []), ...newPts] };
-            } else if (color === "red") {
-              return { ...prevState, redTrajectory: [...(prevState.redTrajectory || []), ...newPts] };
-            }
+            if (color === "blue") return { ...prevState, blueTrajectory: (prevState.blueTrajectory || []).concat(newPts) };
+            else if (color === "red") return { ...prevState, redTrajectory: (prevState.redTrajectory || []).concat(newPts) };
             return prevState;
           });
         }
@@ -135,20 +157,13 @@ export const WebSocketProvider = ({ children }) => {
       };
     } catch (err) {
       console.error("INVALID IP OR NETWORK ERROR", err);
-      if (!isIntentionalDisconnect.current) {
-        setConnectionFailed(true);
-      }
+      if (!isIntentionalDisconnect.current) setConnectionFailed(true);
     }
   };
 
   useEffect(() => {
     connectWebSocket();
-    return () => {
-      if (wsRef.current) {
-        isIntentionalDisconnect.current = true; 
-        wsRef.current.close();
-      }
-    };
+    return () => { if (wsRef.current) { isIntentionalDisconnect.current = true; wsRef.current.close(); } };
     // eslint-disable-next-line
   }, []); 
 
@@ -158,13 +173,10 @@ export const WebSocketProvider = ({ children }) => {
     setIsConnected(false);
   };
 
-  // Upgraded to handle generic commands AND nested JSON object payloads
   const sendCommand = (cmd, value = "", dataObj = null) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       const payload = { command: cmd, value: value.toString() };
-      if (dataObj) {
-          payload.data = dataObj; 
-      }
+      if (dataObj) payload.data = dataObj; 
       wsRef.current.send(JSON.stringify(payload));
     }
   };

@@ -11,8 +11,13 @@ const DIG_STATE_OPTIONS = ["Dig-state", "High", "Low"];
 const VAR1_OPTIONS = ["Vr_1", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
 const VAR2_OPTIONS = ["Vr_2", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
 const MM_OPTIONS = ["mm", "50", "25", "15", "10", "5", "2", "1", "0.1", "0.01", "0.001"];
-const DEG_OPTIONS = ["deg", "20", "15", "10", "5", "2", "1", "0.1", "0.01", "0.001", "0.0001"];
+const DEG_OPTIONS = ["deg", "20", "15", "10", "5", "2", "1", "0.1", "0.01", "0.0001"];
 const FRAME_OPTIONS = ["frames", "Base", "Tool", "User"];
+
+const VAR_MONITOR_LIST = ["V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
+const DI_SIM_NUM_LIST = ["DI", "DI-1", "DI-2", "DI-3", "DI-4", "DI-5", "DI-6", "DI-7", "DI-8", "DI-9", "DI-10", "DI-11", "DI-12", "DI-13", "DI-14", "DI-15", "DI-16"];
+const DO_SIM_NUM_LIST = ["DO", "DO-1", "DO-2", "DO-3", "DO-4", "DO-5", "DO-6", "DO-7", "DO-8", "DO-9", "DO-10", "DO-11", "DO-12", "DO-13", "DO-14", "DO-15", "DO-16"];
+const SIM_STATE_LIST = ["State", "High", "Low"];
 
 const MemoizedTpTableBody = memo(({ tpList, expandedTable, selectedTpIndex, onRowClick }) => {
     if (tpList.length === 0) {
@@ -83,7 +88,12 @@ const RightPart = () => {
   const [selectedPrIndex, setSelectedPrIndex] = useState(0);
   const [showModTpModal, setShowModTpModal] = useState(false);
   const [modTpData, setModTpData] = useState({ name: '', x: '', y: '', z: '' });
+  
+  // --- TABS STATE ---
+  const [activeRow1Tab, setActiveRow1Tab] = useState('Error Pos');
   const [activeRow2Tab, setActiveRow2Tab] = useState('Programs File');
+  // --- NEW ROW 4 TAB STATE ---
+  const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
 
   const [ipPgInput, setIpPgInput] = useState('0');
   const [tpNameVal, setTpNameVal] = useState('0');
@@ -97,6 +107,7 @@ const RightPart = () => {
   const [varInputVal, setVarInputVal] = useState('0');
   const [anIpVal, setAnIpVal] = useState('0');
   const [anOpVal, setAnOpVal] = useState('0');
+  const [debugGoto, setDebugGoto] = useState('');
 
   const [globalSpeed, setGlobalSpeed] = useState(50);
   const [frameVal, setFrameVal] = useState(FRAME_OPTIONS[0]);
@@ -113,9 +124,14 @@ const RightPart = () => {
   const tpList = rs.tp_list || [];
   const prList = rs.pr_program_data || [];
   const staging = rs.staging_data || {};
-  
-  // --- ADDED MISSING VARIABLE ---
   const isCalculating = rs.is_calculating_trajectory === true;
+
+  const errorData = rs.error_pos_data || {};
+  const etherData = rs.ether_cat_data || {};
+  const variableData = rs.variable_data || {};
+  const mechData = rs.mech_data || {};
+  const diVal = rs.di_val || 0;
+  const doVal = rs.do_val || 0;
 
   useEffect(() => { if (rs.tp_run_mode) setDisplayTpMode(rs.tp_run_mode); }, [rs.tp_run_mode]);
   useEffect(() => { if (rs.current_tp_name && rs.current_tp_name !== "None") setTpNameVal(rs.current_tp_name); }, [rs.current_tp_name]);
@@ -128,7 +144,6 @@ const RightPart = () => {
   const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
   
   const handleTpModeSelect = (uiLabel, backendCmd) => { setDisplayTpMode(uiLabel); sendCommand('SET_TP_RUN_MODE', backendCmd); setOpenDropdown(null); };
-
   const handleTpRowClick = useCallback((index) => { setSelectedTpIndex(index); sendCommand('SELECT_TP_INDEX', index); }, [sendCommand]);
   const handlePrRowClick = useCallback((index) => { setSelectedPrIndex(index); sendCommand('SELECT_PR_ROW', index); }, [sendCommand]);
 
@@ -150,7 +165,73 @@ const RightPart = () => {
       setShowModTpModal(false);
   };
 
-  // --- FIXED: ENCODER OFFSET VIEW ---
+  const renderErrorPos = () => {
+      const axes = ['X','Y','Z','a','b','c'];
+      const extras = ['Sp In', 'fun', 'Num', 'Dist', 'ms', 'Trj'];
+      return (
+          <div className="light-panel" style={{ padding: '8px 5px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 60px auto 60px auto 60px auto 60px auto 60px auto 60px auto 60px', gap: '4px', alignItems: 'center' }}>
+                  {axes.map((ax, i) => (
+                      <React.Fragment key={ax}>
+                          <span className="light-label">{ax}-S</span><input className="light-input" value={errorData[`${ax}_S`] || 0} readOnly />
+                          <span className="light-label">J{i+1}-S</span><input className="light-input" value={errorData[`J${i+1}_S`] || 0} readOnly />
+                          <span className="light-label">{ax}-E</span><input className="light-input" value={errorData[`${ax}_E`] || 0} readOnly />
+                          <span className="light-label">J{i+1}-E</span><input className="light-input" value={errorData[`J${i+1}_E`] || 0} readOnly />
+                          <span className="light-label">{ax}-Er</span><input className="light-input" value={errorData[`${ax}_Er`] || 0} readOnly />
+                          <span className="light-label">J{i+1}-Er</span><input className="light-input" value={errorData[`J${i+1}_Er`] || 0} readOnly />
+                          <span className="light-label">{extras[i]}</span><input className="light-input" value={errorData[extras[i]] || 0} readOnly />
+                      </React.Fragment>
+                  ))}
+              </div>
+          </div>
+      );
+  };
+
+  const renderEtherCat = () => {
+      const rows = [1,2,3,4,5,6,7];
+      return (
+          <div className="light-panel" style={{ padding: '8px 15px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto 1fr auto 1fr auto 1fr', gap: '8px 20px', alignItems: 'center' }}>
+                  {rows.map(r => (
+                      <React.Fragment key={r}>
+                          <span className="light-label">state {r}</span><input className="light-input" value={etherData[`state_${r}`] || 0} readOnly />
+                          <span className="light-label">AI_state {r}</span><input className="light-input" value={etherData[`AI_state_${r}`] || 0} readOnly />
+                          <span className="light-label">status {r}</span><input className="light-input" value={etherData[`status_${r}`] || 0} readOnly />
+                          <span className="light-label">et_error {r}</span><input className="light-input" value={etherData[`et_error_${r}`] || 0} readOnly />
+                      </React.Fragment>
+                  ))}
+              </div>
+          </div>
+      );
+  };
+
+  const renderIOModules = () => (
+      <div className="light-panel" style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }}>
+              <div style={{ borderLeft: '4px solid #4CAF50', paddingLeft: '8px', fontWeight: '900', color: '#333', marginBottom: '8px', fontSize: '0.8rem' }}>DIGITAL INPUTS (DI 1-16)</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  {[...Array(16)].map((_, i) => (
+                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <div className={`io-led ${(diVal >> i) & 1 ? 'on' : 'off'}`}></div>
+                          <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#555' }}>{i + 1}</span>
+                      </div>
+                  ))}
+              </div>
+          </div>
+          <div style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '4px', padding: '10px' }}>
+              <div style={{ borderLeft: '4px solid #039BE5', paddingLeft: '8px', fontWeight: '900', color: '#333', marginBottom: '8px', fontSize: '0.8rem' }}>DIGITAL OUTPUTS (DO 1-16)</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  {[...Array(16)].map((_, i) => (
+                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <div className={`io-led ${(doVal >> i) & 1 ? 'on' : 'off'}`}></div>
+                          <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#555' }}>{i + 1}</span>
+                      </div>
+                  ))}
+              </div>
+          </div>
+      </div>
+  );
+
   const renderEncoderOffset = () => (
       <div className="light-panel" style={{ padding: '15px 25px', overflowX: 'auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(80px, 1fr) max-content minmax(80px, 1fr) max-content minmax(80px, 1fr)', gap: '12px 25px', alignItems: 'center', minWidth: '700px' }}>
@@ -173,10 +254,8 @@ const RightPart = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'auto 100px auto 100px', gap: '15px 30px', alignItems: 'center' }}>
               <span className="light-label">Ace_tm %</span><input className="light-input" style={{background: '#00E676', color: '#000'}} defaultValue="50"/>
               <span className="light-label">Dec sp %</span><input className="light-input" defaultValue="100"/>
-              
               <span className="light-label">Dec_tm %</span><input className="light-input" defaultValue="50"/>
               <span className="light-label">Init_vel %</span><input className="light-input" defaultValue="0"/>
-              
               <span className="light-label">Ace sp %</span><input className="light-input" defaultValue="100"/>
               <span className="light-label">end_vel %</span><input className="light-input" defaultValue="0"/>
           </div>
@@ -189,22 +268,26 @@ const RightPart = () => {
           <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: '15px' }}>
               <div style={{ fontWeight: '900', marginBottom: '15px', textAlign: 'center', color: '#333' }}>Output Monitor</div>
               <div style={{ display: 'flex', gap: '10px' }}>
-                  <select className="light-input"><option>V-1</option></select>
-                  <input className="light-input" style={{ color: 'blue', background: '#e0e0e0', textAlign: 'center' }} value="0" readOnly />
+                  <select className="light-input" onChange={(e) => sendCommand("SET_VAR_OUTPUT_SELECTOR", e.target.value)}>
+                        {VAR_MONITOR_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <input className="light-input" style={{ color: 'blue', background: '#e0e0e0', textAlign: 'center' }} value={variableData.outputValue || "0"} readOnly />
               </div>
           </div>
           <div style={{ flex: 1, borderRight: '1px solid #ccc', paddingRight: '15px' }}>
               <div style={{ fontWeight: '900', marginBottom: '15px', textAlign: 'center', color: '#333' }}>Input Control</div>
               <div style={{ display: 'flex', gap: '10px' }}>
-                  <select className="light-input"><option>V-1</option></select>
-                  <input className="light-input" placeholder="Value" />
+                  <select className="light-input" onChange={(e) => sendCommand("SET_VAR_INPUT_SELECTOR", e.target.value)}>
+                        {VAR_MONITOR_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <input className="light-input" placeholder="Value" onBlur={(e) => sendCommand("SET_VAR_INPUT_VALUE", e.target.value)} />
               </div>
           </div>
           <div style={{ flex: 1 }}>
               <div style={{ fontWeight: '900', marginBottom: '15px', textAlign: 'center', color: '#333' }}>Instruction No.</div>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#555' }}>Inst #</span>
-                  <input className="light-input" placeholder="#" />
+                  <input className="light-input" placeholder="#" onBlur={(e) => sendCommand("SET_VAR_INST_NUMBER", e.target.value)} />
               </div>
           </div>
       </div>
@@ -228,11 +311,25 @@ const RightPart = () => {
                   <button className="light-btn">test_1</button>
               </div>
           </div>
-          <div style={{ flex: 1.2 }}>
+          <div style={{ flex: 1.4 }}>
               <div style={{ fontWeight: '900', marginBottom: '15px', color: '#333' }}>Simulation</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr 1fr', gap: '8px', alignItems: 'center' }}>
-                  <span className="light-label">DI Sim:</span><select className="light-input"><option>DI</option></select><select className="light-input"><option>State</option></select>
-                  <span className="light-label">DO Sim:</span><select className="light-input"><option>DO</option></select><select className="light-input"><option>State</option></select>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 100px 100px', gap: '8px', alignItems: 'center' }}>
+                  <span className="light-label">DI Sim:</span>
+                  <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DI_NUMBER", e.target.value)}>
+                       {DI_SIM_NUM_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DI_STATE", e.target.value)}>
+                       {SIM_STATE_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+
+                  <span className="light-label">DO Sim:</span>
+                  <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DO_NUMBER", e.target.value)}>
+                       {DO_SIM_NUM_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DO_STATE", e.target.value)}>
+                       {SIM_STATE_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                  
                   <span className="light-label">Remote:</span><button className="light-btn">rem_h</button><button className="light-btn">rem_l</button>
               </div>
           </div>
@@ -248,16 +345,16 @@ const RightPart = () => {
                   </tr>
               </thead>
               <tbody>
-                  {['l1', 'l2', 'l3', 'l4', 'l5', 'l6'].map(row => (
+                  {['l1', 'l2', 'l3', 'l4', 'l5', 'l6'].map((row, rIndex) => (
                       <tr key={row}>
                           <td style={{fontWeight: '900', fontSize: '0.8rem'}}>{row}</td>
-                          <td><input className="light-input" /></td>
-                          <td><input className="light-input" /></td>
-                          <td><input className="light-input" /></td>
-                          <td><input className="light-input" /></td>
-                          <td><input className="light-input" /></td>
-                          <td><input className="light-input" /></td>
-                          <td><input className="light-input" /></td>
+                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "dh", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "enc", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "gear", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "degc", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "couple", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "jmin", row_index: rIndex, value: e.target.value})} /></td>
+                          <td><input className="light-input" onBlur={e => sendCommand("UPDATE_MECH_SETTING", "", {column_type: "jmax", row_index: rIndex, value: e.target.value})} /></td>
                       </tr>
                   ))}
               </tbody>
@@ -418,6 +515,16 @@ const RightPart = () => {
         
         .spinner-outer { width: 64px; height: 64px; border-radius: 50%; border: 4px solid transparent; border-top-color: #039BE5; border-right-color: #039BE5; animation: spinClockwise 1s linear infinite; position: relative; }
         .spinner-inner { position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px; border-radius: 50%; border: 4px solid transparent; border-bottom-color: #4CAF50; border-left-color: #4CAF50; animation: spinCounter 1.5s linear infinite; }
+        
+        /* IO LED STYLE */
+        .io-led { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #555; transition: 0.2s; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+        .io-led.on { background: #00E676; border-color: #005005; box-shadow: 0 0 8px #00E676, inset 0 1px 3px rgba(255,255,255,0.4); }
+        .io-led.off { background: #222; }
+
+        /* DEBUG TAB BUTTONS */
+        .debug-btn { font-weight: 900; border-radius: 4px; border: 1px solid #999; cursor: pointer; background: #fff; color: #111; padding: 4px; font-size: 0.8rem; box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+        .debug-btn:active { transform: translateY(2px); box-shadow: none; }
+        .debug-red { background: #ff5252; color: white; border-color: #b71c1c; }
       `}</style>
 
       {showModTpModal && (
@@ -465,27 +572,24 @@ const RightPart = () => {
                         {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
                     </div>
                     <div style={{ flex: '0 0 70%', display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+                        
                         <div className="dark-tabs">
-                            <div className="dark-tab active">Error Pos</div>
-                            <div className="dark-tab">Ether Cat</div>
-                            <div className="dark-tab">IO Modules</div>
-                            <div className="dark-tab">Graph</div>
+                            {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
+                                <div key={tab} className={`dark-tab ${activeRow1Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow1Tab(tab)}>
+                                    {tab}
+                                </div>
+                            ))}
                         </div>
-                        <div className="table-container" style={{ padding: '5px 1cqw', overflow: 'hidden' }}>
-                            <div className="var-grid">
-                                {['X','Y','Z','a','b','c'].map(axis => (
-                                    <React.Fragment key={axis}>
-                                        <span className="var-label">{axis}-S</span><input className="var-input" defaultValue="0"/>
-                                        <span className="var-label">J{['X','Y','Z','a','b','c'].indexOf(axis)+1}-S</span><input className="var-input" defaultValue="0"/>
-                                        <span className="var-label">{axis}-E</span><input className="var-input" defaultValue="0"/>
-                                        <span className="var-label">J{['X','Y','Z','a','b','c'].indexOf(axis)+1}-E</span><input className="var-input" defaultValue="0"/>
-                                        <span className="var-label">{axis}-Er</span><input className="var-input" defaultValue="0"/>
-                                        <span className="var-label">J{['X','Y','Z','a','b','c'].indexOf(axis)+1}-Er</span><input className="var-input" defaultValue="0"/>
-                                        <span className="var-label">Sp In</span><input className="var-input" defaultValue="0"/>
-                                    </React.Fragment>
-                                ))}
-                            </div>
+                        
+                        <div className="row2-content" style={{ display: 'flex', flexDirection: 'column' }}>
+                            {activeRow1Tab === 'Error Pos' && renderErrorPos()}
+                            {activeRow1Tab === 'Ether Cat' && renderEtherCat()}
+                            {activeRow1Tab === 'IO Modules' && renderIOModules()}
+                            {activeRow1Tab === 'Graph' && (
+                                <div style={{ padding: '20px', color: '#555', fontStyle: 'italic', textAlign: 'center' }}>Graph View (Placeholder)</div>
+                            )}
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -593,38 +697,63 @@ const RightPart = () => {
             </div>
 
             <div className="rp-row-4">
+                {/* --- NEW ROW 4 TABS --- */}
                 <div className="dark-tabs" style={{ background: '#202430' }}>
-                    <div className="dark-tab active">Inst</div>
-                    <div className="dark-tab">Debug</div>
-                    <div className="dark-tab">Jog Deg</div>
+                    {['Inst', 'Debug', 'Jog Deg'].map(tab => (
+                        <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>
+                            {tab}
+                        </div>
+                    ))}
                 </div>
-                <div className="table-wrapper">
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
-                                <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
-                                <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>{staging.instruction || '--'}</td>
-                                <td>{staging.name1 || '--'}</td>
-                                <td>{staging.value1 || '--'}</td>
-                                <td>{staging.deg1 || '--'}</td>
-                                <td>{staging.name2 || '--'}</td>
-                                <td>{staging.value2 || '--'}</td>
-                                <td>{staging.deg2 || '--'}</td>
-                                <td>{staging.speed || '--'}</td>
-                                <td>--</td>
-                                <td>--</td>
-                                <td>--</td>
-                                <td>{staging.comment || '--'}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                
+                <div className="row2-content">
+                    {/* INST TAB (Default) */}
+                    {activeRow4Tab === 'Inst' && (
+                        <div className="table-wrapper">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
+                                        <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
+                                        <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
+                                        <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
+                                        <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* DEBUG TAB (Matches Screenshot Exactly) */}
+                    {activeRow4Tab === 'Debug' && (
+                        <div className="light-panel" style={{ display: 'flex', gap: '8px', padding: '10px' }}>
+                             <button className="debug-btn debug-red" style={{width: '90px'}} onClick={() => sendCommand('TOGGLE_START')}>Start_Stop</button>
+                             <button className="debug-btn" style={{width: '70px'}} onClick={() => {}}>Step</button>
+                             <button className="debug-btn" style={{width: '70px'}} onClick={() => sendCommand('EXIT')}>Exit</button>
+                             
+                             <div style={{width: '10px'}}></div> {/* Spacer */}
+                             
+                             <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump In</button>
+                             <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump Out</button>
+                             
+                             <button className="debug-btn" style={{fontWeight: '900', border: '2px solid black'}} onClick={() => sendCommand('SET_GOTO_PROGRAM', debugGoto)}>go to</button>
+                             <input className="light-input" style={{width: '60px', textAlign: 'center'}} value={debugGoto} onChange={e => setDebugGoto(e.target.value)} />
+                             
+                             <button className="debug-btn" style={{width: '60px'}} onClick={() => {}}>prv</button>
+                        </div>
+                    )}
+
+                    {/* JOG DEG TAB */}
+                    {activeRow4Tab === 'Jog Deg' && (
+                        <div className="light-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666', fontStyle: 'italic' }}>
+                            Jog Degrees not set
+                        </div>
+                    )}
                 </div>
             </div>
 

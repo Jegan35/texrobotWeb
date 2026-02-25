@@ -103,7 +103,7 @@ function AppContent() {
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', borderRight: '2px solid #333' }}>
           
           <div style={{ height: '40px', flexShrink: 0, backgroundColor: '#151822', borderBottom: '2px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
-            <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TECSONICS</div>
+            <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TEXSONICS</div>
             <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '0.5px' }}>ROBOT CONTROLLER V1.0</div>
           </div>
 
