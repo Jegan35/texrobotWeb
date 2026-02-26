@@ -1,67 +1,138 @@
+/* src/components/ControlButtons.css */
+
 .control-buttons-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    padding-top: 5px;
 }
 
 .btn-row {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  width: 100%;
-  align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    align-items: stretch;
 }
 
+.span-2 {
+    grid-column: span 2;
+}
+
+/* INCREASED FONT SIZES FOR TABLET READABILITY */
 .btn {
-  flex: 1;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 0.85rem;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
-  transition: opacity 0.2s ease, transform 0.1s ease;
+    width: 100%;
+    min-height: 45px;
+    box-sizing: border-box;
+    padding: 5px;
+    border-radius: 0px;
+    font-weight: 900;
+    font-size: clamp(10px, 1.2vw, 14px); /* Increased clamp bounds */
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(0,0,0,0.8);
+    transition: all 0.1s ease-in-out;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.btn:hover { opacity: 0.85; }
-.btn:active { transform: scale(0.98); }
+.btn:hover {
+    filter: brightness(1.15);
+}
 
-.btn-dark { background-color: #333333; color: #aaaaaa; }
-.btn-green { background-color: #4CAF50; color: white; }
-.btn-green-full { background-color: #4CAF50; color: white; }
-.btn-blue { background-color: #2196F3; color: white; }
-.btn-yellow { background-color: #FFEB3B; color: #111; }
-.btn-orange { background-color: #FF9800; color: white; }
-.btn-red { background-color: #F44336; color: white; }
-.btn-purple { background-color: #9C27B0; color: white; }
-.btn-purple-dark { background-color: #673AB7; color: white; }
-.btn-pink { background-color: #E91E63; color: white; }
+.btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0px 0px rgba(0,0,0,0.8), inset 0 3px 5px rgba(0,0,0,0.6) !important;
+}
+
+/* BUTTON COLOR THEMES (With depth and shadows) */
+.btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); box-shadow: 0 4px 0 #151822, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); }
+.btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 0 5px rgba(0,255,0,0.5); }
+.btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.4); color: #000; text-shadow: none; }
+.btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); box-shadow: 0 4px 0 #002171, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+.btn-yellow { background: linear-gradient(180deg, #FFEE58 0%, #F57F17 100%); box-shadow: 0 4px 0 #BC5100, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.5); color: #111; text-shadow: none; }
+.btn-orange { background: linear-gradient(180deg, #FFA726 0%, #E65100 100%); box-shadow: 0 4px 0 #822C00, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+.btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); box-shadow: 0 4px 0 #7F0000, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 0 5px rgba(255,0,0,0.5); }
+.btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); box-shadow: 0 4px 0 #4A148C, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+.btn-pink { background: linear-gradient(180deg, #F06292 0%, #880E4F 100%); box-shadow: 0 4px 0 #4A0024, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+.btn-purple-dark { background: linear-gradient(180deg, #9575CD 0%, #4527A0 100%); box-shadow: 0 4px 0 #311B92, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
 
 .btn-outline-green { 
-  background-color: transparent; 
-  border: 2px solid #4CAF50; 
-  color: #4CAF50; 
-}
-.btn-outline-green:hover { background-color: rgba(76, 175, 80, 0.1); }
-
-.info-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 10px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-family: monospace;
+    background: #1a1e29; 
+    border: 2px solid #4CAF50; 
+    color: #4CAF50; 
+    box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4); 
+    text-shadow: 0 0 5px rgba(76,175,80,0.4); 
 }
 
-.dark-box { background-color: #111; border: 1px solid #333; color: #ccc; }
-.empty-box { background-color: transparent; border: 1px dashed #555; color: #666; }
-.text-green { color: #4CAF50; font-weight: bold; justify-content: flex-end; font-size: 1rem; }
+/* INFO BOXES */
+.info-box { 
+    width: 100%; 
+    box-sizing: border-box; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 0 5px; 
+    border-radius: 0px; 
+    font-size: clamp(9px, 1.1vw, 14px); 
+    font-family: 'Consolas', monospace; 
+    overflow: hidden; 
+    white-space: nowrap; 
+    text-overflow: ellipsis; 
+    font-weight: bold;
+}
+
+.dark-box { 
+    background-color: #0a0e17; 
+    border: 2px solid #333; 
+    border-top-color: #000; 
+    border-left-color: #000; 
+    color: #00bcd4; 
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); 
+    text-shadow: 0 0 3px rgba(0,188,212,0.4); 
+}
+
+.empty-box { 
+    background-color: #111; 
+    border: 1px dashed #444; 
+    color: #555; 
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
+}
+
+.text-green { 
+    background-color: #0a0e17; 
+    border: 2px solid #333; 
+    border-top-color: #000; 
+    border-left-color: #000; 
+    color: #00e676; 
+    font-size: clamp(10px, 1.2vw, 15px); 
+    text-shadow: 0 0 5px rgba(0,230,118,0.5); 
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); 
+}
+
+/* POPUP MENU BUTTON */
+.popup-menu-btn { 
+    width: 100%; 
+    padding: 12px; 
+    background: transparent; 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    font-weight: 900; 
+    font-size: 1rem; 
+    transition: 0.1s; 
+    text-transform: uppercase; 
+}
+
+.popup-menu-btn:hover { 
+    background: #4CAF50; 
+    color: #000; 
+}

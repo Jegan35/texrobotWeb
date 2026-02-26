@@ -1,0 +1,185 @@
+/* src/components/LeftPart.css */
+
+.left-part-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: #151822;
+    padding: 15px;
+    box-sizing: border-box;
+    gap: 15px;
+    border-right: 2px solid #111;
+}
+
+/* --- POPUP MODAL STYLES --- */
+.connection-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+}
+.connection-modal {
+    background: #1e222b; border: 2px solid #E53935;
+    border-radius: 8px; width: 320px; padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+    display: flex; flex-direction: column; gap: 15px;
+    text-align: center;
+}
+.modal-header {
+    color: #E53935; font-weight: 900; font-size: 1.2rem; letter-spacing: 1px;
+    border-bottom: 1px solid #333; padding-bottom: 10px;
+}
+.modal-body {
+    color: white; font-size: 0.95rem; font-weight: bold; line-height: 1.4;
+}
+.modal-btn {
+    background: #333; color: white; border: 1px solid #555;
+    padding: 12px; border-radius: 4px; font-weight: 900; cursor: pointer;
+    text-transform: uppercase; transition: 0.2s;
+}
+.modal-btn:hover { background: #E53935; border-color: #b71c1c; }
+
+/* BRANDING */
+.left-brand-header {
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #333;
+}
+
+.brand-title {
+    color: #00bcd4;
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.brand-subtitle {
+    color: #aaa;
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 4px;
+}
+
+.left-panel {
+    background-color: #1e222b;
+    border-radius: 6px;
+    border: 1px solid #333;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.panel-title {
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+/* CONNECTION STYLES */
+.ip-input {
+    width: 100%;
+    padding: 10px;
+    background-color: #111;
+    border: 1px solid #444;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 4px;
+    outline: none;
+    text-align: center;
+    box-sizing: border-box;
+}
+.ip-input:disabled {
+    color: #777;
+}
+
+.connect-btn {
+    width: 100%;
+    padding: 12px;
+    font-weight: 900;
+    font-size: 1rem;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.2s;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+}
+.connect-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+.btn-connect { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); }
+.btn-connecting { background: linear-gradient(180deg, #FF9800 0%, #E65100 100%); animation: pulse 1.5s infinite; }
+.btn-disconnect { background: linear-gradient(180deg, #E53935 0%, #b71c1c 100%); }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* CARTESIAN STYLES */
+.cartesian-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.cartesian-item {
+    background-color: #111;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cart-lbl { color: #888; font-weight: bold; font-size: 0.9rem; }
+.cart-val { font-weight: 900; font-size: 1.1rem; }
+
+/* JOINT STYLES */
+.joints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.joint-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.joint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+.joint-lbl { color: #aaa; font-weight: bold; font-size: 0.85rem; }
+.joint-val { font-weight: 900; font-size: 1rem; }
+
+/* PROGRESS BARS */
+.progress-track {
+    width: 100%;
+    height: 8px;
+    background-color: #111;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #333;
+}
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.1s linear, background-color 0.3s;
+}
+
+/* STATE COLORS */
+.val-active { color: #00bcd4; text-shadow: 0 0 5px rgba(0, 188, 212, 0.5); }
+.val-inactive { color: #555; }
+.fill-active { background-color: #00bcd4; box-shadow: 0 0 8px #00bcd4; }
+.fill-inactive { background-color: #444; }
