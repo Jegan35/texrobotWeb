@@ -1,66 +1,79 @@
 import React from 'react';
+import { useWebSocket } from '../context/WebSocketContext';
 
 const RightHeader = ({ onMenuToggle, currentMode, isOpen }) => {
-  return (
-    <div style={{
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        padding: '0 15px', 
-        height: '100%', 
-        background: '#202430', 
-        color: 'white',
-        borderBottom: '2px solid #111',
-        boxSizing: 'border-box'
-    }}>
-        {/* LEFT SIDE: Hamburger Menu Button */}
-        <button 
-            onClick={onMenuToggle}
-            style={{
-                background: 'transparent', 
-                border: '1px solid #555', 
-                color: 'white',
-                padding: '8px 15px',
-                borderRadius: '6px',
-                fontSize: '1rem', 
-                cursor: 'pointer', 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                fontWeight: '900',
-                transition: 'background 0.2s ease',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#333'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-        >
-            {/* HORIZONTAL HAMBURGER ICON WITH 90-DEGREE ROTATION ANIMATION */}
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                gap: '4px',
-                // MAGIC: Rotates 90 degrees when isOpen is true, back to 0 when false!
-                transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                transition: 'transform 0.3s ease-in-out'
+    const { robotState } = useWebSocket();
+    
+    // Automatically read the physically moving state from context
+    const isMoving = robotState?.is_physically_moving || false;
+
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 15px', color: 'white', boxSizing: 'border-box' }}>
+            
+            {/* 1. LEFT: MENU BUTTON */}
+            <div 
+                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }} 
+                onClick={onMenuToggle}
+            >
+                <span style={{ fontSize: '1.8rem', marginRight: '10px' }}>{isOpen ? '✕' : '≡'}</span>
+                <span style={{ fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1px' }}>MENU</span>
+            </div>
+
+            {/* 2. CENTER-LEFT: MODE INDICATOR (JOG : CARTESIAN) */}
+            <div style={{ 
+                marginLeft: '30px', 
+                border: '1px solid #333', 
+                borderRadius: '4px', 
+                padding: '6px 12px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                backgroundColor: '#151822' 
             }}>
-                <div style={{ width: '18px', height: '2px', backgroundColor: 'white', borderRadius: '1px' }}></div>
-                <div style={{ width: '18px', height: '2px', backgroundColor: 'white', borderRadius: '1px' }}></div>
-                <div style={{ width: '18px', height: '2px', backgroundColor: 'white', borderRadius: '1px' }}></div>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00bcd4', boxShadow: '0 0 5px #00bcd4' }}></div>
+                <span style={{ fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.85rem' }}>
+                    {currentMode}
+                </span>
+            </div>
+
+            {/* 3. CENTER: THE NEW "2-IN-1" DYNAMIC STANDBY / IN-MOTION BUTTON */}
+            <div style={{ marginLeft: '15px' }}>
+                {isMoving ? (
+                    <div style={{ 
+                        border: '2px solid #FF9800', 
+                        color: '#FF9800', 
+                        padding: '5px 15px', 
+                        borderRadius: '4px', 
+                        fontWeight: '900', 
+                        letterSpacing: '1px', 
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)', 
+                        textShadow: '0 0 5px rgba(255,152,0,0.4)', 
+                        boxShadow: 'inset 0 0 5px rgba(255,152,0,0.2)',
+                        fontSize: '0.85rem'
+                    }}>
+                        IN MOTION
+                    </div>
+                ) : (
+                    <div style={{ 
+                        border: '2px solid #4CAF50', 
+                        color: '#4CAF50', 
+                        padding: '5px 15px', 
+                        borderRadius: '4px', 
+                        fontWeight: '900', 
+                        letterSpacing: '1px', 
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        fontSize: '0.85rem'
+                    }}>
+                        STANDBY
+                    </div>
+                )}
             </div>
             
-            MENU
-        </button>
-
-        {/* RIGHT SIDE: Green Dot + Active Mode Text */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingRight: '10px' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#4CAF50', boxShadow: '0 0 5px #4CAF50' }}></div>
-            <div style={{ fontWeight: '900', fontSize: 'clamp(12px, 1.2vw, 16px)', color: '#00bcd4', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                {currentMode}
-            </div>
+            {/* 4. RIGHT: ANY EXTRA ACTIONS YOU MIGHT HAVE LATER */}
+            <div style={{ flex: 1 }}></div>
+            
         </div>
-    </div>
-  );
+    );
 };
 
 export default RightHeader;

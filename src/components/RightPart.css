@@ -10,7 +10,7 @@
 .rp-row-4 { flex: 1 1 20%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; position: relative; z-index: 10; }
 .rp-row-5 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 5px 0px 8px 0px; position: relative; z-index: 50; flex-shrink: 0; }
 
-/* ROW 1 FLEX SPLIT */
+/* ROW 1 FLEX SPLIT (Header Fixed at Top) */
 .rp-header-col { flex: 0 0 40px; width: 100%; overflow: hidden; background: #1a1e29; }
 .rp-content-col { flex: 1; display: flex; flex-direction: row; min-width: 0; overflow: hidden; }
 .rp-panel-left { flex: 0 0 220px; display: flex; flex-direction: column; border-right: 2px solid #111; overflow-y: auto; overflow-x: hidden; }
@@ -22,7 +22,7 @@
 .row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; width: 100%; }
 .light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
-/* DYNAMIC SHRINK GRIDS */
+/* DYNAMIC SHRINK GRIDS (NO WRAPPING) */
 .grid-7-col { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 .grid-11-col { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 
@@ -39,16 +39,26 @@
 .speed-range-group input[type="range"] { flex: 1; min-width: 50px; cursor: pointer; margin: 0; }
 .speed-range-group input[type="number"] { width: 60px; text-align: center; padding: 0 4px; }
 
-/* JOG PANEL CONTROLS */
+/* ==============================================================
+   2. JOG PANEL CONTROLS (NORMAL INDUSTRIAL BUTTON DESIGN)
+   ============================================================== */
 .jog-panel-container { display: flex; flex-direction: column; width: 100%; min-height: 100%; padding: 10px 5px; box-sizing: border-box; }
 .jog-panel-title { text-align: center; font-size: clamp(10px, 1.6vw, 14px); font-weight: 900; color: #00bcd4; padding-bottom: 10px; letter-spacing: 1px; flex-shrink: 0; }
 .jog-panel-body { display: flex; flex-direction: column; flex: 1; min-height: 200px; }
 .jog-btn-row { display: flex; gap: 5px; flex: 1; min-height: 30px; margin-bottom: 4px; }
 
-.pro-jog-btn { flex: 1; min-width: 0; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; border-radius: 0; border: none; font-weight: 900; color: white; font-size: clamp(10px, 1.5vw, 16px); cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.4); transition: 0.1s; text-transform: uppercase; }
-.pro-jog-btn.neg { background: linear-gradient(135deg, #e53935, #b71c1c); border-bottom: 4px solid #7f0000; }
-.pro-jog-btn.pos { background: linear-gradient(135deg, #43a047, #1b5e20); border-bottom: 4px solid #003300; }
-.pro-jog-btn:active { transform: translateY(2px); border-bottom-width: 2px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+/* Removed the thick 3D bottom border, matched row 3 & 5 industrial style */
+.pro-jog-btn { 
+    flex: 1; min-width: 0; height: 100%; display: flex; justify-content: space-between; align-items: center; 
+    padding: 0 10px; border-radius: 0; font-weight: 900; color: white; font-size: clamp(10px, 1.5vw, 16px); 
+    cursor: pointer; transition: 0.1s; text-transform: uppercase; 
+    border: 1px solid rgba(0,0,0,0.8); 
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); 
+}
+.pro-jog-btn.neg { background: linear-gradient(180deg, #e53935 0%, #b71c1c 100%); } /* Changed to flat 180deg vertical gradient */
+.pro-jog-btn.pos { background: linear-gradient(180deg, #43a047 0%, #1b5e20 100%); }
+.pro-jog-btn:active { transform: translateY(2px); box-shadow: none; border-color: rgba(0,0,0,0.8); }
+
 .btn-txt { opacity: 0.9; }
 .btn-sym { font-size: 1.2em; font-weight: 900; text-shadow: 0 2px 2px rgba(0,0,0,0.5); }
 
@@ -102,18 +112,16 @@
 .mech-table td { padding: 3px 5px; border: 1px solid #ccc; }
 .mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 4px; font-weight: 900; font-size: 0.75rem; border-radius: 0; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
 
-/* =========================================================
-   TABS FIX: HIDDEN "MECH SETTINGS" SCROLL OVERFLOW
-   ========================================================= */
+/* TABS FIX: HIDDEN "MECH SETTINGS" SCROLL OVERFLOW */
 .dark-tabs { 
     display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; 
     border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; 
-    overflow-x: auto; /* Tablet-la idikuratha thadukka scroll add panniyachu */
+    overflow-x: auto; 
     overflow-y: hidden;
-    -ms-overflow-style: none; /* Hide scrollbar completely */
+    -ms-overflow-style: none; 
     scrollbar-width: none; 
 }
-.dark-tabs::-webkit-scrollbar { display: none; } /* Hide scrollbar for Chrome */
+.dark-tabs::-webkit-scrollbar { display: none; } 
 
 .bg-dark-deep { background: #202430; }
 .dark-tab { padding: 6px 10px; color: #aaa; font-weight: bold; font-size: clamp(9px, 1vw, 13px); cursor: pointer; border-radius: 0; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; }
@@ -189,9 +197,7 @@
 }
 .tp-standalone-input:focus { border-color: #039BE5; background: #e3f2fd; }
 
-/* =========================================================
-   DROPDOWN MENU FIX: INST DROPDOWN HIDDEN ISSUE 
-   ========================================================= */
+/* DROPDOWN MENU FIX: INST DROPDOWN HIDDEN ISSUE */
 .dropdown-menu {
     position: absolute; bottom: calc(100% + 8px); left: 0; transform: none; width: max-content; min-width: 140px; 
     background-color: #263238; padding: 8px; border-radius: 0; box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8); 
@@ -200,16 +206,9 @@
 .dropdown-menu::after { content: ''; position: absolute; top: 100%; left: 20px; border-width: 8px; border-style: solid; border-color: #00bcd4 transparent transparent transparent; }
 .dropdown-menu input { background-color: #fff; color: #111; border-radius: 0 !important; border: 1px solid #111 !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
 
-/* Force "Inst" dropdown to open towards the LEFT so it doesn't clip off the right edge of the screen */
-.inst-qty-input-dropdown { 
-    width: 190px; 
-    left: auto !important; 
-    right: 0 !important; 
-}
-.inst-qty-input-dropdown::after {
-    left: auto !important;
-    right: 20px !important;
-}
+/* Force "Inst" dropdown to open towards the LEFT so it doesn't clip off */
+.inst-qty-input-dropdown { width: 190px; left: auto !important; right: 0 !important; }
+.inst-qty-input-dropdown::after { left: auto !important; right: 20px !important; }
 
 .dd-btn { border-radius: 0; padding: 10px 8px; font-weight: 900; font-size: 0.85rem; cursor: pointer; text-align: center; width: 100%; transition: 0.1s; color: #ffffff; text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.8); border: 1px solid #111; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2); text-transform: uppercase; }
 .dd-btn:active { transform: scale(0.95); box-shadow: inset 0 2px 4px rgba(0,0,0,0.9); }

@@ -208,7 +208,7 @@ const ControlButtons = () => {
     <div className="control-buttons-container">
       
       <div className="btn-row">
-        <button className={`btn ${servoOn ? 'btn-green' : 'btn-dark'}`} onClick={handleServoToggle}>⚡ SERVO: {servoOn ? 'ON' : 'OFF'}</button>
+        <button className={`btn ${servoOn ? 'btn-green' : 'btn-dark'}`} onClick={handleServoToggle}>⚡SERVO:{servoOn ? 'ON' : 'OFF'}</button>
         <button className="btn btn-blue" onClick={handleHomeClick}>⌂ HOME</button>
         <button className={`btn ${isRunning ? 'btn-green' : 'btn-yellow'}`} onClick={handleRunPauseToggle}>{isRunning ? '⏵ RUN' : '⏸ PAUSE'}</button>
         <button className={`btn ${isStarted ? 'btn-red' : 'btn-orange'}`} onClick={handleStartStopToggle}>{isStarted ? '⏹ STOP' : '⏻ START'}</button>

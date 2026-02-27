@@ -12,7 +12,7 @@ export const WebSocketProvider = ({ children }) => {
   const [rejectMessage, setRejectMessage] = useState(""); 
   
   const wsRef = useRef(null);
-  const ipRef = useRef(ipAddress); // ALWAYS holds the latest IP without closure bugs
+  const ipRef = useRef(ipAddress);
   const isAccessFullRef = useRef(false); 
   const isIntentionalDisconnect = useRef(false); 
 
@@ -26,6 +26,10 @@ export const WebSocketProvider = ({ children }) => {
     current_tp_name: "None", current_pr_name: "None",
     tp_list: [], pr_program_data: [],
     program_count_output: "0", is_calculating_trajectory: false,
+    
+    // --> NEW VARIABLE ADDED HERE <--
+    is_physically_moving: false, 
+    
     speed_op: 0, di_val: 0, do_val: 0,
     staging_data: {}, 
     error_pos_data: {}, ether_cat_data: {}, variable_data: {}, mech_data: {},
@@ -70,7 +74,6 @@ export const WebSocketProvider = ({ children }) => {
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
-        // --- HANDSHAKE LOGIC ---
         if (data.type === "connection_accepted") {
           console.log("C++ Admin Accepted Connection!");
           setIsConnected(true); 
@@ -91,10 +94,8 @@ export const WebSocketProvider = ({ children }) => {
           isIntentionalDisconnect.current = true;
           wsRef.current.close();
         }
-        // --- HIGH-PERFORMANCE REAL-TIME DATA STREAM ---
         else if (data.type === "status_update" || data.type === "motion_update") {
           setRobotState(prevState => {
-            // EXTREME OPTIMIZATION: Only parse heavy tables if length or first item changes!
             let finalTpList = prevState.tp_list;
             if (data.tp_list) {
                 if (data.tp_list.length !== finalTpList.length) finalTpList = data.tp_list;
@@ -107,7 +108,6 @@ export const WebSocketProvider = ({ children }) => {
                 else if (data.pr_program_data.length > 0 && finalPrList.length > 0 && data.pr_program_data[0].value !== finalPrList[0].value) finalPrList = data.pr_program_data;
             }
 
-            // Fast stringify for small config maps to prevent UI re-renders every 100ms
             const newErrStr = JSON.stringify(data.error_pos_data || {});
             const finalErr = newErrStr !== prevState._errStr ? data.error_pos_data : prevState.error_pos_data;
 
@@ -132,13 +132,16 @@ export const WebSocketProvider = ({ children }) => {
                 current_pr_name: data.current_pr_name || prevState.current_pr_name || "None",
                 program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
                 is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory,
+                
+                // --> PARSING AND SAVING THE NEW PAYLOAD VARIABLE HERE <--
+                is_physically_moving: data.is_physically_moving !== undefined ? data.is_physically_moving : prevState.is_physically_moving,
+                
                 speed_op: data.speed_op !== undefined ? data.speed_op : prevState.speed_op,
                 di_val: data.di_val !== undefined ? data.di_val : prevState.di_val,
                 do_val: data.do_val !== undefined ? data.do_val : prevState.do_val,
                 variable_data: data.variable_data || prevState.variable_data || {},
                 staging_data: data.staging_data || prevState.staging_data || {},
                 
-                // Optimized Data
                 tp_list: finalTpList,
                 pr_program_data: finalPrList,
                 error_pos_data: finalErr, _errStr: newErrStr,
