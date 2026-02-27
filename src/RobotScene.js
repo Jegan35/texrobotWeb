@@ -1,12 +1,47 @@
 import React, { useMemo, Suspense } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard, Line } from "@react-three/drei";
-import * as THREE from "three";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import HamburgerMenu from "./components/HamburgerMenu"; 
 import { useWebSocket } from "./context/WebSocketContext";
 
+// Original Colors Restored (Y_GREEN is dark green)
 const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1", GRID: "#888888" };
+
+// 100% Code-Based 3D Arrows (Reduced Length & Smaller Sharp Cone)
+const Custom3DArrows = () => {
+  // Exact proportions matching your reference image
+  const shaftLength = 0.35;    // Neelatha (Length) paathiya kuraichiyachu!
+  const shaftRadius = 0.0035;  // Kambi thickness
+  const headLength = 0.05;     // Cone height-a chinnathu panniyachu (Small edge cone)
+  const headRadius = 0.012;    // Cone width-a innum sharp aakkiyachu
+
+  const Arrow = ({ color, rotation }) => (
+    <group rotation={rotation}>
+      {/* Arrow Shaft (Thin Cylinder) */}
+      <mesh position={[0, shaftLength / 2, 0]}>
+        <cylinderGeometry args={[shaftRadius, shaftRadius, shaftLength, 32]} />
+        <meshBasicMaterial color={color} depthTest={false} transparent opacity={0.9} />
+      </mesh>
+      {/* Arrow Head (Sharp Cone) */}
+      <mesh position={[0, shaftLength + headLength / 2, 0]}>
+        <coneGeometry args={[headRadius, headLength, 32]} />
+        <meshBasicMaterial color={color} depthTest={false} transparent opacity={0.9} />
+      </mesh>
+    </group>
+  );
+
+  return (
+    <group>
+      {/* Y Axis - Green */}
+      <Arrow color={COLORS.Y_GREEN} rotation={[0, 0, 0]} />
+      {/* X Axis - Red */}
+      <Arrow color={COLORS.X_RED} rotation={[0, 0, -Math.PI / 2]} />
+      {/* Z Axis - Blue */}
+      <Arrow color={COLORS.Z_BLUE} rotation={[Math.PI / 2, 0, 0]} />
+    </group>
+  );
+};
 
 const RealRobot = () => {
   const link0 = useLoader(STLLoader, "/meshes/link0.stl");
@@ -23,6 +58,10 @@ const RealRobot = () => {
   return (
     <group position={[0, 0, 0]} scale={[1000, 1000, 1000]}>
       <mesh geometry={link0}><meshStandardMaterial color="#222222" /></mesh>
+      
+      {/* ROBOT BOTTOM/BASE ARROWS (Added based on your 2nd image) */}
+      <Custom3DArrows />
+
       <group position={[0, 0, 0]} rotation={[0, 0, rad(j.j1)]}>
         <mesh geometry={link1} position={[0, 0, 0]}><meshStandardMaterial color="#0277bd" /></mesh>
         <group position={[0.150, 0, 0.462]} rotation={[0, rad(j.j2), 0]}>
@@ -34,8 +73,10 @@ const RealRobot = () => {
               <group position={[0.687, 0, 0]} rotation={[0, rad(j.j5), 0]}>
                 <mesh geometry={link5} position={[-0.837, 0, -1.252]}><meshStandardMaterial color="#ffb300" /></mesh>
                 <group position={[0.101, 0, 0]} rotation={[rad(j.j6), 0, 0]}>
-                  {/* Pazhaya programmatic axes helper */}
-                  <axesHelper args={[0.3]} />
+                  
+                  {/* ROBOT TOP/TOOL ARROWS */}
+                  <Custom3DArrows />
+
                 </group>
               </group>
             </group>
