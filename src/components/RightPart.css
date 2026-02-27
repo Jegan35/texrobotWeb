@@ -1,16 +1,16 @@
 /* src/components/RightPart.css */
 
 .rp-master-container { display: flex; flex-direction: row; height: 100vh; width: 100%; background-color: #202430; overflow: hidden; }
-.rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; overflow: hidden; }
+.rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; overflow: hidden; box-sizing: border-box; }
 
-/* 1. DYNAMIC ROW SIZING - RESTORED TO ORIGINAL PROPORTIONS */
+/* DYNAMIC ROW SIZING - RESTORED TO ORIGINAL PROPORTIONS */
 .rp-row-1 { flex: 1 1 25%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; }
 .rp-row-2 { flex: 1 1 25%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; } 
 .rp-row-3 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #202430; padding: 5px 0px; overflow: visible; position: relative; z-index: 50; flex-shrink: 0; }
 .rp-row-4 { flex: 1 1 20%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; position: relative; z-index: 10; }
 .rp-row-5 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 5px 0px 8px 0px; position: relative; z-index: 50; flex-shrink: 0; }
 
-/* ROW 1 FLEX SPLIT (Header Fixed at Top) */
+/* ROW 1 FLEX SPLIT */
 .rp-header-col { flex: 0 0 40px; width: 100%; overflow: hidden; background: #1a1e29; }
 .rp-content-col { flex: 1; display: flex; flex-direction: row; min-width: 0; overflow: hidden; }
 .rp-panel-left { flex: 0 0 220px; display: flex; flex-direction: column; border-right: 2px solid #111; overflow-y: auto; overflow-x: hidden; }
@@ -19,12 +19,12 @@
 .bg-light-dark { background-color: #151822; }
 
 /* UNIVERSAL SCROLLABLE CONTENT AREAS */
-.row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; }
-.light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; }
+.row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; width: 100%; }
+.light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
-/* DYNAMIC SHRINK GRIDS (NO WRAPPING) */
-.grid-7-col { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; }
-.grid-11-col { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; }
+/* DYNAMIC SHRINK GRIDS */
+.grid-7-col { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
+.grid-11-col { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 
 /* SPEED PANEL */
 .speed-config-container { display: flex; flex-direction: column; width: 100%; min-height: 100%; padding: 15px 10px; box-sizing: border-box; color: white; }
@@ -52,23 +52,10 @@
 .btn-txt { opacity: 0.9; }
 .btn-sym { font-size: 1.2em; font-weight: 900; text-shadow: 0 2px 2px rgba(0,0,0,0.5); }
 
-/* HORIZONTAL GRIDS (COLLAPSE FIX FOR ERROR POS & ETHER CAT) */
-.error-pos-grid { 
-    display: grid; 
-    grid-template-columns: repeat(7, max-content minmax(50px, 1fr)); 
-    gap: 6px 12px; 
-    align-items: center; 
-    min-width: 1100px; /* Horizontal scroll applied like encoder offset */
-    padding: 10px 5px;
-}
-.ether-cat-grid { 
-    display: grid; 
-    grid-template-columns: repeat(4, max-content minmax(60px, 1fr)); 
-    gap: 8px 15px; 
-    align-items: center; 
-    min-width: 800px; /* Horizontal scroll applied */
-    padding: 10px 5px;
-}
+/* HORIZONTAL GRIDS */
+.error-pos-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 4px 10px; align-items: center; width: 100%; }
+.ether-cat-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 8px 10px; align-items: center; width: 100%; }
+
 .encoder-offset-grid { 
     display: grid; 
     grid-template-columns: max-content minmax(60px, 1fr) max-content minmax(60px, 1fr) max-content minmax(60px, 1fr); 
@@ -79,12 +66,12 @@
 }
 
 .settings-view-grid { display: grid; grid-template-columns: repeat(3, max-content minmax(50px, 1fr)); gap: 15px 20px; align-items: center; width: 100%; }
-.axis-limit-wrapper { display: flex; gap: 15px; justify-content: space-between; width: 100%; }
+.axis-limit-wrapper { display: flex; gap: 15px; justify-content: space-between; width: 100%; min-width: 800px; }
 .axis-limit-grid { display: grid; grid-template-columns: max-content 1fr; gap: 8px; align-items: center; }
 .sim-grid { display: grid; grid-template-columns: max-content 1fr 1fr; gap: 8px; align-items: center; }
 
 /* DATA VAR CUSTOM GRID */
-.data-var-wrapper { display: flex; gap: 20px; justify-content: space-between; width: 100%; }
+.data-var-wrapper { display: flex; gap: 20px; justify-content: space-between; width: 100%; min-width: 800px; }
 .data-var-col { flex: 1; border-right: 1px solid #ccc; padding-right: 15px; min-width: 0; }
 .data-var-col.no-border { border-right: none; padding-right: 0; }
 .data-var-title { font-weight: 900; margin-bottom: 15px; text-align: center; color: #333; font-size: clamp(10px, 1.2vw, 14px); }
@@ -93,7 +80,7 @@
 /* IO MODULES */
 .io-modules-wrapper { 
     display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; 
-    width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; padding: 5px 0;
+    width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; padding: 5px 0; min-width: 600px;
 }
 .io-module-box { background: #fff; border: 1px solid #ccc; border-radius: 0; padding: 10px; box-sizing: border-box; width: 100%; min-height: max-content; }
 .io-module-title { border-left: 4px solid; padding-left: 8px; font-weight: 900; color: #333; margin-bottom: 10px; font-size: clamp(9px, 1vw, 12px); }
@@ -110,13 +97,24 @@
 .light-label { font-weight: 900; text-align: right; padding-right: 5px; white-space: nowrap; align-self: center; color: #333; font-size: clamp(9px, 1vw, 12px); text-transform: uppercase; }
 
 /* MECH TABLE */
-.mech-table { width: 100%; border-collapse: collapse; text-align: center; border: 2px solid #111; }
+.mech-table { width: 100%; border-collapse: collapse; text-align: center; border: 2px solid #111; min-width: 800px; }
 .mech-table th { border: 1px solid #999; padding: 6px; font-size: 0.75rem; background: #cfd8dc; color: #111; position: sticky; top: 0; text-transform: uppercase; border-bottom: 2px solid #111; border-radius: 0; }
 .mech-table td { padding: 3px 5px; border: 1px solid #ccc; }
 .mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 4px; font-weight: 900; font-size: 0.75rem; border-radius: 0; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
 
-/* TABS */
-.dark-tabs { display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; }
+/* =========================================================
+   TABS FIX: HIDDEN "MECH SETTINGS" SCROLL OVERFLOW
+   ========================================================= */
+.dark-tabs { 
+    display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; 
+    border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; 
+    overflow-x: auto; /* Tablet-la idikuratha thadukka scroll add panniyachu */
+    overflow-y: hidden;
+    -ms-overflow-style: none; /* Hide scrollbar completely */
+    scrollbar-width: none; 
+}
+.dark-tabs::-webkit-scrollbar { display: none; } /* Hide scrollbar for Chrome */
+
 .bg-dark-deep { background: #202430; }
 .dark-tab { padding: 6px 10px; color: #aaa; font-weight: bold; font-size: clamp(9px, 1vw, 13px); cursor: pointer; border-radius: 0; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; }
 .dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-top: 2px solid #00bcd4; border-bottom: none; z-index: 10; }
@@ -137,25 +135,10 @@
 .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 30px; }
 .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 60px; }
 .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 70px; }
+.data-table th:last-child, .data-table td:last-child { width: 20%; padding-right: 45px !important; text-align: left; }
 
-/* BUTTON OVERLAP & 20% END FIX FOR THE 4TH/LAST COLUMN */
-.data-table th:last-child, .data-table td:last-child {
-    width: 20%;
-    padding-right: 45px !important; /* Safety padding so the 35px button NEVER overlaps the text */
-    text-align: left; /* Pushes text slightly forward away from the right edge */
-}
-
-/* FILL DOWN ROW 2 (Stretches the table rows to fill empty bottom space) */
-.rp-row-2 .data-table th, .rp-row-2 .data-table td {
-    padding: 8px 6px;
-    height: 38px;
-}
-
-/* ROW 4 CONTENT INCREASED */
-.rp-row-4 .data-table th, .rp-row-4 .data-table td {
-    padding: 10px 12px;
-    font-size: clamp(11px, 1.4vw, 15px);
-}
+.rp-row-2 .data-table th, .rp-row-2 .data-table td { padding: 8px 6px; height: 38px; }
+.rp-row-4 .data-table th, .rp-row-4 .data-table td { padding: 10px 12px; font-size: clamp(11px, 1.4vw, 15px); }
 
 .tr-blue { background-color: #bbdefb !important; }
 .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
@@ -163,26 +146,11 @@
 
 /* MIN MAX BUTTON */
 .min-max-btn { 
-    background: #2196f3 !important; 
-    color: white !important; 
-    cursor: pointer; 
-    transition: 0.1s; 
-    font-weight: 900; 
-    position: absolute; 
-    right: 0; 
-    top: 0; 
-    z-index: 10 !important; 
-    width: 35px !important; 
-    height: 30px; 
-    text-align: center; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    border-radius: 0 !important; 
-    border: 1px solid #111; 
-    border-bottom: 2px solid #111; 
-    border-top: none; 
-    border-right: none; 
+    background: #2196f3 !important; color: white !important; cursor: pointer; transition: 0.1s; 
+    font-weight: 900; position: absolute; right: 0; top: 0; z-index: 10 !important; 
+    width: 35px !important; height: 26px; text-align: center; display: flex; 
+    align-items: center; justify-content: center; border-radius: 0 !important; 
+    border: 1px solid #111; border-bottom: 2px solid #111; border-top: none; border-right: none; 
 }
 .min-max-btn:active { background: #111 !important; border-color: #fff !important; }
 
@@ -221,7 +189,9 @@
 }
 .tp-standalone-input:focus { border-color: #039BE5; background: #e3f2fd; }
 
-/* DROPDOWN MENU */
+/* =========================================================
+   DROPDOWN MENU FIX: INST DROPDOWN HIDDEN ISSUE 
+   ========================================================= */
 .dropdown-menu {
     position: absolute; bottom: calc(100% + 8px); left: 0; transform: none; width: max-content; min-width: 140px; 
     background-color: #263238; padding: 8px; border-radius: 0; box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8); 
@@ -230,13 +200,23 @@
 .dropdown-menu::after { content: ''; position: absolute; top: 100%; left: 20px; border-width: 8px; border-style: solid; border-color: #00bcd4 transparent transparent transparent; }
 .dropdown-menu input { background-color: #fff; color: #111; border-radius: 0 !important; border: 1px solid #111 !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
 
+/* Force "Inst" dropdown to open towards the LEFT so it doesn't clip off the right edge of the screen */
+.inst-qty-input-dropdown { 
+    width: 190px; 
+    left: auto !important; 
+    right: 0 !important; 
+}
+.inst-qty-input-dropdown::after {
+    left: auto !important;
+    right: 20px !important;
+}
+
 .dd-btn { border-radius: 0; padding: 10px 8px; font-weight: 900; font-size: 0.85rem; cursor: pointer; text-align: center; width: 100%; transition: 0.1s; color: #ffffff; text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.8); border: 1px solid #111; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2); text-transform: uppercase; }
 .dd-btn:active { transform: scale(0.95); box-shadow: inset 0 2px 4px rgba(0,0,0,0.9); }
 .dd-blue { background: linear-gradient(to bottom, #2b7bc4, #185a9d); }
 .dd-purple { background: linear-gradient(to bottom, #9b51e0, #6a1b9a); }
 .dd-red { background: linear-gradient(to bottom, #e53935, #b71c1c); }
 
-.inst-qty-input-dropdown { width: 180px; }
 .inst-qty-input { width: 50px; text-align: center; border: 1px solid #111; font-weight: 900; font-size: 0.9rem; outline: none; border-radius: 0; height: 35px; box-sizing: border-box; }
 
 /* MODALS */
