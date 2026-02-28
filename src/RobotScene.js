@@ -5,25 +5,22 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import HamburgerMenu from "./components/HamburgerMenu"; 
 import { useWebSocket } from "./context/WebSocketContext";
 
-// Original Colors Restored (Y_GREEN is dark green)
-const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1", GRID: "#888888" };
+// Original Colors Restored
+const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1" };
 
-// 100% Code-Based 3D Arrows (Reduced Length & Smaller Sharp Cone)
+// 100% Code-Based 3D Arrows
 const Custom3DArrows = () => {
-  // Exact proportions matching your reference image
-  const shaftLength = 0.35;    // Neelatha (Length) paathiya kuraichiyachu!
-  const shaftRadius = 0.0035;  // Kambi thickness
-  const headLength = 0.05;     // Cone height-a chinnathu panniyachu (Small edge cone)
-  const headRadius = 0.012;    // Cone width-a innum sharp aakkiyachu
+  const shaftLength = 0.35;
+  const shaftRadius = 0.0035;
+  const headLength = 0.05;
+  const headRadius = 0.012;
 
   const Arrow = ({ color, rotation }) => (
     <group rotation={rotation}>
-      {/* Arrow Shaft (Thin Cylinder) */}
       <mesh position={[0, shaftLength / 2, 0]}>
         <cylinderGeometry args={[shaftRadius, shaftRadius, shaftLength, 32]} />
         <meshBasicMaterial color={color} depthTest={false} transparent opacity={0.9} />
       </mesh>
-      {/* Arrow Head (Sharp Cone) */}
       <mesh position={[0, shaftLength + headLength / 2, 0]}>
         <coneGeometry args={[headRadius, headLength, 32]} />
         <meshBasicMaterial color={color} depthTest={false} transparent opacity={0.9} />
@@ -33,11 +30,8 @@ const Custom3DArrows = () => {
 
   return (
     <group>
-      {/* Y Axis - Green */}
       <Arrow color={COLORS.Y_GREEN} rotation={[0, 0, 0]} />
-      {/* X Axis - Red */}
       <Arrow color={COLORS.X_RED} rotation={[0, 0, -Math.PI / 2]} />
-      {/* Z Axis - Blue */}
       <Arrow color={COLORS.Z_BLUE} rotation={[Math.PI / 2, 0, 0]} />
     </group>
   );
@@ -55,28 +49,27 @@ const RealRobot = () => {
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
   const rad = (deg) => (deg * Math.PI) / 180;
 
+  // Added metalness and roughness to make the robot look shiny and realistic
+  const matProps = { metalness: 0.6, roughness: 0.3 };
+
   return (
     <group position={[0, 0, 0]} scale={[1000, 1000, 1000]}>
-      <mesh geometry={link0}><meshStandardMaterial color="#222222" /></mesh>
+      <mesh geometry={link0}><meshStandardMaterial color="#222222" {...matProps} /></mesh>
       
-      {/* ROBOT BOTTOM/BASE ARROWS (Added based on your 2nd image) */}
       <Custom3DArrows />
 
       <group position={[0, 0, 0]} rotation={[0, 0, rad(j.j1)]}>
-        <mesh geometry={link1} position={[0, 0, 0]}><meshStandardMaterial color="#0277bd" /></mesh>
+        <mesh geometry={link1} position={[0, 0, 0]}><meshStandardMaterial color="#0277bd" {...matProps} /></mesh>
         <group position={[0.150, 0, 0.462]} rotation={[0, rad(j.j2), 0]}>
-          <mesh geometry={link2} position={[-0.150, 0, -0.462]}><meshStandardMaterial color="#0277bd" /></mesh>
+          <mesh geometry={link2} position={[-0.150, 0, -0.462]}><meshStandardMaterial color="#0277bd" {...matProps} /></mesh>
           <group position={[0, 0, 0.600]} rotation={[0, rad(j.j3), 0]}>
-            <mesh geometry={link3} position={[-0.150, 0, -1.062]}><meshStandardMaterial color="#0277bd" /></mesh>
+            <mesh geometry={link3} position={[-0.150, 0, -1.062]}><meshStandardMaterial color="#0277bd" {...matProps} /></mesh>
             <group position={[0, 0, 0.190]} rotation={[rad(j.j4), 0, 0]}>
-              <mesh geometry={link4} position={[-0.150, 0, -1.252]}><meshStandardMaterial color="#d32f2f" /></mesh>
+              <mesh geometry={link4} position={[-0.150, 0, -1.252]}><meshStandardMaterial color="#d32f2f" {...matProps} /></mesh>
               <group position={[0.687, 0, 0]} rotation={[0, rad(j.j5), 0]}>
-                <mesh geometry={link5} position={[-0.837, 0, -1.252]}><meshStandardMaterial color="#ffb300" /></mesh>
+                <mesh geometry={link5} position={[-0.837, 0, -1.252]}><meshStandardMaterial color="#ffb300" {...matProps} /></mesh>
                 <group position={[0.101, 0, 0]} rotation={[rad(j.j6), 0, 0]}>
-                  
-                  {/* ROBOT TOP/TOOL ARROWS */}
                   <Custom3DArrows />
-
                 </group>
               </group>
             </group>
@@ -87,37 +80,88 @@ const RealRobot = () => {
   );
 };
 
-const RawWebGLGridLines = () => {
-  const vertices = useMemo(() => {
-    const pts = []; const step = 100; const size = 2000; 
-    for (let y = -size; y <= size; y += step) pts.push(-size, y, 0, size, y, 0);
-    for (let x = -size; x <= size; x += step) pts.push(x, -size, 0, x, size, 0);
-    for (let z = 0; z <= 3000; z += step) pts.push(-size, size, z, size, size, z);
-    for (let x = -size; x <= size; x += step) pts.push(x, size, 0, x, size, 3000);
-    for (let z = 0; z <= 3000; z += step) pts.push(-size, -size, z, -size, size, z);
-    for (let y = -size; y <= size; y += step) pts.push(-size, y, 0, -size, y, 3000);
+// ==========================================
+// NEW: MULTI-COLORED WALL GRIDS & TEXT
+// ==========================================
+const CustomGridWalls = () => {
+  const size = 2500;
+  const step = 100;
+  const height = 3000;
+
+  const floorGrid = useMemo(() => {
+    const pts = [];
+    for (let i = -size; i <= size; i += step) {
+      pts.push(-size, i, 0, size, i, 0); // Horizontal
+      pts.push(i, -size, 0, i, size, 0); // Vertical
+    }
     return new Float32Array(pts);
   }, []);
+
+  const backWallGrid = useMemo(() => {
+    const pts = [];
+    for (let x = -size; x <= size; x += step) pts.push(x, 0, 0, x, 0, height);
+    for (let z = 0; z <= height; z += step) pts.push(-size, 0, z, size, 0, z);
+    return new Float32Array(pts);
+  }, []);
+
+  const sideWallGrid = useMemo(() => {
+    const pts = [];
+    for (let y = -size; y <= size; y += step) pts.push(0, y, 0, 0, y, height);
+    for (let z = 0; z <= height; z += step) pts.push(0, -size, z, 0, size, z);
+    return new Float32Array(pts);
+  }, []);
+
   return (
-    <lineSegments>
-      <bufferGeometry><bufferAttribute attach="attributes-position" count={vertices.length / 3} array={vertices} itemSize={3} /></bufferGeometry>
-      <lineBasicMaterial color={COLORS.GRID} transparent opacity={0.4} /> 
-    </lineSegments>
+    <group>
+      {/* 1. Floor (Light Green) */}
+      <lineSegments>
+        <bufferGeometry><bufferAttribute attach="attributes-position" count={floorGrid.length / 3} array={floorGrid} itemSize={3} /></bufferGeometry>
+        <lineBasicMaterial color="#81c784" transparent opacity={0.6} /> 
+      </lineSegments>
+
+      {/* 2. Back Wall (Blue) */}
+      <group position={[0, size, 0]}>
+        <lineSegments>
+          <bufferGeometry><bufferAttribute attach="attributes-position" count={backWallGrid.length / 3} array={backWallGrid} itemSize={3} /></bufferGeometry>
+          <lineBasicMaterial color="#64b5f6" transparent opacity={0.6} /> 
+        </lineSegments>
+      </group>
+
+      {/* 3. Left Side Wall (Red) */}
+      <group position={[-size, 0, 0]}>
+        <lineSegments>
+          <bufferGeometry><bufferAttribute attach="attributes-position" count={sideWallGrid.length / 3} array={sideWallGrid} itemSize={3} /></bufferGeometry>
+          <lineBasicMaterial color="#e57373" transparent opacity={0.6} /> 
+        </lineSegments>
+      </group>
+
+      {/* 4. TEXSONICS Text on Back Wall */}
+      <group position={[0, size - 10, 1600]} rotation={[Math.PI / 2, 0, 0]}>
+        <Text fontSize={220} color="#333" fontWeight="900" anchorX="center" anchorY="bottom" letterSpacing={0.1}>
+          TEXSONICS
+        </Text>
+        <Text position={[0, -50, 0]} fontSize={80} color="#666" fontWeight="bold" anchorX="center" anchorY="top" letterSpacing={0.6}>
+          R O B O T I C S
+        </Text>
+      </group>
+    </group>
   );
 };
 
 const WorldCoordinates = () => {
   const labels = [];
-  const step = 100; const fontSize = 35; const axisLabelSize = 120;
-  labels.push(<Billboard key="y" position={[0, -2250, 0]}><Text fontSize={axisLabelSize} color={COLORS.Y_GREEN} fontWeight="bold" outlineWidth={3}>Y</Text></Billboard>);
-  labels.push(<Billboard key="x" position={[2250, 0, 0]}><Text fontSize={axisLabelSize} color={COLORS.X_RED} fontWeight="bold" outlineWidth={3}>X</Text></Billboard>);
-  labels.push(<Billboard key="z" position={[2150, 2150, 1500]}><Text fontSize={axisLabelSize} color={COLORS.Z_BLUE} fontWeight="bold" outlineWidth={3}>Z</Text></Billboard>);
-  for (let i = -2000; i <= 2000; i += step) {
-    labels.push(<Billboard key={`yn-${i}`} position={[i, -2080, 0]}><Text fontSize={fontSize} color={COLORS.Y_GREEN} fontWeight="bold">{i}</Text></Billboard>);
-    if (i !== 0) labels.push(<Billboard key={`xn-${i}`} position={[2080, i, 0]}><Text fontSize={fontSize} color={COLORS.X_RED} fontWeight="bold">{i}</Text></Billboard>);
+  const step = 200; const fontSize = 40; const axisLabelSize = 120;
+  
+  labels.push(<Billboard key="y" position={[0, -2600, 0]}><Text fontSize={axisLabelSize} color={COLORS.Y_GREEN} fontWeight="bold" outlineWidth={3}>Y</Text></Billboard>);
+  labels.push(<Billboard key="x" position={[2600, 0, 0]}><Text fontSize={axisLabelSize} color={COLORS.X_RED} fontWeight="bold" outlineWidth={3}>X</Text></Billboard>);
+  labels.push(<Billboard key="z" position={[2600, 2600, 1500]}><Text fontSize={axisLabelSize} color={COLORS.Z_BLUE} fontWeight="bold" outlineWidth={3}>Z</Text></Billboard>);
+  
+  for (let i = -2400; i <= 2400; i += step) {
+    labels.push(<Billboard key={`yn-${i}`} position={[i, -2550, 0]}><Text fontSize={fontSize} color={COLORS.Y_GREEN} fontWeight="bold">{i}</Text></Billboard>);
+    if (i !== 0) labels.push(<Billboard key={`xn-${i}`} position={[2550, i, 0]}><Text fontSize={fontSize} color={COLORS.X_RED} fontWeight="bold">{i}</Text></Billboard>);
   }
-  for (let z = 100; z <= 3000; z += step) { 
-    labels.push(<Billboard key={`zn-${z}`} position={[2080, 2080, z]}><Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="bold">{z}</Text></Billboard>);
+  for (let z = 200; z <= 3000; z += step) { 
+    labels.push(<Billboard key={`zn-${z}`} position={[2550, 2550, z]}><Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="bold">{z}</Text></Billboard>);
   }
   return <group>{labels}</group>;
 };
@@ -131,7 +175,7 @@ const RobotScene = () => {
   const redPts = robotState?.redTrajectory || [];
 
   return (
-    <div style={{ width: "100%", height: "100%", backgroundColor: "#b5c1ce", position: "relative" }}>
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
       
       <HamburgerMenu />
 
@@ -177,13 +221,24 @@ const RobotScene = () => {
         </div>
       </div>
 
+      {/* 3D CANVAS */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', bottom: 'clamp(50px, 10vh, 85px)' }}>
-        <Canvas camera={{ position: [0, -5000, 2500], up: [0, 0, 1], fov: 45, near: 1, far: 25000 }}>
-          <ambientLight intensity={0.6} />
-          <pointLight position={[2000, -2000, 5000]} intensity={1.5} />
-          <directionalLight position={[-1000, -1000, 1000]} intensity={0.5} />
-          <OrbitControls makeDefault target={[0, 0, 500]} maxDistance={10000} minDistance={200} />
-          <group><RawWebGLGridLines /><WorldCoordinates /></group>
+        <Canvas camera={{ position: [0, -6500, 3000], up: [0, 0, 1], fov: 45, near: 1, far: 30000 }}>
+          
+          {/* Enhanced Light Studio Environment */}
+          <color attach="background" args={["#f0f4f8"]} /> {/* Light grayish-blue background */}
+          <ambientLight intensity={1.2} />
+          <hemisphereLight skyColor="#ffffff" groundColor="#444444" intensity={1.0} />
+          <directionalLight position={[2000, -4000, 4000]} intensity={2.5} castShadow />
+          <pointLight position={[-2000, -2000, 3000]} intensity={1.8} />
+
+          <OrbitControls makeDefault target={[0, 0, 800]} maxDistance={12000} minDistance={200} />
+          
+          <group>
+            <CustomGridWalls />
+            <WorldCoordinates />
+          </group>
+          
           <Suspense fallback={null}>
             <group rotation={[0, 0, -Math.PI / 2]}>
               <RealRobot />
@@ -191,6 +246,7 @@ const RobotScene = () => {
               {redPts.length > 1 && <Line points={redPts} color="#E53935" lineWidth={3} />}
             </group>
           </Suspense>
+
           <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
             <GizmoViewport axisColors={[COLORS.X_RED, COLORS.Y_GREEN, COLORS.Z_BLUE]} labelColor="white" />
           </GizmoHelper>

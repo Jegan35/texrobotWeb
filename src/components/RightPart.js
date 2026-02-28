@@ -69,7 +69,8 @@ const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, onRo
 });
 
 const RightPart = () => {
-  const { sendCommand, robotState } = useWebSocket();
+  // Grab the new local graph lock states from Context
+  const { sendCommand, robotState, isGraphReading, setGraphReading } = useWebSocket();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
@@ -84,16 +85,14 @@ const RightPart = () => {
   const [showModTpModal, setShowModTpModal] = useState(false);
   const [modTpData, setModTpData] = useState({ name: '', x: '', y: '', z: '' });
   
-  const [activeRow1Tab, setActiveRow1Tab] = useState('Graph'); // Default to Graph for testing
+  const [activeRow1Tab, setActiveRow1Tab] = useState('Error Pos'); 
   const [activeRow2Tab, setActiveRow2Tab] = useState('Programs File');
   const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
 
   // --> GRAPH STATES <--
   const [selectedGraphAxis, setSelectedGraphAxis] = useState('All-axis');
-  const [isGraphReading, setIsGraphReading] = useState(false); // New state to control readings
-  const [zoomWindow, setZoomWindow] = useState(5); // Default 5 seconds zoom window
+  const [zoomWindow, setZoomWindow] = useState(5); 
 
-  // Zoom handlers
   const handleZoomIn = () => setZoomWindow(prev => Math.max(1, prev / 1.5));
   const handleZoomOut = () => setZoomWindow(prev => Math.min(20, prev * 1.5));
   const handleZoomReset = () => setZoomWindow(5);
@@ -167,13 +166,7 @@ const RightPart = () => {
   };
 
   // ==============================================================
-  // NEW: MODIFIED GRAPH RENDERER (INDUSTRIAL DESIGN)
-  // ==============================================================
-// ==============================================================
-  // MODERN INDUSTRIAL GRAPH RENDERER
-  // ==============================================================
-// ==============================================================
-  // MODERN INDUSTRIAL GRAPH RENDERER (PERFECT GRID & ZOOM)
+  // GRAPH RENDERER 
   // ==============================================================
   const renderGraphView = () => {
       const gData = rs.graph_data || [];
@@ -184,14 +177,12 @@ const RightPart = () => {
       const maxY = 360;
       const minY = -360;
       
-      // Y-Axis Mapping
       const mapY = (val) => {
           const clamped = Math.max(minY, Math.min(maxY, val || 0));
           const norm = (clamped - minY) / (maxY - minY);
           return svgHeight - (norm * svgHeight);
       };
 
-      // X-Axis Mapping with Dynamic Zoom
       let maxX = 5; 
       if (hasData) {
           maxX = gData[gData.length - 1][0] || 5;
@@ -221,12 +212,10 @@ const RightPart = () => {
           : axisConfig.filter(a => a.name === selectedGraphAxis);
 
       const toggleGraphReading = () => {
-          const nextState = !isGraphReading;
-          setIsGraphReading(nextState);
-          sendCommand(nextState ? 'START_GRAPH' : 'STOP_GRAPH');
+          // Toggles the local Context State lock
+          setGraphReading(!isGraphReading);
       };
 
-      // Generate Perfect SVG Grids
       const yGridLines = [];
       for (let y = -360; y <= 360; y += 30) {
           const isZero = y === 0;
@@ -253,7 +242,6 @@ const RightPart = () => {
 
       return (
           <div className="modern-graph-container">
-              {/* Header Controls */}
               <div className="mg-header">
                   <button className={`mg-toggle-btn ${isGraphReading ? 'mg-stop' : 'mg-start'}`} onClick={toggleGraphReading}>
                       {isGraphReading ? '■ STOP GRAPH' : '▶ START GRAPH'}
@@ -270,53 +258,44 @@ const RightPart = () => {
                   </div>
               </div>
 
-              {/* Main Graph Area */}
-              <div className="mg-body">
-                  {/* Left Label - PERFECTLY SEPARATED */}
-                  <div className="mg-y-label-col">
-                      <span>deg / mm</span>
+              {/* Added horizontal scroll wrapper to maintain rectangle on tablets */}
+              <div className="mg-scroll-wrapper">
+                  <div className="mg-body">
+                      <div className="mg-y-label-col"><span>deg / mm</span></div>
+                      <div className="mg-y-axis">
+                          <span>360.0</span><span>240.0</span><span>120.0</span>
+                          <span>0.0</span><span>-120.0</span><span>-240.0</span><span>-360.0</span>
+                      </div>
+                      <div className="mg-plot-wrapper">
+                          <svg className="mg-svg" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none">
+                              {yGridLines}
+                              {vGridLines}
+                              {hasData && axesToDraw.map(axis => {
+                                  const pointsStr = gData.map(d => `${mapX(d[0]||0)},${mapY(d[axis.index]||0)}`).join(' ');
+                                  return <polyline key={axis.name} points={pointsStr} fill="none" stroke={axis.color} strokeWidth="2.5" strokeLinejoin="round" />
+                              })}
+                          </svg>
+                      </div>
+                      <div className="mg-tools">
+                          <button className="mg-tool-btn" onClick={handleZoomIn}>+</button>
+                          <button className="mg-tool-btn" onClick={handleZoomOut}>-</button>
+                          <button className="mg-tool-btn" onClick={handleZoomReset}>↺</button>
+                      </div>
                   </div>
-
-                  {/* Y-Axis Values */}
-                  <div className="mg-y-axis">
-                      <span>360.0</span><span>240.0</span><span>120.0</span>
-                      <span>0.0</span><span>-120.0</span><span>-240.0</span><span>-360.0</span>
+                  <div className="mg-x-axis">
+                      <span>{(minX).toFixed(2)}</span>
+                      <span>{(minX + zoomWindow*0.2).toFixed(2)}</span>
+                      <span>{(minX + zoomWindow*0.4).toFixed(2)}</span>
+                      <span>{(minX + zoomWindow*0.6).toFixed(2)}</span>
+                      <span>{(minX + zoomWindow*0.8).toFixed(2)}</span>
+                      <span>{(maxX).toFixed(2)}</span>
                   </div>
-
-                  {/* SVG Plot */}
-                  <div className="mg-plot-wrapper">
-                      <svg className="mg-svg" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none">
-                          {yGridLines}
-                          {vGridLines}
-                          {/* Data Lines */}
-                          {hasData && axesToDraw.map(axis => {
-                              const pointsStr = gData.map(d => `${mapX(d[0]||0)},${mapY(d[axis.index]||0)}`).join(' ');
-                              return <polyline key={axis.name} points={pointsStr} fill="none" stroke={axis.color} strokeWidth="2.5" strokeLinejoin="round" />
-                          })}
-                      </svg>
-                  </div>
-
-                  {/* Right Tools - ZOOM ENABLED */}
-                  <div className="mg-tools">
-                      <button className="mg-tool-btn" onClick={handleZoomIn}>+</button>
-                      <button className="mg-tool-btn" onClick={handleZoomOut}>-</button>
-                      <button className="mg-tool-btn" onClick={handleZoomReset}>↺</button>
-                  </div>
+                  <div className="mg-x-label">Time [s]</div>
               </div>
-
-              {/* X-Axis */}
-              <div className="mg-x-axis">
-                  <span>{(minX).toFixed(2)}</span>
-                  <span>{(minX + zoomWindow*0.2).toFixed(2)}</span>
-                  <span>{(minX + zoomWindow*0.4).toFixed(2)}</span>
-                  <span>{(minX + zoomWindow*0.6).toFixed(2)}</span>
-                  <span>{(minX + zoomWindow*0.8).toFixed(2)}</span>
-                  <span>{(maxX).toFixed(2)}</span>
-              </div>
-              <div className="mg-x-label">Time [s]</div>
           </div>
       );
   };
+
   const renderErrorPos = () => {
       const axes = ['X','Y','Z','a','b','c'];
       const extras = ['Sp In', 'fun', 'Num', 'Dist', 'ms', 'Trj'];
@@ -544,7 +523,6 @@ const RightPart = () => {
           <div className="jog-panel-container">
             <div className="jog-panel-title">JOINTS CONTROL</div>
             <div className="joints-two-col-layout">
-              {/* Column 1: J1, J2, J3 */}
               <div className="joints-col">
                  <div className="joints-col-title">BASE / ARM</div>
                  {['J1', 'J2', 'J3'].map(id => {
@@ -559,7 +537,6 @@ const RightPart = () => {
                  })}
               </div>
               <div className="joints-divider"></div>
-              {/* Column 2: J4, J5, J6 */}
               <div className="joints-col">
                  <div className="joints-col-title">WRIST</div>
                  {['J4', 'J5', 'J6'].map(id => {
@@ -581,7 +558,6 @@ const RightPart = () => {
           <div className="jog-panel-container">
             <div className="jog-panel-title">CARTESIAN D-PAD</div>
             <div className="dpad-two-col-layout">
-                {/* Column 1: TRANSLATION */}
                 <div className="dpad-col">
                     <div className="dpad-col-title">TRANSLATION</div>
                     <div className="dpad-cross">
@@ -597,7 +573,6 @@ const RightPart = () => {
                     </div>
                 </div>
                 <div className="joints-divider"></div>
-                {/* Column 2: ROTATION */}
                 <div className="dpad-col">
                     <div className="dpad-col-title">ROTATION</div>
                     <div className="dpad-cross">
@@ -654,7 +629,6 @@ const RightPart = () => {
       <div className="rp-master-container">
         <div className="rp-main-content">
             
-            {/* UPPER HALF WRAPPER */}
             <div className="rp-upper-half">
                 
                 {/* ROW 1 */}
@@ -667,29 +641,37 @@ const RightPart = () => {
                         <div className={`rp-panel-left ${currentView === 'SPEED CONFIG' ? 'bg-dark' : 'bg-light-dark'}`}>
                             {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
                         </div>
-                        <div className="rp-panel-right">
-                            
+                        
+                        {/* --> ROW 1 RIGHT PANEL WITH OVERLAY LOGIC <-- */}
+                        <div className="rp-panel-right" style={{ position: 'relative' }}>
                             <div className="dark-tabs">
                                 {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
                                     <div key={tab} className={`dark-tab ${activeRow1Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow1Tab(tab)}>
                                         {tab}
                                     </div>
                                 ))}
-                                {/* ROW 1 MAX/MIN BUTTON */}
                                 <div className="panel-min-max-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW1' ? 'NONE' : 'ROW1')}>
                                     {expandedRowPanel === 'ROW1' ? '>< MIN' : '[ ] MAX'}
                                 </div>
                             </div>
                             
-                            <div className="row2-content">
+                            {/* Blur content if not maximized */}
+                            <div className={`row2-content ${expandedRowPanel !== 'ROW1' ? 'blurred-content' : ''}`}>
                                 {activeRow1Tab === 'Error Pos' && renderErrorPos()}
                                 {activeRow1Tab === 'Ether Cat' && renderEtherCat()}
                                 {activeRow1Tab === 'IO Modules' && renderIOModules()}
-                                
-                                {/* --> NEW: GRAPH VIEW RENDERING <-- */}
                                 {activeRow1Tab === 'Graph' && renderGraphView()}
-                                
                             </div>
+
+                            {/* View Full Overlay Button */}
+                            {expandedRowPanel !== 'ROW1' && (
+                                <div className="view-full-overlay">
+                                    <button className="view-full-btn" onClick={() => setExpandedRowPanel('ROW1')}>
+                                        ⛶ VIEW FULL
+                                    </button>
+                                </div>
+                            )}
+
                         </div>
                     </div>
                 </div>
@@ -702,7 +684,6 @@ const RightPart = () => {
                                 {tab}
                             </div>
                         ))}
-                        {/* ROW 2 MAX/MIN BUTTON */}
                         <div className="panel-min-max-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
                             {expandedRowPanel === 'ROW2' ? '>< MIN' : '[ ] MAX'}
                         </div>

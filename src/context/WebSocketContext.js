@@ -16,6 +16,15 @@ export const WebSocketProvider = ({ children }) => {
   const isAccessFullRef = useRef(false); 
   const isIntentionalDisconnect = useRef(false); 
 
+  // --> NEW: Frontend Lock logic for Graph
+  const [isGraphReading, setIsGraphReadingState] = useState(true);
+  const isGraphReadingRef = useRef(true); 
+
+  const setGraphReading = (status) => {
+      setIsGraphReadingState(status);
+      isGraphReadingRef.current = status;
+  };
+
   useEffect(() => { ipRef.current = ipAddress; }, [ipAddress]);
 
   const [robotState, setRobotState] = useState({
@@ -26,15 +35,11 @@ export const WebSocketProvider = ({ children }) => {
     current_tp_name: "None", current_pr_name: "None",
     tp_list: [], pr_program_data: [],
     program_count_output: "0", is_calculating_trajectory: false,
-    
     is_physically_moving: false, 
-    
     speed_op: 0, di_val: 0, do_val: 0,
     staging_data: {}, 
     error_pos_data: {}, ether_cat_data: {}, variable_data: {}, mech_data: {},
     blueTrajectory: [], redTrajectory: [],
-    
-    // --> NEW: Added State for Real-Time Graph Data <--
     graph_data: [] 
   });
 
@@ -96,14 +101,15 @@ export const WebSocketProvider = ({ children }) => {
           isIntentionalDisconnect.current = true;
           wsRef.current.close();
         }
-        // --> NEW: GRAPH UPDATE PARSER <--
         else if (data.type === "graph_update") {
-          setRobotState(prevState => {
-            const newGraphData = [...(prevState.graph_data || []), data.data];
-            // Keep maximum of 100 points to prevent React from lagging/hanging
-            if (newGraphData.length > 100) newGraphData.shift(); 
-            return { ...prevState, graph_data: newGraphData };
-          });
+          // --> FIXED: Only process graph data if Frontend Lock is TRUE
+          if (isGraphReadingRef.current) {
+              setRobotState(prevState => {
+                const newGraphData = [...(prevState.graph_data || []), data.data];
+                if (newGraphData.length > 100) newGraphData.shift(); 
+                return { ...prevState, graph_data: newGraphData };
+              });
+          }
         }
         else if (data.type === "status_update" || data.type === "motion_update") {
           setRobotState(prevState => {
@@ -198,7 +204,8 @@ export const WebSocketProvider = ({ children }) => {
   return (
     <WebSocketContext.Provider value={{ 
       isConnected, isConnecting, ipAddress, setIpAddress, connectWebSocket, disconnectWebSocket, sendCommand, robotState,
-      accessFull, setAccessFull, connectionFailed, setConnectionFailed, rejectMessage 
+      accessFull, setAccessFull, connectionFailed, setConnectionFailed, rejectMessage,
+      isGraphReading, setGraphReading // Exported for RightPart.js
     }}>
       {children}
     </WebSocketContext.Provider>
