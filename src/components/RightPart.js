@@ -73,6 +73,8 @@ const RightPart = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
+  const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
+
   const [expandedTable, setExpandedTable] = useState('NONE'); 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [instInput, setInstInput] = useState('');
@@ -82,10 +84,20 @@ const RightPart = () => {
   const [showModTpModal, setShowModTpModal] = useState(false);
   const [modTpData, setModTpData] = useState({ name: '', x: '', y: '', z: '' });
   
-  const [activeRow1Tab, setActiveRow1Tab] = useState('Error Pos');
+  const [activeRow1Tab, setActiveRow1Tab] = useState('Graph'); // Default to Graph for testing
   const [activeRow2Tab, setActiveRow2Tab] = useState('Programs File');
   const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
 
+  // --> GRAPH STATES <--
+  const [selectedGraphAxis, setSelectedGraphAxis] = useState('All-axis');
+  const [isGraphReading, setIsGraphReading] = useState(false); // New state to control readings
+  const [zoomWindow, setZoomWindow] = useState(5); // Default 5 seconds zoom window
+
+  // Zoom handlers
+  const handleZoomIn = () => setZoomWindow(prev => Math.max(1, prev / 1.5));
+  const handleZoomOut = () => setZoomWindow(prev => Math.min(20, prev * 1.5));
+  const handleZoomReset = () => setZoomWindow(5);
+  
   const [ipPgInput, setIpPgInput] = useState('0');
   const [tpNameVal, setTpNameVal] = useState('0');
   const [comVal, setComVal] = useState('0');
@@ -154,6 +166,157 @@ const RightPart = () => {
       setShowModTpModal(false);
   };
 
+  // ==============================================================
+  // NEW: MODIFIED GRAPH RENDERER (INDUSTRIAL DESIGN)
+  // ==============================================================
+// ==============================================================
+  // MODERN INDUSTRIAL GRAPH RENDERER
+  // ==============================================================
+// ==============================================================
+  // MODERN INDUSTRIAL GRAPH RENDERER (PERFECT GRID & ZOOM)
+  // ==============================================================
+  const renderGraphView = () => {
+      const gData = rs.graph_data || [];
+      const hasData = gData.length > 0;
+      
+      const svgWidth = 800; 
+      const svgHeight = 250;
+      const maxY = 360;
+      const minY = -360;
+      
+      // Y-Axis Mapping
+      const mapY = (val) => {
+          const clamped = Math.max(minY, Math.min(maxY, val || 0));
+          const norm = (clamped - minY) / (maxY - minY);
+          return svgHeight - (norm * svgHeight);
+      };
+
+      // X-Axis Mapping with Dynamic Zoom
+      let maxX = 5; 
+      if (hasData) {
+          maxX = gData[gData.length - 1][0] || 5;
+      }
+      let minX = maxX - zoomWindow;
+      if (minX < 0 && !hasData) minX = 0;
+      
+      const mapX = (t) => {
+          const norm = (t - minX) / zoomWindow;
+          return norm * svgWidth;
+      };
+
+      const axisConfig = [
+          { name: 'X', index: 1, color: '#FF3B30' },
+          { name: 'Y', index: 2, color: '#4CAF50' },
+          { name: 'Z', index: 3, color: '#2196F3' },
+          { name: 'J1', index: 4, color: '#FFC107' },
+          { name: 'J2', index: 5, color: '#9C27B0' },
+          { name: 'J3', index: 6, color: '#00BCD4' },
+          { name: 'J4', index: 7, color: '#8BC34A' },
+          { name: 'J5', index: 8, color: '#FF9800' },
+          { name: 'J6', index: 9, color: '#E91E63' },
+      ];
+
+      const axesToDraw = selectedGraphAxis === 'All-axis' 
+          ? axisConfig 
+          : axisConfig.filter(a => a.name === selectedGraphAxis);
+
+      const toggleGraphReading = () => {
+          const nextState = !isGraphReading;
+          setIsGraphReading(nextState);
+          sendCommand(nextState ? 'START_GRAPH' : 'STOP_GRAPH');
+      };
+
+      // Generate Perfect SVG Grids
+      const yGridLines = [];
+      for (let y = -360; y <= 360; y += 30) {
+          const isZero = y === 0;
+          const isMajor = y % 120 === 0;
+          const yPos = mapY(y);
+          yGridLines.push(
+              <line key={`hy-${y}`} x1="0" y1={yPos} x2={svgWidth} y2={yPos}
+                    className={isZero ? "mg-zero-line" : (isMajor ? "mg-major-grid" : "mg-minor-grid")} />
+          );
+      }
+
+      const vGridLines = [];
+      let majorStep = zoomWindow / 5;
+      let minorStep = majorStep / 5;
+      let startX = Math.floor(minX / minorStep) * minorStep;
+      for (let t = startX; t <= maxX + minorStep; t += minorStep) {
+           const isMajor = Math.abs((t % majorStep)) < 0.0001 || Math.abs((t % majorStep) - majorStep) < 0.0001;
+           const xPos = mapX(t);
+           vGridLines.push(
+              <line key={`vx-${t.toFixed(2)}`} x1={xPos} y1="0" x2={xPos} y2={svgHeight}
+                    className={isMajor ? "mg-major-grid" : "mg-minor-grid"} />
+          );
+      }
+
+      return (
+          <div className="modern-graph-container">
+              {/* Header Controls */}
+              <div className="mg-header">
+                  <button className={`mg-toggle-btn ${isGraphReading ? 'mg-stop' : 'mg-start'}`} onClick={toggleGraphReading}>
+                      {isGraphReading ? '■ STOP GRAPH' : '▶ START GRAPH'}
+                  </button>
+                  
+                  <div className="mg-axis-selector">
+                      <label>SELECT AXIS:</label>
+                      <select value={selectedGraphAxis} onChange={(e) => setSelectedGraphAxis(e.target.value)}>
+                          <option value="All-axis">All-axis</option>
+                          <option value="X">X Axis</option><option value="Y">Y Axis</option><option value="Z">Z Axis</option>
+                          <option value="J1">J1 Axis</option><option value="J2">J2 Axis</option><option value="J3">J3 Axis</option>
+                          <option value="J4">J4 Axis</option><option value="J5">J5 Axis</option><option value="J6">J6 Axis</option>
+                      </select>
+                  </div>
+              </div>
+
+              {/* Main Graph Area */}
+              <div className="mg-body">
+                  {/* Left Label - PERFECTLY SEPARATED */}
+                  <div className="mg-y-label-col">
+                      <span>deg / mm</span>
+                  </div>
+
+                  {/* Y-Axis Values */}
+                  <div className="mg-y-axis">
+                      <span>360.0</span><span>240.0</span><span>120.0</span>
+                      <span>0.0</span><span>-120.0</span><span>-240.0</span><span>-360.0</span>
+                  </div>
+
+                  {/* SVG Plot */}
+                  <div className="mg-plot-wrapper">
+                      <svg className="mg-svg" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none">
+                          {yGridLines}
+                          {vGridLines}
+                          {/* Data Lines */}
+                          {hasData && axesToDraw.map(axis => {
+                              const pointsStr = gData.map(d => `${mapX(d[0]||0)},${mapY(d[axis.index]||0)}`).join(' ');
+                              return <polyline key={axis.name} points={pointsStr} fill="none" stroke={axis.color} strokeWidth="2.5" strokeLinejoin="round" />
+                          })}
+                      </svg>
+                  </div>
+
+                  {/* Right Tools - ZOOM ENABLED */}
+                  <div className="mg-tools">
+                      <button className="mg-tool-btn" onClick={handleZoomIn}>+</button>
+                      <button className="mg-tool-btn" onClick={handleZoomOut}>-</button>
+                      <button className="mg-tool-btn" onClick={handleZoomReset}>↺</button>
+                  </div>
+              </div>
+
+              {/* X-Axis */}
+              <div className="mg-x-axis">
+                  <span>{(minX).toFixed(2)}</span>
+                  <span>{(minX + zoomWindow*0.2).toFixed(2)}</span>
+                  <span>{(minX + zoomWindow*0.4).toFixed(2)}</span>
+                  <span>{(minX + zoomWindow*0.6).toFixed(2)}</span>
+                  <span>{(minX + zoomWindow*0.8).toFixed(2)}</span>
+                  <span>{(maxX).toFixed(2)}</span>
+              </div>
+              <div className="mg-x-label">Time [s]</div>
+          </div>
+      );
+  };
   const renderErrorPos = () => {
       const axes = ['X','Y','Z','a','b','c'];
       const extras = ['Sp In', 'fun', 'Num', 'Dist', 'ms', 'Trj'];
@@ -376,23 +539,83 @@ const RightPart = () => {
   );
 
   const renderJogPanel = () => {
-    const axes = isJoints 
-        ? [{m:'J1-',p:'J1+'}, {m:'J2-',p:'J2+'}, {m:'J3-',p:'J3+'}, {m:'J4-',p:'J4+'}, {m:'J5-',p:'J5+'}, {m:'J6-',p:'J6+'}]
-        : [{m:'X-',p:'X+'}, {m:'Y-',p:'Y+'}, {m:'Z-',p:'Z+'}, {m:'Rx-',p:'Rx+'}, {m:'Ry-',p:'Ry+'}, {m:'Rz-',p:'Rz+'}];
-
-    return (
-      <div className="jog-panel-container">
-        <div className="jog-panel-title">{motionType} CONTROLS</div>
-        <div className="jog-panel-body">
-          {axes.map(ax => (
-            <div key={ax.m} className="jog-btn-row">
-              <button className="pro-jog-btn neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}><span className="btn-txt">{ax.m.slice(0, -1)}</span><span className="btn-sym">-</span></button>
-              <button className="pro-jog-btn pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}><span className="btn-txt">{ax.p.slice(0, -1)}</span><span className="btn-sym">+</span></button>
+    if (isJoints) {
+        return (
+          <div className="jog-panel-container">
+            <div className="jog-panel-title">JOINTS CONTROL</div>
+            <div className="joints-two-col-layout">
+              {/* Column 1: J1, J2, J3 */}
+              <div className="joints-col">
+                 <div className="joints-col-title">BASE / ARM</div>
+                 {['J1', 'J2', 'J3'].map(id => {
+                     const ax = { id, m: `${id}-`, p: `${id}+` };
+                     return (
+                         <div key={ax.id} className="joint-industrial-block">
+                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>{ax.id}-</button>
+                             <div className="jib-label">{ax.id}</div>
+                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>{ax.id}+</button>
+                         </div>
+                     )
+                 })}
+              </div>
+              <div className="joints-divider"></div>
+              {/* Column 2: J4, J5, J6 */}
+              <div className="joints-col">
+                 <div className="joints-col-title">WRIST</div>
+                 {['J4', 'J5', 'J6'].map(id => {
+                     const ax = { id, m: `${id}-`, p: `${id}+` };
+                     return (
+                         <div key={ax.id} className="joint-industrial-block">
+                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>{ax.id}-</button>
+                             <div className="jib-label">{ax.id}</div>
+                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>{ax.id}+</button>
+                         </div>
+                     )
+                 })}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-    );
+          </div>
+        );
+    } else {
+        return (
+          <div className="jog-panel-container">
+            <div className="jog-panel-title">CARTESIAN D-PAD</div>
+            <div className="dpad-two-col-layout">
+                {/* Column 1: TRANSLATION */}
+                <div className="dpad-col">
+                    <div className="dpad-col-title">TRANSLATION</div>
+                    <div className="dpad-cross">
+                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Y+')} onPointerUp={()=>handlePointerUp('Y+')} onPointerLeave={()=>handlePointerUp('Y+')}>Y+</button>
+                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('X-')} onPointerUp={()=>handlePointerUp('X-')} onPointerLeave={()=>handlePointerUp('X-')}>X-</button>
+                        <div className="dpad-center">XYZ</div>
+                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('X+')} onPointerUp={()=>handlePointerUp('X+')} onPointerLeave={()=>handlePointerUp('X+')}>X+</button>
+                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Y-')} onPointerUp={()=>handlePointerUp('Y-')} onPointerLeave={()=>handlePointerUp('Y-')}>Y-</button>
+                    </div>
+                    <div className="dpad-z-row">
+                        <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Z-')} onPointerUp={()=>handlePointerUp('Z-')} onPointerLeave={()=>handlePointerUp('Z-')}>Z-</button>
+                        <button className="dpad-btn text-pos" onPointerDown={()=>handlePointerDown('Z+')} onPointerUp={()=>handlePointerUp('Z+')} onPointerLeave={()=>handlePointerUp('Z+')}>Z+</button>
+                    </div>
+                </div>
+                <div className="joints-divider"></div>
+                {/* Column 2: ROTATION */}
+                <div className="dpad-col">
+                    <div className="dpad-col-title">ROTATION</div>
+                    <div className="dpad-cross">
+                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Ry+')} onPointerUp={()=>handlePointerUp('Ry+')} onPointerLeave={()=>handlePointerUp('Ry+')}>Ry+</button>
+                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('Rx-')} onPointerUp={()=>handlePointerUp('Rx-')} onPointerLeave={()=>handlePointerUp('Rx-')}>Rx-</button>
+                        <div className="dpad-center">ROT</div>
+                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('Rx+')} onPointerUp={()=>handlePointerUp('Rx+')} onPointerLeave={()=>handlePointerUp('Rx+')}>Rx+</button>
+                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerUp={()=>handlePointerUp('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
+                    </div>
+                    <div className="dpad-z-row">
+                        <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
+                        <button className="dpad-btn text-pos" onPointerDown={()=>handlePointerDown('Rz+')} onPointerUp={()=>handlePointerUp('Rz+')} onPointerLeave={()=>handlePointerUp('Rz+')}>Rz+</button>
+                    </div>
+                </div>
+            </div>
+          </div>
+        );
+    }
   };
 
   return (
@@ -431,70 +654,90 @@ const RightPart = () => {
       <div className="rp-master-container">
         <div className="rp-main-content">
             
-            <div className="rp-row-1">
-                <div className="rp-header-col">
-                    <RightHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} currentMode={currentView} isOpen={isSidebarOpen} />
-                </div>
-                <div className="rp-content-col">
-                    <div className={`rp-panel-left ${currentView === 'SPEED CONFIG' ? 'bg-dark' : 'bg-light-dark'}`}>
-                        {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
-                    </div>
-                    <div className="rp-panel-right">
-                        <div className="dark-tabs">
-                            {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
-                                <div key={tab} className={`dark-tab ${activeRow1Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow1Tab(tab)}>
-                                    {tab}
-                                </div>
-                            ))}
-                        </div>
-                        
-                        <div className="row2-content">
-                            {activeRow1Tab === 'Error Pos' && renderErrorPos()}
-                            {activeRow1Tab === 'Ether Cat' && renderEtherCat()}
-                            {activeRow1Tab === 'IO Modules' && renderIOModules()}
-                            {activeRow1Tab === 'Graph' && <div style={{ padding: '20px', color: '#555', fontStyle: 'italic', textAlign: 'center' }}>Graph View (Placeholder)</div>}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="rp-row-2">
-                <div className="dark-tabs bg-dark-deep">
-                    {['Programs File', 'Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings'].map(tab => (
-                        <div key={tab} className={`dark-tab ${activeRow2Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow2Tab(tab)}>
-                            {tab}
-                        </div>
-                    ))}
-                </div>
+            {/* UPPER HALF WRAPPER */}
+            <div className="rp-upper-half">
                 
-                <div className="row2-content">
-                    {activeRow2Tab === 'Programs File' && (
-                        <div className="table-container" style={{ gap: expandedTable === 'NONE' ? '4px' : '0' }}>
-                            {(expandedTable === 'NONE' || expandedTable === 'TP') && (
-                                <div className="table-wrapper">
-                                    <MemoizedTpTableBody tpList={tpList} expandedTable={expandedTable} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
-                                    {tpList.length > 0 && (
-                                        <div className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'TP' ? 'NONE' : 'TP')}> {expandedTable === 'TP' ? '><' : '[ ]'} </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {(expandedTable === 'NONE' || expandedTable === 'PR') && (
-                                <div className="table-wrapper" style={{ borderLeft: expandedTable === 'NONE' ? '2px solid #202430' : 'none' }}>
-                                    <MemoizedPrTableBody prList={prList} expandedTable={expandedTable} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
-                                    {prList.length > 0 && (
-                                        <div className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'PR' ? 'NONE' : 'PR')}> {expandedTable === 'PR' ? '><' : '[ ]'} </div>
-                                    )}
-                                </div>
-                            )}
+                {/* ROW 1 */}
+                <div className={`rp-row-1 ${expandedRowPanel === 'ROW1' ? 'row-maximized' : expandedRowPanel === 'ROW2' ? 'row-minimized' : ''}`}>
+                    <div className="rp-header-col">
+                        <RightHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} currentMode={currentView} isOpen={isSidebarOpen} />
+                    </div>
+                    
+                    <div className="rp-content-col" style={{ display: expandedRowPanel === 'ROW2' ? 'none' : 'flex' }}>
+                        <div className={`rp-panel-left ${currentView === 'SPEED CONFIG' ? 'bg-dark' : 'bg-light-dark'}`}>
+                            {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
                         </div>
-                    )}
-                    {activeRow2Tab === 'Encoder Offset' && renderEncoderOffset()}
-                    {activeRow2Tab === 'Settings View' && renderSettingsView()}
-                    {activeRow2Tab === 'Data Variable' && renderDataVariable()}
-                    {activeRow2Tab === 'Axis Limit' && renderAxisLimit()}
-                    {activeRow2Tab === 'Mech Settings' && renderMechSettings()}
+                        <div className="rp-panel-right">
+                            
+                            <div className="dark-tabs">
+                                {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
+                                    <div key={tab} className={`dark-tab ${activeRow1Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow1Tab(tab)}>
+                                        {tab}
+                                    </div>
+                                ))}
+                                {/* ROW 1 MAX/MIN BUTTON */}
+                                <div className="panel-min-max-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW1' ? 'NONE' : 'ROW1')}>
+                                    {expandedRowPanel === 'ROW1' ? '>< MIN' : '[ ] MAX'}
+                                </div>
+                            </div>
+                            
+                            <div className="row2-content">
+                                {activeRow1Tab === 'Error Pos' && renderErrorPos()}
+                                {activeRow1Tab === 'Ether Cat' && renderEtherCat()}
+                                {activeRow1Tab === 'IO Modules' && renderIOModules()}
+                                
+                                {/* --> NEW: GRAPH VIEW RENDERING <-- */}
+                                {activeRow1Tab === 'Graph' && renderGraphView()}
+                                
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                {/* ROW 2 */}
+                <div className={`rp-row-2 ${expandedRowPanel === 'ROW2' ? 'row-maximized' : expandedRowPanel === 'ROW1' ? 'row-minimized' : ''}`}>
+                    <div className="dark-tabs bg-dark-deep">
+                        {['Programs File', 'Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings'].map(tab => (
+                            <div key={tab} className={`dark-tab ${activeRow2Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow2Tab(tab)}>
+                                {tab}
+                            </div>
+                        ))}
+                        {/* ROW 2 MAX/MIN BUTTON */}
+                        <div className="panel-min-max-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
+                            {expandedRowPanel === 'ROW2' ? '>< MIN' : '[ ] MAX'}
+                        </div>
+                    </div>
+                    
+                    <div className="row2-content" style={{ display: expandedRowPanel === 'ROW1' ? 'none' : 'flex' }}>
+                        {activeRow2Tab === 'Programs File' && (
+                            <div className="table-container" style={{ gap: expandedTable === 'NONE' ? '4px' : '0' }}>
+                                {(expandedTable === 'NONE' || expandedTable === 'TP') && (
+                                    <div className="table-wrapper">
+                                        <MemoizedTpTableBody tpList={tpList} expandedTable={expandedTable} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
+                                        {tpList.length > 0 && (
+                                            <div className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'TP' ? 'NONE' : 'TP')}> {expandedTable === 'TP' ? '><' : '[ ]'} </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {(expandedTable === 'NONE' || expandedTable === 'PR') && (
+                                    <div className="table-wrapper" style={{ borderLeft: expandedTable === 'NONE' ? '2px solid #202430' : 'none' }}>
+                                        <MemoizedPrTableBody prList={prList} expandedTable={expandedTable} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                        {prList.length > 0 && (
+                                            <div className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'PR' ? 'NONE' : 'PR')}> {expandedTable === 'PR' ? '><' : '[ ]'} </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeRow2Tab === 'Encoder Offset' && renderEncoderOffset()}
+                        {activeRow2Tab === 'Settings View' && renderSettingsView()}
+                        {activeRow2Tab === 'Data Variable' && renderDataVariable()}
+                        {activeRow2Tab === 'Axis Limit' && renderAxisLimit()}
+                        {activeRow2Tab === 'Mech Settings' && renderMechSettings()}
+                    </div>
+                </div>
+            
             </div>
 
             <div className="rp-row-3">

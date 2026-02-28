@@ -1,19 +1,73 @@
 /* src/components/RightPart.css */
 
-.rp-master-container { display: flex; flex-direction: row; height: 100vh; width: 100%; background-color: #202430; overflow: hidden; }
+.rp-master-container { 
+    display: flex; 
+    flex-direction: row; 
+    height: 100vh; 
+    width: 100%; 
+    background-color: #202430; 
+    overflow: hidden; 
+    position: relative; /* <-- இதை சேர்த்தால் தான் Menu வெளியே போகாது */
+}
 .rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; overflow: hidden; box-sizing: border-box; }
 
-/* DYNAMIC ROW SIZING - RESTORED TO ORIGINAL PROPORTIONS */
-.rp-row-1 { flex: 1 1 25%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; }
-.rp-row-2 { flex: 1 1 25%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; } 
-.rp-row-3 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #202430; padding: 5px 0px; overflow: visible; position: relative; z-index: 50; flex-shrink: 0; }
-.rp-row-4 { flex: 1 1 20%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; position: relative; z-index: 10; }
-.rp-row-5 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 5px 0px 8px 0px; position: relative; z-index: 50; flex-shrink: 0; }
+/* ==============================================================
+   UPPER HALF WRAPPER (TAKES ALL EXTRA SPACE) 
+   ============================================================== */
+.rp-upper-half {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Forces the upper half to stretch and absorb all space */
+    min-height: 0;
+    overflow: hidden;
+}
 
-/* ROW 1 FLEX SPLIT (Header Fixed at Top) */
+/* Row 1 & 2 share space equally INSIDE the upper half wrapper */
+.rp-row-1 { flex: 1; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; }
+.rp-row-2 { flex: 1; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 50px; } 
+
+/* MAXIMIZE / MINIMIZE LOGIC */
+.row-maximized { flex: 1 !important; } 
+.row-minimized { display: none !important; } 
+
+/* ==============================================================
+   LOWER ROWS (STRICTLY LOCKED - NEVER GROWS ON MAXIMIZE)
+   ============================================================== */
+.rp-row-3 { 
+    flex: 0 0 auto; 
+    display: flex; flex-direction: column; justify-content: center; background: #202430; padding: 5px 0px; overflow: visible; position: relative; z-index: 50; flex-shrink: 0; 
+}
+
+/* THE FIX: ROW 4 STRICTLY LOCKED SIZE */
+.rp-row-4 { 
+    flex: 0 0 auto; /* PREVENTS GROWING */
+    height: clamp(140px, 22vh, 180px); /* ALWAYS STAYS DEFAULT SIZE */
+    display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; position: relative; z-index: 10; 
+} 
+
+.rp-row-5 { 
+    flex: 0 0 auto; 
+    display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 5px 0px 8px 0px; position: relative; z-index: 50; flex-shrink: 0; 
+}
+
+/* ----------------------------------------------------------- */
+
+.panel-min-max-btn {
+    position: sticky; right: 0; margin-left: auto;
+    background: linear-gradient(180deg, #546E7A 0%, #263238 100%);
+    color: #fff; border: 1px solid #111; border-bottom: none;
+    cursor: pointer; font-weight: 900; padding: 0 15px;
+    font-size: 0.75rem; box-shadow: -4px 0 10px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.2);
+    z-index: 20; display: flex; align-items: center; justify-content: center; letter-spacing: 1px;
+}
+.panel-min-max-btn:active { background: #111; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
+
+/* ROW 1 FLEX SPLIT */
 .rp-header-col { flex: 0 0 40px; width: 100%; overflow: hidden; background: #1a1e29; }
 .rp-content-col { flex: 1; display: flex; flex-direction: row; min-width: 0; overflow: hidden; }
-.rp-panel-left { flex: 0 0 220px; display: flex; flex-direction: column; border-right: 2px solid #111; overflow-y: auto; overflow-x: hidden; }
+
+/* LEFT PANEL */
+.rp-panel-left { flex: 0 0 clamp(320px, 40%, 480px); display: flex; flex-direction: column; border-right: 2px solid #111; overflow-y: auto; overflow-x: hidden; }
 .rp-panel-right { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 .bg-dark { background-color: #1a1e29; }
 .bg-light-dark { background-color: #151822; }
@@ -22,7 +76,7 @@
 .row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; width: 100%; }
 .light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
-/* DYNAMIC SHRINK GRIDS (NO WRAPPING) */
+/* DYNAMIC SHRINK GRIDS */
 .grid-7-col { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 .grid-11-col { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 
@@ -39,41 +93,52 @@
 .speed-range-group input[type="range"] { flex: 1; min-width: 50px; cursor: pointer; margin: 0; }
 .speed-range-group input[type="number"] { width: 60px; text-align: center; padding: 0 4px; }
 
-/* ==============================================================
-   2. JOG PANEL CONTROLS (NORMAL INDUSTRIAL BUTTON DESIGN)
-   ============================================================== */
+/* JOG PANEL CONTROLS (VERTICAL JOINTS & DPAD) */
 .jog-panel-container { display: flex; flex-direction: column; width: 100%; min-height: 100%; padding: 10px 5px; box-sizing: border-box; }
-.jog-panel-title { text-align: center; font-size: clamp(10px, 1.6vw, 14px); font-weight: 900; color: #00bcd4; padding-bottom: 10px; letter-spacing: 1px; flex-shrink: 0; }
-.jog-panel-body { display: flex; flex-direction: column; flex: 1; min-height: 200px; }
-.jog-btn-row { display: flex; gap: 5px; flex: 1; min-height: 30px; margin-bottom: 4px; }
+.jog-panel-title { text-align: center; font-size: clamp(10px, 1.6vw, 14px); font-weight: 900; color: #00bcd4; padding-bottom: 10px; letter-spacing: 1px; flex-shrink: 0; border-bottom: 1px solid #333; margin-bottom: 10px; }
+.jog-panel-body { display: flex; flex-direction: column; flex: 1; }
 
-/* Removed the thick 3D bottom border, matched row 3 & 5 industrial style */
-.pro-jog-btn { 
-    flex: 1; min-width: 0; height: 100%; display: flex; justify-content: space-between; align-items: center; 
-    padding: 0 10px; border-radius: 0; font-weight: 900; color: white; font-size: clamp(10px, 1.5vw, 16px); 
-    cursor: pointer; transition: 0.1s; text-transform: uppercase; 
-    border: 1px solid rgba(0,0,0,0.8); 
-    box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); 
+.joints-two-col-layout, .dpad-two-col-layout { display: flex; justify-content: space-around; width: 100%; height: 100%; padding-top: 5px; gap: 5px; }
+.joints-col, .dpad-col { display: flex; flex-direction: column; align-items: center; width: 48%; }
+.joints-col-title, .dpad-col-title { color: #888; font-weight: 900; font-size: 0.75rem; margin-bottom: 15px; letter-spacing: 1px; }
+.joints-divider { width: 1px; background-color: #333; height: 95%; margin: 0; }
+
+/* VERTICAL JOINTS */
+.joint-industrial-block { display: flex; align-items: center; justify-content: space-between; padding: 4px; margin-bottom: 15px; width: 100%; box-sizing: border-box; }
+.jib-label { color: #fff; font-weight: 900; font-size: 1.1rem; width: 30px; text-align: center; }
+.jib-btn { 
+    width: 55px; height: 45px; background: linear-gradient(180deg, #373d49 0%, #262b33 100%); 
+    border: 1px solid #111; border-radius: 4px; font-weight: 900; font-size: 1.1rem; cursor: pointer; 
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 3px 5px rgba(0,0,0,0.4); 
+    transition: 0.1s; display: flex; align-items: center; justify-content: center; 
 }
-.pro-jog-btn.neg { background: linear-gradient(180deg, #e53935 0%, #b71c1c 100%); } /* Changed to flat 180deg vertical gradient */
-.pro-jog-btn.pos { background: linear-gradient(180deg, #43a047 0%, #1b5e20 100%); }
-.pro-jog-btn:active { transform: translateY(2px); box-shadow: none; border-color: rgba(0,0,0,0.8); }
+.jib-btn:active { transform: translateY(2px); box-shadow: inset 2px 2px 4px rgba(0,0,0,0.8); }
 
-.btn-txt { opacity: 0.9; }
-.btn-sym { font-size: 1.2em; font-weight: 900; text-shadow: 0 2px 2px rgba(0,0,0,0.5); }
+/* DPAD */
+.dpad-cross { display: grid; grid-template-columns: 45px 45px 45px; grid-template-rows: 45px 45px 45px; gap: 3px; margin-bottom: 25px; }
+.dpad-btn { 
+    background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 6px; 
+    font-weight: 900; font-size: 0.95rem; cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 3px 5px rgba(0,0,0,0.4); 
+    display: flex; align-items: center; justify-content: center; transition: 0.1s; 
+}
+.dpad-btn:active { transform: scale(0.95); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
+
+.text-pos { color: #4caf50 !important; text-shadow: 0 0 2px rgba(76, 175, 80, 0.4); }
+.text-neg { color: #ff5252 !important; text-shadow: 0 0 2px rgba(255, 82, 82, 0.4); }
+
+.dpad-up { grid-column: 2; grid-row: 1; }
+.dpad-down { grid-column: 2; grid-row: 3; }
+.dpad-left { grid-column: 1; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-center { grid-column: 2; grid-row: 2; background: #151822; border: 2px solid #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #03a9f4; font-size: 0.55rem; font-weight: bold; margin: 3px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
+
+.dpad-z-row { display: flex; gap: 15px; justify-content: center; width: 100%; }
+.dpad-z-row .dpad-btn { width: 55px; height: 38px; }
 
 /* HORIZONTAL GRIDS */
 .error-pos-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 4px 10px; align-items: center; width: 100%; }
 .ether-cat-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 8px 10px; align-items: center; width: 100%; }
-
-.encoder-offset-grid { 
-    display: grid; 
-    grid-template-columns: max-content minmax(60px, 1fr) max-content minmax(60px, 1fr) max-content minmax(60px, 1fr); 
-    gap: 12px 20px; 
-    align-items: center; 
-    min-width: 800px; 
-    padding: 10px 5px;
-}
+.encoder-offset-grid { display: grid; grid-template-columns: max-content minmax(60px, 1fr) max-content minmax(60px, 1fr) max-content minmax(60px, 1fr); gap: 12px 20px; align-items: center; min-width: 800px; padding: 10px 5px; }
 
 .settings-view-grid { display: grid; grid-template-columns: repeat(3, max-content minmax(50px, 1fr)); gap: 15px 20px; align-items: center; width: 100%; }
 .axis-limit-wrapper { display: flex; gap: 15px; justify-content: space-between; width: 100%; min-width: 800px; }
@@ -88,16 +153,20 @@
 .data-var-flex { display: flex; gap: 10px; align-items: center; }
 
 /* IO MODULES */
-.io-modules-wrapper { 
-    display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; 
-    width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; padding: 5px 0; min-width: 600px;
-}
-.io-module-box { background: #fff; border: 1px solid #ccc; border-radius: 0; padding: 10px; box-sizing: border-box; width: 100%; min-height: max-content; }
-.io-module-title { border-left: 4px solid; padding-left: 8px; font-weight: 900; color: #333; margin-bottom: 10px; font-size: clamp(9px, 1vw, 12px); }
+.io-modules-wrapper { display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; padding: 5px 0; min-width: 600px; transition: 0.3s; }
+.io-module-box { background: #fff; border: 1px solid #ccc; border-radius: 0; padding: 10px; box-sizing: border-box; width: 100%; min-height: max-content; transition: 0.3s; }
+.io-module-title { border-left: 4px solid; padding-left: 8px; font-weight: 900; color: #333; margin-bottom: 10px; font-size: clamp(9px, 1vw, 12px); transition: 0.3s; }
 .io-module-flex { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; width: 100%; justify-items: center; }
 .io-led-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .io-led { width: 10px; height: 10px; border-radius: 50%; transition: 0.2s; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); border: 1px solid #111; }
-.io-led-col span { font-size: 8px; font-weight: bold; color: #555; }
+.io-led-col span { font-size: 8px; font-weight: bold; color: #555; transition: 0.3s; }
+
+/* SCALING WHEN ROW 1 IS MAXIMIZED */
+.row-maximized .io-modules-wrapper { gap: 25px; justify-content: center; }
+.row-maximized .io-module-box { padding: 25px 15px; }
+.row-maximized .io-module-title { font-size: 1.2rem; margin-bottom: 25px; }
+.row-maximized .io-led { width: 18px; height: 18px; }
+.row-maximized .io-led-col span { font-size: 12px; margin-top: 5px; }
 
 /* GENERIC LIGHT PANEL CONTROLS */
 .light-input { border: 1px solid #888; padding: 4px; border-radius: 0; width: 100%; box-sizing: border-box; font-weight: 900; font-size: clamp(10px, 1vw, 12px); color: #111; background: #fff; outline: none; box-shadow: inset 0px 1px 2px rgba(0,0,0,0.1); height: 32px; }
@@ -112,17 +181,9 @@
 .mech-table td { padding: 3px 5px; border: 1px solid #ccc; }
 .mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 4px; font-weight: 900; font-size: 0.75rem; border-radius: 0; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
 
-/* TABS FIX: HIDDEN "MECH SETTINGS" SCROLL OVERFLOW */
-.dark-tabs { 
-    display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; 
-    border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; 
-    overflow-x: auto; 
-    overflow-y: hidden;
-    -ms-overflow-style: none; 
-    scrollbar-width: none; 
-}
+/* TABS FIX */
+.dark-tabs { display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; overflow-x: auto; overflow-y: hidden; -ms-overflow-style: none; scrollbar-width: none; }
 .dark-tabs::-webkit-scrollbar { display: none; } 
-
 .bg-dark-deep { background: #202430; }
 .dark-tab { padding: 6px 10px; color: #aaa; font-weight: bold; font-size: clamp(9px, 1vw, 13px); cursor: pointer; border-radius: 0; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; }
 .dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-top: 2px solid #00bcd4; border-bottom: none; z-index: 10; }
@@ -135,31 +196,24 @@
 .table-wrapper::-webkit-scrollbar-thumb { background: #555; border-radius: 0; border: 1px solid #111; }
 
 .data-table { width: 100%; min-width: max-content; border-collapse: collapse; font-weight: bold; background: white; text-align: center; }
-.data-table th, .data-table td { padding: 4px 6px; font-size: clamp(9px, 1vw, 12px); border: 1px solid #999; white-space: nowrap; }
+.data-table th, .data-table td { padding: 6px 8px; font-size: clamp(10px, 1.1vw, 13px); border: 1px solid #999; white-space: nowrap; }
 .data-table th { background: #cfd8dc; color: #111; position: sticky; top: 0; z-index: 5; text-transform: uppercase; border-bottom: 2px solid #111; }
 .data-table td { color: #111; }
 
-/* TABLE COMPRESSION FIX */
 .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 30px; }
 .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 60px; }
 .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 70px; }
 .data-table th:last-child, .data-table td:last-child { width: 20%; padding-right: 45px !important; text-align: left; }
 
 .rp-row-2 .data-table th, .rp-row-2 .data-table td { padding: 8px 6px; height: 38px; }
-.rp-row-4 .data-table th, .rp-row-4 .data-table td { padding: 10px 12px; font-size: clamp(11px, 1.4vw, 15px); }
+.rp-row-4 .data-table th, .rp-row-4 .data-table td { padding: 14px 12px; font-size: clamp(12px, 1.5vw, 16px); }
 
 .tr-blue { background-color: #bbdefb !important; }
 .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
 .empty-table-text { color: #555; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding: 20px !important; }
 
 /* MIN MAX BUTTON */
-.min-max-btn { 
-    background: #2196f3 !important; color: white !important; cursor: pointer; transition: 0.1s; 
-    font-weight: 900; position: absolute; right: 0; top: 0; z-index: 10 !important; 
-    width: 35px !important; height: 26px; text-align: center; display: flex; 
-    align-items: center; justify-content: center; border-radius: 0 !important; 
-    border: 1px solid #111; border-bottom: 2px solid #111; border-top: none; border-right: none; 
-}
+.min-max-btn { background: #2196f3 !important; color: white !important; cursor: pointer; transition: 0.1s; font-weight: 900; position: absolute; right: 0; top: 0; z-index: 10 !important; width: 35px !important; height: 26px; text-align: center; display: flex; align-items: center; justify-content: center; border-radius: 0 !important; border: 1px solid #111; border-bottom: 2px solid #111; border-top: none; border-right: none; }
 .min-max-btn:active { background: #111 !important; border-color: #fff !important; }
 
 /* HELPER CLASSES */
@@ -197,7 +251,7 @@
 }
 .tp-standalone-input:focus { border-color: #039BE5; background: #e3f2fd; }
 
-/* DROPDOWN MENU FIX: INST DROPDOWN HIDDEN ISSUE */
+/* DROPDOWN MENU FIX */
 .dropdown-menu {
     position: absolute; bottom: calc(100% + 8px); left: 0; transform: none; width: max-content; min-width: 140px; 
     background-color: #263238; padding: 8px; border-radius: 0; box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8); 
@@ -206,7 +260,6 @@
 .dropdown-menu::after { content: ''; position: absolute; top: 100%; left: 20px; border-width: 8px; border-style: solid; border-color: #00bcd4 transparent transparent transparent; }
 .dropdown-menu input { background-color: #fff; color: #111; border-radius: 0 !important; border: 1px solid #111 !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
 
-/* Force "Inst" dropdown to open towards the LEFT so it doesn't clip off */
 .inst-qty-input-dropdown { width: 190px; left: auto !important; right: 0 !important; }
 .inst-qty-input-dropdown::after { left: auto !important; right: 20px !important; }
 
@@ -250,7 +303,25 @@
 .debug-red { background: #e53935; color: white; border-color: #b71c1c; }
 
 /* SIDEBAR RMS STYLES */
-.rms-container { width: 260px; height: 100%; background-color: #1a1e29; border-left: 2px solid #333; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; flex-shrink: 0; overflow-y: auto; }
+/* SIDEBAR RMS STYLES - CHANGED TO OVERLAY POPUP */
+.rms-container { 
+    width: 260px; 
+    height: 100%; 
+    background-color: #1a1e29; 
+    border-left: 2px solid #00bcd4; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 15px; 
+    box-sizing: border-box; 
+    overflow-y: auto;
+    
+    /* THE FIX: இதுதான் Menu-வை மற்ற டிசைனை கலைக்காமல் மேலே கொண்டுவரும் */
+    position: absolute; 
+    top: 0; 
+    right: 0; 
+    z-index: 9999; 
+    box-shadow: -10px 0 20px rgba(0,0,0,0.8); /* Menu-க்கு ஒரு நிழல் எஃபெக்ட் */
+}
 .rms-title { color: white; font-weight: 900; font-size: 1rem; margin-bottom: 20px; letter-spacing: 1px; }
 .rms-btn { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 0; color: white; font-weight: 900; font-size: 1rem; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 2px solid #111; box-shadow: inset 1px 1px 0px rgba(255,255,255,0.2), 0 4px 6px rgba(0,0,0,0.5); transition: 0.1s; }
 .rms-btn:active { transform: translateY(2px); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.9); }
@@ -263,3 +334,42 @@
 .btn-remote { background: linear-gradient(180deg, #ff9800, #ef6c00); }
 .btn-close { background: linear-gradient(180deg, #f44336, #c62828); margin-top: auto; }
 .btn-back { background: #333947; color: #fff; border: 2px solid #111; }
+/* ==============================================================
+   NEW GRAPH VIEW STYLES (COMPACT & DENSE GRID FIX)
+   ============================================================== */
+.modern-graph-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #fdfdfd; padding: 10px 15px; box-sizing: border-box; }
+
+.mg-header { display: flex; align-items: center; padding-bottom: 8px; margin-bottom: 8px; gap: 15px; }
+
+.mg-toggle-btn { height: 30px; padding: 0 15px; font-weight: 900; font-size: 0.85rem; color: white; border: 1px solid #111; cursor: pointer; border-radius: 4px; transition: all 0.1s; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), 0 2px 3px rgba(0,0,0,0.3); letter-spacing: 1px; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.mg-start { background: linear-gradient(180deg, #4CAF50, #2E7D32); }
+.mg-stop { background: linear-gradient(180deg, #F44336, #C62828); }
+.mg-toggle-btn:active { transform: translateY(2px); box-shadow: none; }
+
+.mg-axis-selector { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.mg-axis-selector label { font-weight: 900; font-size: 0.8rem; color: #333; }
+.mg-axis-selector select { padding: 4px 8px; border: 1px solid #888; border-radius: 3px; font-weight: bold; font-size: 0.8rem; outline: none; background: #fff; cursor: pointer; }
+
+/* LAYOUT FOR GRAPH BODY - SEPARATED CLEARLY */
+.mg-body { display: flex; flex: 1; min-height: 0; position: relative; align-items: stretch; }
+
+.mg-y-label-col { width: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mg-y-label-col span { transform: rotate(-90deg); font-weight: 900; color: #333; font-size: 0.85rem; white-space: nowrap; }
+
+.mg-y-axis { width: 45px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding-right: 8px; font-weight: 900; color: #555; font-size: 0.75rem; flex-shrink: 0; }
+
+.mg-plot-wrapper { flex: 1; position: relative; background-color: #fff; border: 2px solid #888; overflow: hidden; /* Clips lines from going outside */ }
+.mg-svg { width: 100%; height: 100%; display: block; position: absolute; top: 0; left: 0; }
+
+/* SVG GRID COLORS */
+.mg-major-grid { stroke: #d4d4d4; stroke-width: 1.5; }
+.mg-minor-grid { stroke: #ebebeb; stroke-width: 1; }
+.mg-zero-line { stroke: #333; stroke-width: 2; }
+
+.mg-tools { width: 45px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; flex-shrink: 0; }
+.mg-tool-btn { width: 32px; height: 32px; font-size: 1.2rem; font-weight: 900; background: #fff; border: 1px solid #aaa; border-radius: 4px; cursor: pointer; color: #333; box-shadow: 0 2px 3px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; transition: 0.1s; }
+.mg-tool-btn:active { background: #e0e0e0; transform: translateY(2px); box-shadow: none; border-color: #333; }
+
+/* X-AXIS ALIGNMENT FIX */
+.mg-x-axis { display: flex; justify-content: space-between; margin-left: 75px; /* Offset for label + y-axis */ margin-right: 45px; /* Offset for tools */ margin-top: 5px; font-weight: 900; color: #555; font-size: 0.75rem; }
+.mg-x-label { text-align: center; font-weight: 900; font-size: 0.85rem; color: #333; margin-top: 2px; }

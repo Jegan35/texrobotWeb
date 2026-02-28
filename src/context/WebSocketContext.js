@@ -27,13 +27,15 @@ export const WebSocketProvider = ({ children }) => {
     tp_list: [], pr_program_data: [],
     program_count_output: "0", is_calculating_trajectory: false,
     
-    // --> NEW VARIABLE ADDED HERE <--
     is_physically_moving: false, 
     
     speed_op: 0, di_val: 0, do_val: 0,
     staging_data: {}, 
     error_pos_data: {}, ether_cat_data: {}, variable_data: {}, mech_data: {},
-    blueTrajectory: [], redTrajectory: []
+    blueTrajectory: [], redTrajectory: [],
+    
+    // --> NEW: Added State for Real-Time Graph Data <--
+    graph_data: [] 
   });
 
   const connectWebSocket = () => {
@@ -94,6 +96,15 @@ export const WebSocketProvider = ({ children }) => {
           isIntentionalDisconnect.current = true;
           wsRef.current.close();
         }
+        // --> NEW: GRAPH UPDATE PARSER <--
+        else if (data.type === "graph_update") {
+          setRobotState(prevState => {
+            const newGraphData = [...(prevState.graph_data || []), data.data];
+            // Keep maximum of 100 points to prevent React from lagging/hanging
+            if (newGraphData.length > 100) newGraphData.shift(); 
+            return { ...prevState, graph_data: newGraphData };
+          });
+        }
         else if (data.type === "status_update" || data.type === "motion_update") {
           setRobotState(prevState => {
             let finalTpList = prevState.tp_list;
@@ -132,10 +143,7 @@ export const WebSocketProvider = ({ children }) => {
                 current_pr_name: data.current_pr_name || prevState.current_pr_name || "None",
                 program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
                 is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory,
-                
-                // --> PARSING AND SAVING THE NEW PAYLOAD VARIABLE HERE <--
                 is_physically_moving: data.is_physically_moving !== undefined ? data.is_physically_moving : prevState.is_physically_moving,
-                
                 speed_op: data.speed_op !== undefined ? data.speed_op : prevState.speed_op,
                 di_val: data.di_val !== undefined ? data.di_val : prevState.di_val,
                 do_val: data.do_val !== undefined ? data.do_val : prevState.do_val,
