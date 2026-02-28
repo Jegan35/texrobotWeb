@@ -150,7 +150,9 @@ const CustomGridWalls = () => {
 
 const WorldCoordinates = () => {
   const labels = [];
-  const step = 200; const fontSize = 40; const axisLabelSize = 120;
+  const step = 100; // திரும்பவும் 100-க்கு மாற்றியாச்சு!
+  const fontSize = 40; 
+  const axisLabelSize = 120;
   
   labels.push(<Billboard key="y" position={[0, -2600, 0]}><Text fontSize={axisLabelSize} color={COLORS.Y_GREEN} fontWeight="bold" outlineWidth={3}>Y</Text></Billboard>);
   labels.push(<Billboard key="x" position={[2600, 0, 0]}><Text fontSize={axisLabelSize} color={COLORS.X_RED} fontWeight="bold" outlineWidth={3}>X</Text></Billboard>);
@@ -160,7 +162,7 @@ const WorldCoordinates = () => {
     labels.push(<Billboard key={`yn-${i}`} position={[i, -2550, 0]}><Text fontSize={fontSize} color={COLORS.Y_GREEN} fontWeight="bold">{i}</Text></Billboard>);
     if (i !== 0) labels.push(<Billboard key={`xn-${i}`} position={[2550, i, 0]}><Text fontSize={fontSize} color={COLORS.X_RED} fontWeight="bold">{i}</Text></Billboard>);
   }
-  for (let z = 200; z <= 3000; z += step) { 
+  for (let z = 100; z <= 3000; z += step) { 
     labels.push(<Billboard key={`zn-${z}`} position={[2550, 2550, z]}><Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="bold">{z}</Text></Billboard>);
   }
   return <group>{labels}</group>;
