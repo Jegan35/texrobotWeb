@@ -1,8 +1,14 @@
 /* General Layout */
 .app-container {
   display: flex;
-  height: 100vh;
-  width: 100vw;
+  
+  /* THE FIX: Use position fixed to lock it to the screen edges */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
   background-color: #1a1e29;
   color: white;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

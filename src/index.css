@@ -1,5 +1,23 @@
-body {
+html, body, #root {
   margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  
+  /* The Ultimate Scroll & Bounce Lock */
+  overflow: hidden !important; 
+  overscroll-behavior: none !important; 
+  touch-action: none !important; 
+  
+  /* Disable text selection and blue tap highlights */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  
+  background-color: #1a1e29;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -8,6 +26,5 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
