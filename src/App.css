@@ -1,8 +1,13 @@
-/* General Layout */
 .app-container {
   display: flex;
-  height: 100vh;
-  width: 100vw;
+  
+  /* THE ULTIMATE LOCK: 100vh-க்கு பதிலாக இதை பயன்படுத்துங்கள் */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
   background-color: #1a1e29;
   color: white;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
