@@ -1,29 +1,5 @@
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  
-  /* ஸ்க்ரோல் ஆவதை முழுமையாகத் தடுக்கும் (Completely locks scrolling) */
-  overflow: hidden; 
-  
-  /* Chrome-ன் Pull-to-refresh (கீழே இழுத்தால் ரீலோட் ஆகுமே) அதைத் தடுக்கும் */
-  overscroll-behavior: none; 
-  
-  /* Browser-ன் Pinch-zoom மற்றும் Swipe gestures-ஐத் தடுக்கும் */
-  touch-action: none; 
-  
-  /* தேவையில்லாமல் டெக்ஸ்ட்களை செலக்ட் செய்வதைத் தடுக்கும் */
-  -webkit-user-select: none;
-  user-select: none;
-  
-  /* பட்டன்களைத் தொடும்போது வரும் நீல நிற ஹைலைட்டைத் தடுக்கும் */
-  -webkit-tap-highlight-color: transparent; 
-  
-  background-color: #1a1e29;
-}
-
 body {
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -32,5 +8,6 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
