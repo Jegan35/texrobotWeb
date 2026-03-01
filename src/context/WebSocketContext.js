@@ -5,8 +5,8 @@ const WebSocketContext = createContext(null);
 export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false); 
-  const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
-  
+  //const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
+  const [ipAddress, setIpAddress] = useState("bdda-103-130-204-214.ngrok-free.app");
   const [accessFull, setAccessFull] = useState(false); 
   const [connectionFailed, setConnectionFailed] = useState(false); 
   const [rejectMessage, setRejectMessage] = useState(""); 
@@ -59,9 +59,21 @@ export const WebSocketProvider = ({ children }) => {
     isAccessFullRef.current = false; 
     isIntentionalDisconnect.current = false; 
 
-    try {
-      wsRef.current = new WebSocket(`ws://${targetIp}:8080`);
+   try {
+      // --- SMART CONNECTION LOGIC ---
+      let wsUrl = "";
+      if (ipAddress.includes("ngrok-free.app")) {
+        // If using Ngrok: Must use secure 'wss://' and NO PORT
+        wsUrl = `wss://${ipAddress}`;
+      } else {
+        // If using Local Wi-Fi: Uses 'ws://' and REQUIRES port 8080
+        wsUrl = `ws://${ipAddress}:8080`;
+      }
 
+      wsRef.current = new WebSocket(wsUrl);
+      // ------------------------------
+
+      wsRef.current.onopen = () => console.log(`CONNECTED TO: ${wsUrl}`);
       wsRef.current.onopen = () => {
           console.log(`Connected to ${targetIp}:8080 physically. Waiting for C++ Admin Handshake...`);
       };
