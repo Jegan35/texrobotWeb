@@ -62,15 +62,18 @@ export const WebSocketProvider = ({ children }) => {
    try {
       // --- SMART CONNECTION LOGIC ---
       let wsUrl = "";
-      if (ipAddress.includes("ngrok-free.app")) {
-        // If using Ngrok: Must use secure 'wss://' and NO PORT
-        wsUrl = `wss://${ipAddress}`;
-      } else {
-        // If using Local Wi-Fi: Uses 'ws://' and REQUIRES port 8080
-        wsUrl = `ws://${ipAddress}:8080`;
-      }
 
-      wsRef.current = new WebSocket(wsUrl);
+// Check for BOTH .app and .dev ngrok extensions
+if (ipAddress.includes("ngrok-free.app") || ipAddress.includes("ngrok-free.dev")) {
+  // Ngrok handles the 8080 port internally. 
+  // You MUST use 'wss://' (secure) and NO port in the URL string.
+  wsUrl = `wss://${ipAddress}`;
+} else {
+  // Local Wi-Fi logic
+  wsUrl = `ws://${ipAddress}:8080`;
+}
+
+wsRef.current = new WebSocket(wsUrl);
       // ------------------------------
 
       wsRef.current.onopen = () => console.log(`CONNECTED TO: ${wsUrl}`);
