@@ -167,7 +167,7 @@ const ControlButtons = () => {
                           {filteredList.length === 0 && <div style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No files found.</div>}
                       </div>
                       <div style={{ padding: '15px', borderTop: '1px solid #333', display: 'flex', gap: '10px' }}>
-                          <button className="btn" style={{ background: '#2b303b', minHeight: '40px' }} onClick={() => { setSelectedRadio(''); setFileModalStep('OPS'); }}>RETURN TO MENU</button>
+                          <button className="btn" style={{ background: '#2b303b', minHeight: '40px' }} onClick={() => { setSelectedRadio(''); setFileModalStep('OPS'); }}>  BACK</button>
                           <button className="btn" style={{ background: selectedRadio ? '#039BE5' : '#333', color: selectedRadio ? 'white' : '#888', minHeight: '40px' }} onClick={executeOpenFile}>OPEN FILE</button>
                       </div>
                   </div>
@@ -195,7 +195,7 @@ const ControlButtons = () => {
                           {filteredList.length === 0 && <div style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No files found.</div>}
                       </div>
                       <div style={{ padding: '15px', borderTop: '1px solid #333', display: 'flex', gap: '10px' }}>
-                          <button className="btn" style={{ background: '#2b303b', minHeight: '40px' }} onClick={() => { setSelectedChecks({}); setFileModalStep('OPS'); }}>RETURN TO MENU</button>
+                          <button className="btn" style={{ background: '#2b303b', minHeight: '40px' }} onClick={() => { setSelectedChecks({}); setFileModalStep('OPS'); }}>  BACK</button>
                           <button className="btn" style={{ background: Object.values(selectedChecks).some(v=>v) ? '#E53935' : '#333', color: Object.values(selectedChecks).some(v=>v) ? 'white' : '#888', minHeight: '40px' }} onClick={executeDeleteFiles}>DELETE</button>
                       </div>
                   </div>

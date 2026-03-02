@@ -7,7 +7,7 @@ import './RightPart.css';
 const INST_OPTIONS = ["Inst", "MOVJ", "MOVJ_dg", "MOVL", "MOVC", "MVLEX_Deg", "MVLEX_mm", "Pallet_Matrix", "Num_of_row", "Num_of_colm", "pos_add_x", "pos_add_y", "pos_add_z", "delay_ms", "go_to", "loop", "Start If", "End If", "Start-Con", "End-Con", "Wait", "DI-1", "DI-2", "DI-3", "DI-4", "DI-5", "DI-6", "DI-7", "DI-8", "DI-9", "DI-10", "DI-11", "DI-12", "DI-13", "DI-14", "DI-15", "DI-16", "DO-1", "DO-2", "DO-3", "DO-4", "DO-5", "DO-6", "DO-7", "DO-8", "DO-9", "DO-10", "DO-11", "DO-12", "DO-13", "DO-14", "DO-15", "DO-16", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4", "DI-1 Chk", "DI-2 Chk", "DI-3 Chk", "DI-4 Chk", "DI-5 Chk", "DI-6 Chk", "DI-7 Chk", "DI-8 Chk", "DI-9 Chk", "DI-10 Chk", "DI-11 Chk", "DI-12 Chk", "DI-13 Chk", "DI-14 Chk", "DI-15 Chk", "DI-16 Chk", "DI-1 Un Chk", "DI-2 Un Chk", "DI-3 Un Chk", "DI-4 Un Chk", "DI-5 Un Chk", "DI-6 Un Chk", "DI-7 Un Chk", "DI-8 Un Chk", "DI-9 Un Chk", "DI-10 Un Chk", "DI-11 Un Chk", "DI-12 Un Chk", "DI-13 Un Chk", "DI-14 Un Chk", "DI-15 Un Chk", "DI-16 Un Chk", "= Assign", "== Equal", "!= Not Eql", "<", ">", "<=", ">=", "+", "-", "&", "stop", "Servo off"];
 const DI_OPTIONS = ["Di-1", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
 const DI2_OPTIONS = ["Di-2", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
-const DIG_STATE_OPTIONS = ["Dig-state", "High", "Low"];
+const DIG_STATE_OPTIONS = ["DIG-S", "High", "Low"];
 const VAR1_OPTIONS = ["Vr_1", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
 const VAR2_OPTIONS = ["Vr_2", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
 const MM_OPTIONS = ["mm", "50", "25", "15", "10", "5", "2", "1", "0.1", "0.01", "0.001"];
@@ -69,36 +69,44 @@ const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, onRo
 });
 
 const RightPart = () => {
-  // Grab the new local graph lock states from Context
   const { sendCommand, robotState, isGraphReading, setGraphReading } = useWebSocket();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
-
   const [expandedTable, setExpandedTable] = useState('NONE'); 
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [instInput, setInstInput] = useState('');
-  // --> NEW STATES FOR CUSTOM DROPDOWNS IN ROW 5 <--
+  
+  // =================================================================================
+  // UNIVERSAL CUSTOM DROPDOWN STATES (Eliminates ALL Native <select> tags)
+  // =================================================================================
   const [selInst, setSelInst] = useState(INST_OPTIONS[0]);
   const [selDi1, setSelDi1] = useState(DI_OPTIONS[0]);
   const [selDi2, setSelDi2] = useState(DI2_OPTIONS[0]);
   const [selHL, setSelHL] = useState(DIG_STATE_OPTIONS[0]);
   const [selVar1, setSelVar1] = useState(VAR1_OPTIONS[0]);
   const [selVar2, setSelVar2] = useState(VAR2_OPTIONS[0]);
+  
+  const [varOutSel, setVarOutSel] = useState(VAR_MONITOR_LIST[0]);
+  const [varInSel, setVarInSel] = useState(VAR_MONITOR_LIST[0]);
+  const [simDiNum, setSimDiNum] = useState(DI_SIM_NUM_LIST[0]);
+  const [simDiState, setSimDiState] = useState(SIM_STATE_LIST[0]);
+  const [simDoNum, setSimDoNum] = useState(DO_SIM_NUM_LIST[0]);
+  const [simDoState, setSimDoState] = useState(SIM_STATE_LIST[0]);
 
-  // --> HELPER FUNCTION FOR CUSTOM SELECT <--
-  const renderCustomSelect = (menuKey, options, currentValue, setValue, command) => (
-      <div className="rel-flex" style={{ width: '100%', height: '100%' }}>
-          <button className="tp-standalone-input custom-select-btn" onClick={() => toggleDropdown(menuKey)}>
+  const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
+
+  // GLOBAL HELPER: Converts ANY select box into an Industrial Button with Pop-up!
+  const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp-standalone-input", direction = "down", wrapStyle = { width: '100%', height: '100%' }) => (
+      <div className="rel-flex" style={wrapStyle}>
+          <button className={`${btnClass} custom-select-btn`} onClick={() => toggleDropdown(menuKey)}>
               {currentValue}
           </button>
           {openDropdown === menuKey && (
-              <div className="custom-select-menu">
+              <div className={`custom-select-menu custom-select-menu-${direction}`}>
                   {options.map(o => (
                       <div key={o} className="custom-select-item" onClick={() => {
-                          setValue(o);
-                          sendCommand(command, o);
+                          onSelect(o);
                           setOpenDropdown(null);
                       }}>
                           {o}
@@ -108,6 +116,8 @@ const RightPart = () => {
           )}
       </div>
   );
+
+  const [instInput, setInstInput] = useState('');
   const [displayTpMode, setDisplayTpMode] = useState('TP Mode');
   const [selectedTpIndex, setSelectedTpIndex] = useState(0);
   const [selectedPrIndex, setSelectedPrIndex] = useState(0);
@@ -129,7 +139,6 @@ const RightPart = () => {
   const [ipPgInput, setIpPgInput] = useState('0');
   const [tpNameVal, setTpNameVal] = useState('0');
   const [comVal, setComVal] = useState('0');
-  
   const [delayVal, setDelayVal] = useState('0');
   const [gotoVal, setGotoVal] = useState('0');
   const [loopVal, setLoopVal] = useState('0');
@@ -171,7 +180,6 @@ const RightPart = () => {
   const handleGlobalSpeedChange = (e) => { setGlobalSpeed(e.target.value); sendCommand("SET_GLOBAL_SPEED", e.target.value); };
   const applyMmSpeed = () => sendCommand("SET_MM_SPEED", mmSpeedText);
   const applyDegSpeed = () => sendCommand("SET_DEG_SPEED", degSpeedText);
-  const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
   const handleTpModeSelect = (uiLabel, backendCmd) => { setDisplayTpMode(uiLabel); sendCommand('SET_TP_RUN_MODE', backendCmd); setOpenDropdown(null); };
   const handleTpRowClick = useCallback((index) => { setSelectedTpIndex(index); sendCommand('SELECT_TP_INDEX', index); }, [sendCommand]);
   const handlePrRowClick = useCallback((index) => { setSelectedPrIndex(index); sendCommand('SELECT_PR_ROW', index); }, [sendCommand]);
@@ -240,11 +248,6 @@ const RightPart = () => {
           ? axisConfig 
           : axisConfig.filter(a => a.name === selectedGraphAxis);
 
-      const toggleGraphReading = () => {
-          // Toggles the local Context State lock
-          setGraphReading(!isGraphReading);
-      };
-
       const yGridLines = [];
       for (let y = -360; y <= 360; y += 30) {
           const isZero = y === 0;
@@ -272,22 +275,17 @@ const RightPart = () => {
       return (
           <div className="modern-graph-container">
               <div className="mg-header">
-                  <button className={`mg-toggle-btn ${isGraphReading ? 'mg-stop' : 'mg-start'}`} onClick={toggleGraphReading}>
+                  <button className={`mg-toggle-btn ${isGraphReading ? 'mg-stop' : 'mg-start'}`} onClick={() => setGraphReading(!isGraphReading)}>
                       {isGraphReading ? '■ STOP GRAPH' : '▶ START GRAPH'}
                   </button>
                   
                   <div className="mg-axis-selector">
                       <label>SELECT AXIS:</label>
-                      <select value={selectedGraphAxis} onChange={(e) => setSelectedGraphAxis(e.target.value)}>
-                          <option value="All-axis">All-axis</option>
-                          <option value="X">X Axis</option><option value="Y">Y Axis</option><option value="Z">Z Axis</option>
-                          <option value="J1">J1 Axis</option><option value="J2">J2 Axis</option><option value="J3">J3 Axis</option>
-                          <option value="J4">J4 Axis</option><option value="J5">J5 Axis</option><option value="J6">J6 Axis</option>
-                      </select>
+                      {/* Native <select> Replaced! */}
+                      {renderDropdown('GRAPH_AXIS', ["All-axis", "X", "Y", "Z", "J1", "J2", "J3", "J4", "J5", "J6"], selectedGraphAxis, setSelectedGraphAxis, "gas-dropdown", "down", {width: '120px'})}
                   </div>
               </div>
 
-              {/* Added horizontal scroll wrapper to maintain rectangle on tablets */}
               <div className="mg-scroll-wrapper">
                   <div className="mg-body">
                       <div className="mg-y-label-col"><span>deg / mm</span></div>
@@ -431,18 +429,16 @@ const RightPart = () => {
               <div className="data-var-col">
                   <div className="data-var-title">Output Monitor</div>
                   <div className="data-var-flex">
-                      <select className="light-input" onChange={(e) => sendCommand("SET_VAR_OUTPUT_SELECTOR", e.target.value)}>
-                            {VAR_MONITOR_LIST.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
+                      {/* Native <select> Replaced! */}
+                      {renderDropdown('VAR_OUT_SEL', VAR_MONITOR_LIST, varOutSel, (v) => { setVarOutSel(v); sendCommand("SET_VAR_OUTPUT_SELECTOR", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       <input className="light-input" style={{ color: 'blue', background: '#e0e0e0', textAlign: 'center' }} value={variableData.outputValue || "0"} readOnly />
                   </div>
               </div>
               <div className="data-var-col">
                   <div className="data-var-title">Input Control</div>
                   <div className="data-var-flex">
-                      <select className="light-input" onChange={(e) => sendCommand("SET_VAR_INPUT_SELECTOR", e.target.value)}>
-                            {VAR_MONITOR_LIST.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
+                      {/* Native <select> Replaced! */}
+                      {renderDropdown('VAR_IN_SEL', VAR_MONITOR_LIST, varInSel, (v) => { setVarInSel(v); sendCommand("SET_VAR_INPUT_SELECTOR", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       <input className="light-input" placeholder="Value" onBlur={(e) => sendCommand("SET_VAR_INPUT_VALUE", e.target.value)} />
                   </div>
               </div>
@@ -480,26 +476,21 @@ const RightPart = () => {
                   <div className="data-var-title">Simulation</div>
                   <div className="sim-grid">
                       <span className="light-label">DI Sim:</span>
-                      <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DI_NUMBER", e.target.value)}>
-                           {DI_SIM_NUM_LIST.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
-                      <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DI_STATE", e.target.value)}>
-                           {SIM_STATE_LIST.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
+                      {/* "up" என்பதை "down" என்று மாற்றிவிட்டேன் 👇 */}
+                      {renderDropdown('SIM_DI_NUM', DI_SIM_NUM_LIST, simDiNum, (v) => { setSimDiNum(v); sendCommand("SET_SIM_DI_NUMBER", v); }, "light-input", "down", {width:'100%', height:'32px'})}
+                      {renderDropdown('SIM_DI_ST', SIM_STATE_LIST, simDiState, (v) => { setSimDiState(v); sendCommand("SET_SIM_DI_STATE", v); }, "light-input", "down", {width:'100%', height:'32px'})}
+                      
                       <span className="light-label">DO Sim:</span>
-                      <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DO_NUMBER", e.target.value)}>
-                           {DO_SIM_NUM_LIST.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
-                      <select className="light-input" onChange={(e) => sendCommand("SET_SIM_DO_STATE", e.target.value)}>
-                           {SIM_STATE_LIST.map(o => <option key={o} value={o}>{o}</option>)}
-                      </select>
+                      {/* "up" என்பதை "down" என்று மாற்றிவிட்டேன் 👇 */}
+                      {renderDropdown('SIM_DO_NUM', DO_SIM_NUM_LIST, simDoNum, (v) => { setSimDoNum(v); sendCommand("SET_SIM_DO_NUMBER", v); }, "light-input", "down", {width:'100%', height:'32px'})}
+                      {renderDropdown('SIM_DO_ST', SIM_STATE_LIST, simDoState, (v) => { setSimDoState(v); sendCommand("SET_SIM_DO_STATE", v); }, "light-input", "down", {width:'100%', height:'32px'})}
+                      
                       <span className="light-label">Remote:</span><button className="light-btn">rem_h</button><button className="light-btn">rem_l</button>
                   </div>
               </div>
           </div>
       </div>
   );
-
   const renderMechSettings = () => (
       <div className="light-panel" style={{ padding: 0 }}>
           <table className="mech-table">
@@ -530,11 +521,22 @@ const RightPart = () => {
     <div className="speed-config-container">
       <div className="speed-config-title">SPEED SETTINGS</div>
       <div className="speed-config-body">
-        <div className="fluid-speed-row"><span className="fluid-speed-label">MM</span><select className="fluid-speed-input" value={mmIncVal} onChange={(e)=>{setMmIncVal(e.target.value); sendCommand("SET_MM_INC", e.target.value)}}>{MM_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+        {/* Native <select> Replaced! */}
+        <div className="fluid-speed-row"><span className="fluid-speed-label">MM</span>
+            {renderDropdown('SPEED_MM', MM_OPTIONS, mmIncVal, (v) => { setMmIncVal(v); sendCommand("SET_MM_INC", v); }, "fluid-speed-input", "down")}
+        </div>
         <div className="fluid-speed-row"><span className="fluid-speed-label">MM/S</span><input type="number" className="fluid-speed-input" value={mmSpeedText} onChange={(e) => setMmSpeedText(e.target.value)} onBlur={applyMmSpeed} /></div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">DEG</span><select className="fluid-speed-input" value={degIncVal} onChange={(e)=>{setDegIncVal(e.target.value); sendCommand("SET_DEG_INC", e.target.value)}}>{DEG_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+        
+        {/* Native <select> Replaced! */}
+        <div className="fluid-speed-row"><span className="fluid-speed-label">DEG</span>
+            {renderDropdown('SPEED_DEG', DEG_OPTIONS, degIncVal, (v) => { setDegIncVal(v); sendCommand("SET_DEG_INC", v); }, "fluid-speed-input", "down")}
+        </div>
         <div className="fluid-speed-row"><span className="fluid-speed-label">DEG/S</span><input type="number" className="fluid-speed-input" value={degSpeedText} onChange={(e) => setDegSpeedText(e.target.value)} onBlur={applyDegSpeed} /></div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">FRAME</span><select className="fluid-speed-input" value={frameVal} onChange={(e)=>{setFrameVal(e.target.value); sendCommand("SET_FRAME", e.target.value)}}>{FRAME_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+        
+        {/* Native <select> Replaced! */}
+        <div className="fluid-speed-row"><span className="fluid-speed-label">FRAME</span>
+            {renderDropdown('SPEED_FRAME', FRAME_OPTIONS, frameVal, (v) => { setFrameVal(v); sendCommand("SET_FRAME", v); }, "fluid-speed-input", "down")}
+        </div>
         <div className="fluid-speed-row">
           <span className="fluid-speed-label">SPEED</span>
           <div className="speed-range-group">
@@ -671,7 +673,6 @@ const RightPart = () => {
                             {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
                         </div>
                         
-                        {/* --> ROW 1 RIGHT PANEL WITH OVERLAY LOGIC <-- */}
                         <div className="rp-panel-right" style={{ position: 'relative' }}>
                             <div className="dark-tabs">
                                 {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
@@ -684,7 +685,6 @@ const RightPart = () => {
                                 </div>
                             </div>
                             
-                            {/* Blur content if not maximized */}
                             <div className={`row2-content ${expandedRowPanel !== 'ROW1' ? 'blurred-content' : ''}`}>
                                 {activeRow1Tab === 'Error Pos' && renderErrorPos()}
                                 {activeRow1Tab === 'Ether Cat' && renderEtherCat()}
@@ -692,7 +692,6 @@ const RightPart = () => {
                                 {activeRow1Tab === 'Graph' && renderGraphView()}
                             </div>
 
-                            {/* View Full Overlay Button */}
                             {expandedRowPanel !== 'ROW1' && (
                                 <div className="view-full-overlay">
                                     <button className="view-full-btn" onClick={() => setExpandedRowPanel('ROW1')}>
@@ -700,7 +699,6 @@ const RightPart = () => {
                                     </button>
                                 </div>
                             )}
-
                         </div>
                     </div>
                 </div>
@@ -859,16 +857,16 @@ const RightPart = () => {
                 </div>
             </div>
 
-           <div className="rp-row-5">
+            <div className="rp-row-5">
                 <div className="grid-11-col">
-                    {/* Replaced native <select> with our Custom Select */}
-                    {renderCustomSelect('R5_INST', INST_OPTIONS, selInst, setSelInst, "SET_INSTRUCTION_TYPE")}
-                    {renderCustomSelect('R5_DI1', DI_OPTIONS, selDi1, setSelDi1, "SET_DIGI_1")}
-                    {renderCustomSelect('R5_DI2', DI2_OPTIONS, selDi2, setSelDi2, "SET_DIGI_2")}
+                    {/* Native Selects globally replaced with our Custom Select */}
+                    {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "tp-standalone-input", "up")}
+                    {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "tp-standalone-input", "up")}
+                    {renderDropdown('R5_DI2', DI2_OPTIONS, selDi2, (v) => { setSelDi2(v); sendCommand("SET_DIGI_2", v); }, "tp-standalone-input", "up")}
                     
                     <button className="tp-btn btn-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
                     
-                    {renderCustomSelect('R5_HL', DIG_STATE_OPTIONS, selHL, setSelHL, "SET_HIGH_LOW")}
+                    {renderDropdown('R5_HL', DIG_STATE_OPTIONS, selHL, (v) => { setSelHL(v); sendCommand("SET_HIGH_LOW", v); }, "tp-standalone-input", "up")}
                     
                     <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_DELAY', delayVal)}>⏱ delay</button>
                     <input className="tp-standalone-input" value={delayVal} onChange={e => setDelayVal(e.target.value)} />
@@ -880,16 +878,14 @@ const RightPart = () => {
                 <div className="grid-11-col">
                     <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_PROGRAM_SPEED', progSpeedVal)}>⏱ mm/s</button>
                     <input className="tp-standalone-input" value={progSpeedVal} onChange={e => setProgSpeedVal(e.target.value)} />
-                    <button className="tp-btn btn-dark" onClick={() => {}}>🎯 Radius</button>
+                    <button className="tp-btn btn-dark" onClick={() => {}}>🎯 RAD</button>
                     <input className="tp-standalone-input" value={radiusVal} onChange={e => setRadiusVal(e.target.value)} />
                     
-                    {/* Replaced native <select> with our Custom Select */}
-                    {renderCustomSelect('R5_VAR1', VAR1_OPTIONS, selVar1, setSelVar1, "SET_VAR1")}
+                    {renderDropdown('R5_VAR1', VAR1_OPTIONS, selVar1, (v) => { setSelVar1(v); sendCommand("SET_VAR1", v); }, "tp-standalone-input", "up")}
                     
                     <input className="tp-standalone-input" value={varInputVal} onChange={e => setVarInputVal(e.target.value)} onBlur={(e) => sendCommand('SET_VAR_VAL', e.target.value)} />
                     
-                    {/* Replaced native <select> with our Custom Select */}
-                    {renderCustomSelect('R5_VAR2', VAR2_OPTIONS, selVar2, setSelVar2, "SET_VAR2")}
+                    {renderDropdown('R5_VAR2', VAR2_OPTIONS, selVar2, (v) => { setSelVar2(v); sendCommand("SET_VAR2", v); }, "tp-standalone-input", "up")}
                     
                     <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN ip</button>
                     <input className="tp-standalone-input" value={anIpVal} onChange={e => setAnIpVal(e.target.value)} />
