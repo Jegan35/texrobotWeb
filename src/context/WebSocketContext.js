@@ -5,8 +5,8 @@ const WebSocketContext = createContext(null);
 export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false); 
-  const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
-  
+  //const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
+  const [ipAddress, setIpAddress] = useState("unirritated-offensively-javon.ngrok-free.dev");
   const [accessFull, setAccessFull] = useState(false); 
   const [connectionFailed, setConnectionFailed] = useState(false); 
   const [rejectMessage, setRejectMessage] = useState(""); 
@@ -59,9 +59,24 @@ export const WebSocketProvider = ({ children }) => {
     isAccessFullRef.current = false; 
     isIntentionalDisconnect.current = false; 
 
-    try {
-      wsRef.current = new WebSocket(`ws://${targetIp}:8080`);
+   try {
+      // --- SMART CONNECTION LOGIC ---
+      let wsUrl = "";
 
+// Check for BOTH .app and .dev ngrok extensions
+if (ipAddress.includes("ngrok-free.app") || ipAddress.includes("ngrok-free.dev")) {
+  // Ngrok handles the 8080 port internally. 
+  // You MUST use 'wss://' (secure) and NO port in the URL string.
+  wsUrl = `wss://${ipAddress}`;
+} else {
+  // Local Wi-Fi logic
+  wsUrl = `ws://${ipAddress}:8080`;
+}
+
+wsRef.current = new WebSocket(wsUrl);
+      // ------------------------------
+
+      wsRef.current.onopen = () => console.log(`CONNECTED TO: ${wsUrl}`);
       wsRef.current.onopen = () => {
           console.log(`Connected to ${targetIp}:8080 physically. Waiting for C++ Admin Handshake...`);
       };
