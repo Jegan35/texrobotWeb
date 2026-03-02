@@ -212,7 +212,7 @@ const ControlButtons = () => {
         <button className="btn btn-blue" onClick={handleHomeClick}>⌂ HOME</button>
         <button className={`btn ${isRunning ? 'btn-green' : 'btn-yellow'}`} onClick={handleRunPauseToggle}>{isRunning ? '⏵ RUN' : '⏸ PAUSE'}</button>
         <button className={`btn ${isStarted ? 'btn-red' : 'btn-orange'}`} onClick={handleStartStopToggle}>{isStarted ? '⏹ STOP' : '⏻ START'}</button>
-        <button className="btn btn-red" onClick={handleExitClick}>⎋ EXIT</button>
+        <button className="btn btn-red" onClick={handleExitClick}>✖ EXIT</button>
         <div style={{ position: "relative", display: "flex", width: "100%" }}>
           <button className="btn btn-outline-green" style={{ width: "100%" }} onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}>{mode}</button>
           {isModeMenuOpen && (
@@ -242,12 +242,12 @@ const ControlButtons = () => {
 
       <div className="btn-row">
         <div className="span-2" style={{ position: "relative", display: "flex", width: "100%" }}>
-          <button className={`btn ${hasError ? 'btn-orange' : 'btn-green-full'}`} style={{ width: "100%" }} onClick={() => setIsSystemOkOpen(!isSystemOkOpen)}>
+          <button className={`btn ${hasError ? 'btn-red' : 'btn-green-full'}`} style={{ width: "100%" }} onClick={() => setIsSystemOkOpen(!isSystemOkOpen)}>
             {hasError ? "⚠️ VIEW ERROR" : "✓ SYSTEM OK"}
           </button>
           {isSystemOkOpen && (
-            <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '200%', background: '#1e222b', border: hasError ? '2px solid #FF9800' : '2px solid #00E676', zIndex: 1000, borderRadius: '6px', padding: '15px', color: 'white', boxShadow: '0 10px 25px rgba(0,0,0,0.9)' }}>
-              <h4 style={{ margin: '0 0 10px 0', color: hasError ? '#FF9800' : '#00E676', textTransform: 'uppercase', letterSpacing: '1px' }}>SYSTEM STATUS</h4>
+            <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '200%', background: '#1e222b', border: hasError ? '2px solid #fc0606' : '2px solid #00E676', zIndex: 1000, borderRadius: '6px', padding: '15px', color: 'white', boxShadow: '0 10px 25px rgba(0,0,0,0.9)' }}>
+              <h4 style={{ margin: '0 0 10px 0', color: hasError ? '#f50707' : '#00E676', textTransform: 'uppercase', letterSpacing: '1px' }}>SYSTEM STATUS</h4>
               <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1.1rem' }}>{currentError}</p>
               <button style={{ marginTop: '15px', width: '100%', padding: '10px', background: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase' }} onClick={() => setIsSystemOkOpen(false)}>CLOSE</button>
             </div>

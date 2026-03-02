@@ -75,11 +75,13 @@ const RightPart = () => {
 
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
   const [expandedTable, setExpandedTable] = useState('NONE'); 
+  
+  // ---> NEW STATE: ENHANCE ROW 1 RIGHT PART <---
+  const [isRow1RightExpanded, setIsRow1RightExpanded] = useState(false);
+
   const [openDropdown, setOpenDropdown] = useState(null);
   
-  // =================================================================================
-  // UNIVERSAL CUSTOM DROPDOWN STATES (Eliminates ALL Native <select> tags)
-  // =================================================================================
+  // Custom Dropdown States
   const [selInst, setSelInst] = useState(INST_OPTIONS[0]);
   const [selDi1, setSelDi1] = useState(DI_OPTIONS[0]);
   const [selDi2, setSelDi2] = useState(DI2_OPTIONS[0]);
@@ -96,7 +98,6 @@ const RightPart = () => {
 
   const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
 
-  // GLOBAL HELPER: Converts ANY select box into an Industrial Button with Pop-up!
   const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp-standalone-input", direction = "down", wrapStyle = { width: '100%', height: '100%' }) => (
       <div className="rel-flex" style={wrapStyle}>
           <button className={`${btnClass} custom-select-btn`} onClick={() => toggleDropdown(menuKey)}>
@@ -128,7 +129,6 @@ const RightPart = () => {
   const [activeRow2Tab, setActiveRow2Tab] = useState('Programs File');
   const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
 
-  // --> GRAPH STATES <--
   const [selectedGraphAxis, setSelectedGraphAxis] = useState('All-axis');
   const [zoomWindow, setZoomWindow] = useState(5); 
 
@@ -202,74 +202,35 @@ const RightPart = () => {
       setShowModTpModal(false);
   };
 
-  // ==============================================================
-  // GRAPH RENDERER 
-  // ==============================================================
   const renderGraphView = () => {
       const gData = rs.graph_data || [];
       const hasData = gData.length > 0;
-      
-      const svgWidth = 800; 
-      const svgHeight = 250;
-      const maxY = 360;
-      const minY = -360;
-      
-      const mapY = (val) => {
-          const clamped = Math.max(minY, Math.min(maxY, val || 0));
-          const norm = (clamped - minY) / (maxY - minY);
-          return svgHeight - (norm * svgHeight);
-      };
-
-      let maxX = 5; 
-      if (hasData) {
-          maxX = gData[gData.length - 1][0] || 5;
-      }
-      let minX = maxX - zoomWindow;
-      if (minX < 0 && !hasData) minX = 0;
-      
-      const mapX = (t) => {
-          const norm = (t - minX) / zoomWindow;
-          return norm * svgWidth;
-      };
+      const svgWidth = 800; const svgHeight = 250;
+      const maxY = 360; const minY = -360;
+      const mapY = (val) => { const clamped = Math.max(minY, Math.min(maxY, val || 0)); const norm = (clamped - minY) / (maxY - minY); return svgHeight - (norm * svgHeight); };
+      let maxX = 5; if (hasData) { maxX = gData[gData.length - 1][0] || 5; }
+      let minX = maxX - zoomWindow; if (minX < 0 && !hasData) minX = 0;
+      const mapX = (t) => { const norm = (t - minX) / zoomWindow; return norm * svgWidth; };
 
       const axisConfig = [
-          { name: 'X', index: 1, color: '#FF3B30' },
-          { name: 'Y', index: 2, color: '#4CAF50' },
-          { name: 'Z', index: 3, color: '#2196F3' },
-          { name: 'J1', index: 4, color: '#FFC107' },
-          { name: 'J2', index: 5, color: '#9C27B0' },
-          { name: 'J3', index: 6, color: '#00BCD4' },
-          { name: 'J4', index: 7, color: '#8BC34A' },
-          { name: 'J5', index: 8, color: '#FF9800' },
-          { name: 'J6', index: 9, color: '#E91E63' },
+          { name: 'X', index: 1, color: '#FF3B30' }, { name: 'Y', index: 2, color: '#4CAF50' }, { name: 'Z', index: 3, color: '#2196F3' },
+          { name: 'J1', index: 4, color: '#FFC107' }, { name: 'J2', index: 5, color: '#9C27B0' }, { name: 'J3', index: 6, color: '#00BCD4' },
+          { name: 'J4', index: 7, color: '#8BC34A' }, { name: 'J5', index: 8, color: '#FF9800' }, { name: 'J6', index: 9, color: '#E91E63' },
       ];
-
-      const axesToDraw = selectedGraphAxis === 'All-axis' 
-          ? axisConfig 
-          : axisConfig.filter(a => a.name === selectedGraphAxis);
+      const axesToDraw = selectedGraphAxis === 'All-axis' ? axisConfig : axisConfig.filter(a => a.name === selectedGraphAxis);
 
       const yGridLines = [];
       for (let y = -360; y <= 360; y += 30) {
-          const isZero = y === 0;
-          const isMajor = y % 120 === 0;
-          const yPos = mapY(y);
-          yGridLines.push(
-              <line key={`hy-${y}`} x1="0" y1={yPos} x2={svgWidth} y2={yPos}
-                    className={isZero ? "mg-zero-line" : (isMajor ? "mg-major-grid" : "mg-minor-grid")} />
-          );
+          const isZero = y === 0; const isMajor = y % 120 === 0; const yPos = mapY(y);
+          yGridLines.push(<line key={`hy-${y}`} x1="0" y1={yPos} x2={svgWidth} y2={yPos} className={isZero ? "mg-zero-line" : (isMajor ? "mg-major-grid" : "mg-minor-grid")} />);
       }
 
       const vGridLines = [];
-      let majorStep = zoomWindow / 5;
-      let minorStep = majorStep / 5;
+      let majorStep = zoomWindow / 5; let minorStep = majorStep / 5;
       let startX = Math.floor(minX / minorStep) * minorStep;
       for (let t = startX; t <= maxX + minorStep; t += minorStep) {
-           const isMajor = Math.abs((t % majorStep)) < 0.0001 || Math.abs((t % majorStep) - majorStep) < 0.0001;
-           const xPos = mapX(t);
-           vGridLines.push(
-              <line key={`vx-${t.toFixed(2)}`} x1={xPos} y1="0" x2={xPos} y2={svgHeight}
-                    className={isMajor ? "mg-major-grid" : "mg-minor-grid"} />
-          );
+           const isMajor = Math.abs((t % majorStep)) < 0.0001 || Math.abs((t % majorStep) - majorStep) < 0.0001; const xPos = mapX(t);
+           vGridLines.push(<line key={`vx-${t.toFixed(2)}`} x1={xPos} y1="0" x2={xPos} y2={svgHeight} className={isMajor ? "mg-major-grid" : "mg-minor-grid"} />);
       }
 
       return (
@@ -278,25 +239,20 @@ const RightPart = () => {
                   <button className={`mg-toggle-btn ${isGraphReading ? 'mg-stop' : 'mg-start'}`} onClick={() => setGraphReading(!isGraphReading)}>
                       {isGraphReading ? '■ STOP GRAPH' : '▶ START GRAPH'}
                   </button>
-                  
                   <div className="mg-axis-selector">
                       <label>SELECT AXIS:</label>
-                      {/* Native <select> Replaced! */}
                       {renderDropdown('GRAPH_AXIS', ["All-axis", "X", "Y", "Z", "J1", "J2", "J3", "J4", "J5", "J6"], selectedGraphAxis, setSelectedGraphAxis, "gas-dropdown", "down", {width: '120px'})}
                   </div>
               </div>
-
               <div className="mg-scroll-wrapper">
                   <div className="mg-body">
                       <div className="mg-y-label-col"><span>deg / mm</span></div>
                       <div className="mg-y-axis">
-                          <span>360.0</span><span>240.0</span><span>120.0</span>
-                          <span>0.0</span><span>-120.0</span><span>-240.0</span><span>-360.0</span>
+                          <span>360.0</span><span>240.0</span><span>120.0</span><span>0.0</span><span>-120.0</span><span>-240.0</span><span>-360.0</span>
                       </div>
                       <div className="mg-plot-wrapper">
                           <svg className="mg-svg" viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="none">
-                              {yGridLines}
-                              {vGridLines}
+                              {yGridLines}{vGridLines}
                               {hasData && axesToDraw.map(axis => {
                                   const pointsStr = gData.map(d => `${mapX(d[0]||0)},${mapY(d[axis.index]||0)}`).join(' ');
                                   return <polyline key={axis.name} points={pointsStr} fill="none" stroke={axis.color} strokeWidth="2.5" strokeLinejoin="round" />
@@ -304,18 +260,12 @@ const RightPart = () => {
                           </svg>
                       </div>
                       <div className="mg-tools">
-                          <button className="mg-tool-btn" onClick={handleZoomIn}>+</button>
-                          <button className="mg-tool-btn" onClick={handleZoomOut}>-</button>
-                          <button className="mg-tool-btn" onClick={handleZoomReset}>↺</button>
+                          <button className="mg-tool-btn" onClick={handleZoomIn}>+</button><button className="mg-tool-btn" onClick={handleZoomOut}>-</button><button className="mg-tool-btn" onClick={handleZoomReset}>↺</button>
                       </div>
                   </div>
                   <div className="mg-x-axis">
-                      <span>{(minX).toFixed(2)}</span>
-                      <span>{(minX + zoomWindow*0.2).toFixed(2)}</span>
-                      <span>{(minX + zoomWindow*0.4).toFixed(2)}</span>
-                      <span>{(minX + zoomWindow*0.6).toFixed(2)}</span>
-                      <span>{(minX + zoomWindow*0.8).toFixed(2)}</span>
-                      <span>{(maxX).toFixed(2)}</span>
+                      <span>{(minX).toFixed(2)}</span><span>{(minX + zoomWindow*0.2).toFixed(2)}</span><span>{(minX + zoomWindow*0.4).toFixed(2)}</span>
+                      <span>{(minX + zoomWindow*0.6).toFixed(2)}</span><span>{(minX + zoomWindow*0.8).toFixed(2)}</span><span>{(maxX).toFixed(2)}</span>
                   </div>
                   <div className="mg-x-label">Time [s]</div>
               </div>
@@ -429,7 +379,6 @@ const RightPart = () => {
               <div className="data-var-col">
                   <div className="data-var-title">Output Monitor</div>
                   <div className="data-var-flex">
-                      {/* Native <select> Replaced! */}
                       {renderDropdown('VAR_OUT_SEL', VAR_MONITOR_LIST, varOutSel, (v) => { setVarOutSel(v); sendCommand("SET_VAR_OUTPUT_SELECTOR", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       <input className="light-input" style={{ color: 'blue', background: '#e0e0e0', textAlign: 'center' }} value={variableData.outputValue || "0"} readOnly />
                   </div>
@@ -437,7 +386,6 @@ const RightPart = () => {
               <div className="data-var-col">
                   <div className="data-var-title">Input Control</div>
                   <div className="data-var-flex">
-                      {/* Native <select> Replaced! */}
                       {renderDropdown('VAR_IN_SEL', VAR_MONITOR_LIST, varInSel, (v) => { setVarInSel(v); sendCommand("SET_VAR_INPUT_SELECTOR", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       <input className="light-input" placeholder="Value" onBlur={(e) => sendCommand("SET_VAR_INPUT_VALUE", e.target.value)} />
                   </div>
@@ -476,12 +424,10 @@ const RightPart = () => {
                   <div className="data-var-title">Simulation</div>
                   <div className="sim-grid">
                       <span className="light-label">DI Sim:</span>
-                      {/* "up" என்பதை "down" என்று மாற்றிவிட்டேன் 👇 */}
                       {renderDropdown('SIM_DI_NUM', DI_SIM_NUM_LIST, simDiNum, (v) => { setSimDiNum(v); sendCommand("SET_SIM_DI_NUMBER", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       {renderDropdown('SIM_DI_ST', SIM_STATE_LIST, simDiState, (v) => { setSimDiState(v); sendCommand("SET_SIM_DI_STATE", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       
                       <span className="light-label">DO Sim:</span>
-                      {/* "up" என்பதை "down" என்று மாற்றிவிட்டேன் 👇 */}
                       {renderDropdown('SIM_DO_NUM', DO_SIM_NUM_LIST, simDoNum, (v) => { setSimDoNum(v); sendCommand("SET_SIM_DO_NUMBER", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       {renderDropdown('SIM_DO_ST', SIM_STATE_LIST, simDoState, (v) => { setSimDoState(v); sendCommand("SET_SIM_DO_STATE", v); }, "light-input", "down", {width:'100%', height:'32px'})}
                       
@@ -491,6 +437,7 @@ const RightPart = () => {
           </div>
       </div>
   );
+
   const renderMechSettings = () => (
       <div className="light-panel" style={{ padding: 0 }}>
           <table className="mech-table">
@@ -521,19 +468,14 @@ const RightPart = () => {
     <div className="speed-config-container">
       <div className="speed-config-title">SPEED SETTINGS</div>
       <div className="speed-config-body">
-        {/* Native <select> Replaced! */}
         <div className="fluid-speed-row"><span className="fluid-speed-label">MM</span>
             {renderDropdown('SPEED_MM', MM_OPTIONS, mmIncVal, (v) => { setMmIncVal(v); sendCommand("SET_MM_INC", v); }, "fluid-speed-input", "down")}
         </div>
         <div className="fluid-speed-row"><span className="fluid-speed-label">MM/S</span><input type="number" className="fluid-speed-input" value={mmSpeedText} onChange={(e) => setMmSpeedText(e.target.value)} onBlur={applyMmSpeed} /></div>
-        
-        {/* Native <select> Replaced! */}
         <div className="fluid-speed-row"><span className="fluid-speed-label">DEG</span>
             {renderDropdown('SPEED_DEG', DEG_OPTIONS, degIncVal, (v) => { setDegIncVal(v); sendCommand("SET_DEG_INC", v); }, "fluid-speed-input", "down")}
         </div>
         <div className="fluid-speed-row"><span className="fluid-speed-label">DEG/S</span><input type="number" className="fluid-speed-input" value={degSpeedText} onChange={(e) => setDegSpeedText(e.target.value)} onBlur={applyDegSpeed} /></div>
-        
-        {/* Native <select> Replaced! */}
         <div className="fluid-speed-row"><span className="fluid-speed-label">FRAME</span>
             {renderDropdown('SPEED_FRAME', FRAME_OPTIONS, frameVal, (v) => { setFrameVal(v); sendCommand("SET_FRAME", v); }, "fluid-speed-input", "down")}
         </div>
@@ -669,19 +611,33 @@ const RightPart = () => {
                     </div>
                     
                     <div className="rp-content-col" style={{ display: expandedRowPanel === 'ROW2' ? 'none' : 'flex' }}>
-                        <div className={`rp-panel-left ${currentView === 'SPEED CONFIG' ? 'bg-dark' : 'bg-light-dark'}`}>
-                            {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
-                        </div>
+                        
+                        {/* Only show left panel if not expanded */}
+                        {!isRow1RightExpanded && (
+                            <div className={`rp-panel-left ${currentView === 'SPEED CONFIG' ? 'bg-dark' : 'bg-light-dark'}`}>
+                                {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
+                            </div>
+                        )}
                         
                         <div className="rp-panel-right" style={{ position: 'relative' }}>
+                            
+                            {/* ---> NEW ENHANCE BUTTON IN CENTER <--- */}
+                            <div 
+                                className={`row1-enhance-btn ${isRow1RightExpanded ? 'expanded' : ''}`} 
+                                onClick={() => setIsRow1RightExpanded(!isRow1RightExpanded)}
+                                title="Toggle Expand Right Panel"
+                            >
+                                {isRow1RightExpanded ? '>' : '<'}
+                            </div>
+
                             <div className="dark-tabs">
                                 {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
                                     <div key={tab} className={`dark-tab ${activeRow1Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow1Tab(tab)}>
                                         {tab}
                                     </div>
                                 ))}
-                                <div className="panel-min-max-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW1' ? 'NONE' : 'ROW1')}>
-                                    {expandedRowPanel === 'ROW1' ? '>< MIN' : '[ ] MAX'}
+                                <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW1' ? 'NONE' : 'ROW1')}>
+                                    {expandedRowPanel === 'ROW1' ? '▼ MIN' : '⛶ MAX'}
                                 </div>
                             </div>
                             
@@ -711,28 +667,37 @@ const RightPart = () => {
                                 {tab}
                             </div>
                         ))}
-                        <div className="panel-min-max-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
-                            {expandedRowPanel === 'ROW2' ? '>< MIN' : '[ ] MAX'}
+                        <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
+                            {expandedRowPanel === 'ROW2' ? '▼ MIN' : '⛶ MAX'}
                         </div>
                     </div>
                     
                     <div className="row2-content" style={{ display: expandedRowPanel === 'ROW1' ? 'none' : 'flex' }}>
                         {activeRow2Tab === 'Programs File' && (
                             <div className="table-container" style={{ gap: expandedTable === 'NONE' ? '4px' : '0' }}>
+                                
                                 {(expandedTable === 'NONE' || expandedTable === 'TP') && (
                                     <div className="table-wrapper">
-                                        <MemoizedTpTableBody tpList={tpList} expandedTable={expandedTable} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
+                                        <div className="table-scroller">
+                                            <MemoizedTpTableBody tpList={tpList} expandedTable={expandedTable} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
+                                        </div>
                                         {tpList.length > 0 && (
-                                            <div className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'TP' ? 'NONE' : 'TP')}> {expandedTable === 'TP' ? '><' : '[ ]'} </div>
+                                            <div className="table-min-max-btn" onClick={() => setExpandedTable(expandedTable === 'TP' ? 'NONE' : 'TP')}> 
+                                                {expandedTable === 'TP' ? '▼ MIN' : '⛶ MAX'} 
+                                            </div>
                                         )}
                                     </div>
                                 )}
 
                                 {(expandedTable === 'NONE' || expandedTable === 'PR') && (
                                     <div className="table-wrapper" style={{ borderLeft: expandedTable === 'NONE' ? '2px solid #202430' : 'none' }}>
-                                        <MemoizedPrTableBody prList={prList} expandedTable={expandedTable} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                        <div className="table-scroller">
+                                            <MemoizedPrTableBody prList={prList} expandedTable={expandedTable} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                        </div>
                                         {prList.length > 0 && (
-                                            <div className="min-max-btn" onClick={() => setExpandedTable(expandedTable === 'PR' ? 'NONE' : 'PR')}> {expandedTable === 'PR' ? '><' : '[ ]'} </div>
+                                            <div className="table-min-max-btn" onClick={() => setExpandedTable(expandedTable === 'PR' ? 'NONE' : 'PR')}> 
+                                                {expandedTable === 'PR' ? '▼ MIN' : '⛶ MAX'} 
+                                            </div>
                                         )}
                                     </div>
                                 )}
@@ -815,23 +780,25 @@ const RightPart = () => {
                 
                 <div className="row2-content">
                     {activeRow4Tab === 'Inst' && (
-                        <div className="table-wrapper">
-                            <table className="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
-                                        <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
-                                        <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
-                                        <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
-                                        <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div className="table-wrapper" style={{ overflow: 'hidden' }}>
+                            <div className="table-scroller">
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
+                                            <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
+                                            <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
+                                            <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
+                                            <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 
@@ -859,7 +826,6 @@ const RightPart = () => {
 
             <div className="rp-row-5">
                 <div className="grid-11-col">
-                    {/* Native Selects globally replaced with our Custom Select */}
                     {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "tp-standalone-input", "up")}
                     {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "tp-standalone-input", "up")}
                     {renderDropdown('R5_DI2', DI2_OPTIONS, selDi2, (v) => { setSelDi2(v); sendCommand("SET_DIGI_2", v); }, "tp-standalone-input", "up")}

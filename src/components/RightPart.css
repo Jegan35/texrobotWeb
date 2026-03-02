@@ -16,8 +16,31 @@
 .rp-row-4 { flex: 1 1 30%; min-height: 0; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; position: relative; z-index: 10; } 
 .rp-row-5 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 5px 0px 8px 0px; position: relative; z-index: 50; }
 
-.panel-min-max-btn { position: sticky; right: 0; margin-left: auto; background: linear-gradient(180deg, #546E7A 0%, #263238 100%); color: #fff; border: 1px solid #111; border-bottom: none; cursor: pointer; font-weight: 900; padding: 0 15px; font-size: 0.75rem; box-shadow: -4px 0 10px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.2); z-index: 20; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; }
-.panel-min-max-btn:active { background: #111; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
+/* ==============================================================
+   NEW INDUSTRIAL CORNER PANEL BUTTON (ROW 1 & 2)
+   ============================================================== */
+.panel-action-btn { 
+    position: sticky; 
+    right: 0; 
+    margin-left: auto; 
+    background: #151822; 
+    color: #00bcd4; 
+    border-left: 2px solid #00bcd4; 
+    cursor: pointer; 
+    font-weight: 900; 
+    padding: 0 15px; 
+    font-size: 0.8rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    z-index: 20; 
+    box-shadow: -5px 0 10px rgba(0,0,0,0.5);
+    transition: all 0.1s;
+}
+.panel-action-btn:hover { background: #00bcd4; color: #111; }
+.panel-action-btn:active { background: #008ba3; border-left-color: #008ba3; }
 
 .rp-header-col { flex: 0 0 40px; width: 100%; overflow: hidden; background: #1a1e29; }
 .rp-content-col { flex: 1; display: flex; flex-direction: row; min-width: 0; overflow: hidden; }
@@ -116,11 +139,32 @@
 .dark-tab { padding: 6px 10px; color: #aaa; font-weight: bold; font-size: clamp(9px, 1vw, 13px); cursor: pointer; border-radius: 0; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; }
 .dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-top: 2px solid #00bcd4; border-bottom: none; z-index: 10; }
 
+/* ==============================================================
+   TABLE SCROLL FIX (Min/Max Buttons Float OVER the scroll now)
+   ============================================================== */
 .table-container { flex: 1; display: flex; flex-direction: row; min-height: 0; padding: 0; background: #2b303b; }
-.table-wrapper { flex: 1; overflow: auto; display: flex; flex-direction: column; background: #fff; position: relative; border: 2px solid #111; border-radius: 0; }
-.table-wrapper::-webkit-scrollbar { width: 14px; height: 14px; }
-.table-wrapper::-webkit-scrollbar-track { background: #1a1e29; border-left: 1px solid #444; border-top: 1px solid #444; }
-.table-wrapper::-webkit-scrollbar-thumb { background: #555; border-radius: 0; border: 1px solid #111; }
+
+.table-wrapper { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    background: #fff; 
+    position: relative; 
+    border: 2px solid #111; 
+    border-radius: 0; 
+    overflow: hidden; /* Hides internal scrolling overflow */
+}
+
+/* Inner scroller handles the actual table scroll */
+.table-scroller {
+    flex: 1;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+}
+.table-scroller::-webkit-scrollbar { width: 14px; height: 14px; }
+.table-scroller::-webkit-scrollbar-track { background: #1a1e29; border-left: 1px solid #444; border-top: 1px solid #444; }
+.table-scroller::-webkit-scrollbar-thumb { background: #555; border-radius: 0; border: 1px solid #111; }
 
 .data-table { width: 100%; min-width: max-content; border-collapse: collapse; font-weight: bold; background: white; text-align: center; }
 .data-table th, .data-table td { padding: 6px 8px; font-size: clamp(10px, 1.1vw, 13px); border: 1px solid #999; white-space: nowrap; }
@@ -139,8 +183,29 @@
 .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
 .empty-table-text { color: #555; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding: 20px !important; }
 
-.min-max-btn { background: #2196f3 !important; color: white !important; cursor: pointer; transition: 0.1s; font-weight: 900; position: absolute; right: 0; top: 0; z-index: 10 !important; width: 35px !important; height: 26px; text-align: center; display: flex; align-items: center; justify-content: center; border-radius: 0 !important; border: 1px solid #111; border-bottom: 2px solid #111; border-top: none; border-right: none; }
-.min-max-btn:active { background: #111 !important; border-color: #fff !important; }
+/* Fixed Table Min/Max Button that never scrolls away */
+/* Fixed Table Min/Max Button that never scrolls away - MOVED TO BOTTOM RIGHT */
+.table-min-max-btn { 
+    position: absolute; 
+    right: 0; 
+    bottom: 0; /* மேலிருந்து கீழே மாற்றியாச்சு */
+    background: #039BE5; 
+    color: #fff; 
+    font-weight: 900; 
+    font-size: 0.75rem; 
+    padding: 6px 12px; 
+    cursor: pointer; 
+    border-top: 2px solid #111; /* Border-ஐயும் மேல்நோக்கி மாற்றியாச்சு */
+    border-left: 2px solid #111; 
+    z-index: 10; 
+    transition: 0.1s;
+    box-shadow: -2px -2px 5px rgba(0,0,0,0.4); /* ஷேடோவும் மேல்நோக்கி மாற்றப்பட்டது */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.table-min-max-btn:active { background: #0277bd; color: #fff; }
+.table-min-max-btn:active { background: #0277bd; color: #fff; }
 
 .rel-flex { position: relative; display: flex; }
 .gap-flex { display: flex; gap: 5px; }
@@ -249,54 +314,60 @@
 /* ==============================================================
    UNIVERSAL CUSTOM INDUSTRIAL SELECT DROPDOWN (LAG-FREE)
    ============================================================== */
-.custom-select-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+.custom-select-btn { display: flex; align-items: center; justify-content: center; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.custom-select-menu {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    min-width: max-content; /* Dynamically fits the text */
-    max-height: 250px;
-    overflow-y: auto;
-    background: #e3f2fd;
-    border: 2px solid #111;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-}
+.custom-select-menu { position: absolute; left: 0; width: 100%; min-width: max-content; max-height: 250px; overflow-y: auto; background: #e3f2fd; border: 2px solid #111; z-index: 10000; display: flex; flex-direction: column; }
 
-/* Direction Modifiers */
 .custom-select-menu-up { bottom: 100%; box-shadow: 4px -4px 10px rgba(0,0,0,0.6); }
 .custom-select-menu-down { top: 100%; box-shadow: 4px 4px 10px rgba(0,0,0,0.6); }
 
-/* Custom sharp scrollbar */
 .custom-select-menu::-webkit-scrollbar { width: 12px; }
 .custom-select-menu::-webkit-scrollbar-track { background: #202430; border-left: 1px solid #111; }
 .custom-select-menu::-webkit-scrollbar-thumb { background: #555; border: 1px solid #111; border-radius: 0; }
 
-.custom-select-item {
-    padding: 10px 15px; /* Better tap target size */
-    font-size: 0.85rem;
-    font-weight: 900;
-    color: #111;
-    border-bottom: 1px solid #999;
+.custom-select-item { padding: 10px 15px; font-size: 0.85rem; font-weight: 900; color: #111; border-bottom: 1px solid #999; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.1s; }
+.custom-select-item:hover, .custom-select-item:active { background: #039BE5; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+/* ==============================================================
+   ROW 1 ENHANCE BUTTON (COLLAPSE LEFT PANEL)
+   ============================================================== */
+.row1-enhance-btn {
+    position: absolute;
+    left: 0; 
+    top: 50%;
+    transform: translateY(-50%);
+    width: 25px;
+    height: 50px;
+    background: #151822;
+    color: #00bcd4;
+    border: 1px solid #111;
+    border-left: none; /* Flush with the left border */
+    border-radius: 0 6px 6px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    text-transform: uppercase;
-    text-align: center;
-    transition: 0.1s;
+    z-index: 100;
+    font-weight: 900;
+    font-size: 1.2rem;
+    box-shadow: 3px 2px 5px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.1);
+    transition: all 0.2s;
 }
 
-.custom-select-item:hover, 
-.custom-select-item:active {
-    background: #039BE5;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+.row1-enhance-btn:hover { 
+    background: #00bcd4; 
+    color: #111; 
+}
+
+.row1-enhance-btn:active {
+    background: #008ba3;
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8);
+}
+
+/* When the right panel is expanded, the button flips to the left edge neatly */
+.row1-enhance-btn.expanded {
+    left: 0;
+    border-left: 1px solid #111;
+    border-right: 2px solid #00bcd4;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
 }
