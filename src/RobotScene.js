@@ -1,7 +1,7 @@
-import React, { useMemo, Suspense, useRef, useEffect } from "react";
-import * as THREE from "three"; // Added THREE for BufferGeometry
+import React, { useState, useMemo, Suspense, useRef, useEffect } from "react";
+import * as THREE from "three"; 
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard } from "@react-three/drei";
+import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard, Line } from "@react-three/drei";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import HamburgerMenu from "./components/HamburgerMenu"; 
 import { useWebSocket } from "./context/WebSocketContext";
@@ -10,35 +10,73 @@ import { useWebSocket } from "./context/WebSocketContext";
 const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1" };
 
 // ==========================================
-// OPTIMIZATION 1: O(N) Fast Line Renderer
-// Bypasses React rendering logic and injects 
-// coordinates directly into GPU memory.
+// OPTIMIZATION 1: THE ULTIMATE ZERO-LAG THICK LINE
+// O(K) Complexity + 150ms Throttling + 1D Array Injection
 // ==========================================
-const FastLine = React.memo(({ points, color }) => {
-  const geomRef = useRef();
+const FastThickLine = React.memo(({ points, color, lineWidth }) => {
+  const [renderPoints, setRenderPoints] = useState([]);
+  const latestPoints = useRef(points);
+  
+  // Persistent JS Array - Prevents Memory/Garbage Collection Lag
+  const flatArr = useRef([]);
+  const lastLen = useRef(0);
+
+  // Silently keep track of incoming websocket points
+  latestPoints.current = points;
 
   useEffect(() => {
-    if (geomRef.current && points && points.length > 1) {
-      // Flatten the array O(N) complexity
-      const flatPoints = new Float32Array(points.length * 3);
-      for (let i = 0; i < points.length; i++) {
-        flatPoints[i * 3] = points[i][0];
-        flatPoints[i * 3 + 1] = points[i][1];
-        flatPoints[i * 3 + 2] = points[i][2];
-      }
-      // Direct GPU Memory update
-      geomRef.current.setAttribute('position', new THREE.BufferAttribute(flatPoints, 3));
-      geomRef.current.setDrawRange(0, points.length);
-    }
-  }, [points]);
+    // Throttle: Update the 3D line only every 150ms (~6 FPS). 
+    // The Robot will still move at 60 FPS perfectly without hanging!
+    const interval = setInterval(() => {
+      const pts = latestPoints.current;
+      if (!pts) return;
 
-  if (!points || points.length < 2) return null;
+      const currentLen = pts.length;
+
+      // 1. FAST CLEAR (Instant wipe without lag)
+      if (currentLen < 2) {
+        if (lastLen.current > 0) {
+          flatArr.current = [];
+          setRenderPoints([]);
+          lastLen.current = 0;
+        }
+        return;
+      }
+
+      // 2. O(K) FAST APPEND (Only processes the newly added points)
+      if (currentLen !== lastLen.current) {
+        
+        // Safety check: If trajectory was reset
+        if (currentLen < lastLen.current) {
+          flatArr.current = [];
+          lastLen.current = 0;
+        }
+
+        // Push ONLY the new points into the 1D flat array
+        for (let i = lastLen.current; i < currentLen; i++) {
+          flatArr.current.push(pts[i][0], pts[i][1], pts[i][2]);
+        }
+        lastLen.current = currentLen;
+
+        // Shallow copy triggers React to draw the line without .flat() errors
+        setRenderPoints([...flatArr.current]);
+      }
+    }, 150); 
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Requires at least 2 points (6 floats) to draw a line
+  if (renderPoints.length < 6) return null;
 
   return (
-    <line>
-      <bufferGeometry ref={geomRef} />
-      <lineBasicMaterial color={color} depthTest={false} transparent opacity={0.9} />
-    </line>
+    <Line
+      points={renderPoints} // Direct 1D array - super fast!
+      color={color}
+      lineWidth={lineWidth || 2.5}
+      transparent
+      opacity={0.9}
+    />
   );
 });
 
@@ -261,9 +299,9 @@ const RobotScene = () => {
           <Suspense fallback={null}>
             <group rotation={[0, 0, -Math.PI / 2]}>
               <RealRobot />
-              {/* Using the highly optimized O(N) FastLine component! */}
-              {bluePts.length > 1 && <FastLine points={bluePts} color="#039BE5" />}
-              {redPts.length > 1 && <FastLine points={redPts} color="#E53935" />}
+              {/* Using the Ultra-Optimized, Lag-Free ThickLine Component! */}
+              {bluePts.length > 1 && <FastThickLine points={bluePts} color="#039BE5" lineWidth={2.5} />}
+              {redPts.length > 1 && <FastThickLine points={redPts} color="#E53935" lineWidth={4} />}
             </group>
           </Suspense>
 

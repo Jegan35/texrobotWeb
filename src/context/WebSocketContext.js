@@ -4,25 +4,25 @@ const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false); 
+  const [isConnecting, setIsConnecting] = useState(false);
   //const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
   const [ipAddress, setIpAddress] = useState("unirritated-offensively-javon.ngrok-free.dev");
-  const [accessFull, setAccessFull] = useState(false); 
-  const [connectionFailed, setConnectionFailed] = useState(false); 
-  const [rejectMessage, setRejectMessage] = useState(""); 
-  
+  const [accessFull, setAccessFull] = useState(false);
+  const [connectionFailed, setConnectionFailed] = useState(false);
+  const [rejectMessage, setRejectMessage] = useState("");
+
   const wsRef = useRef(null);
   const ipRef = useRef(ipAddress);
-  const isAccessFullRef = useRef(false); 
-  const isIntentionalDisconnect = useRef(false); 
+  const isAccessFullRef = useRef(false);
+  const isIntentionalDisconnect = useRef(false);
 
   // --> NEW: Frontend Lock logic for Graph
   const [isGraphReading, setIsGraphReadingState] = useState(true);
-  const isGraphReadingRef = useRef(true); 
+  const isGraphReadingRef = useRef(true);
 
   const setGraphReading = (status) => {
-      setIsGraphReadingState(status);
-      isGraphReadingRef.current = status;
+    setIsGraphReadingState(status);
+    isGraphReadingRef.current = status;
   };
 
   useEffect(() => { ipRef.current = ipAddress; }, [ipAddress]);
@@ -35,79 +35,81 @@ export const WebSocketProvider = ({ children }) => {
     current_tp_name: "None", current_pr_name: "None",
     tp_list: [], pr_program_data: [],
     program_count_output: "0", is_calculating_trajectory: false,
-    is_physically_moving: false, 
+    is_physically_moving: false,
     speed_op: 0, di_val: 0, do_val: 0,
-    staging_data: {}, 
+    staging_data: {},
     error_pos_data: {}, ether_cat_data: {}, variable_data: {}, mech_data: {},
     blueTrajectory: [], redTrajectory: [],
-    graph_data: [] 
+    graph_data: []
   });
 
   const connectWebSocket = () => {
+    // ---> APPLIED FIX: .trim() removes accidental spaces that cause the WebSocket to fail
     const targetIp = ipRef.current.trim();
-    
+
     if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
-      isIntentionalDisconnect.current = true; 
+      isIntentionalDisconnect.current = true;
       wsRef.current.close();
     }
-    
-    setConnectionFailed(false); 
+
+    setConnectionFailed(false);
     setAccessFull(false);
-    setIsConnecting(true); 
+    setIsConnecting(true);
     setIsConnected(false);
     setRejectMessage("");
-    isAccessFullRef.current = false; 
-    isIntentionalDisconnect.current = false; 
+    isAccessFullRef.current = false;
+    isIntentionalDisconnect.current = false;
 
-   try {
+    try {
       // --- SMART CONNECTION LOGIC ---
       let wsUrl = "";
 
-// Check for BOTH .app and .dev ngrok extensions
-if (ipAddress.includes("ngrok-free.app") || ipAddress.includes("ngrok-free.dev")) {
-  // Ngrok handles the 8080 port internally. 
-  // You MUST use 'wss://' (secure) and NO port in the URL string.
-  wsUrl = `wss://${ipAddress}`;
-} else {
-  // Local Wi-Fi logic
-  wsUrl = `ws://${ipAddress}:8080`;
-}
+      // ---> APPLIED FIX: Using 'targetIp' instead of 'ipAddress' below
+      // Check for BOTH .app and .dev ngrok extensions
+      if (targetIp.includes("ngrok-free.app") || targetIp.includes("ngrok-free.dev")) {
+        // Ngrok handles the 8080 port internally. 
+        // You MUST use 'wss://' (secure) and NO port in the URL string.
+        wsUrl = `wss://${targetIp}`;
+      } else {
+        // Local Wi-Fi logic
+        wsUrl = `ws://${targetIp}:8080`;
+      }
 
-wsRef.current = new WebSocket(wsUrl);
+      wsRef.current = new WebSocket(wsUrl);
       // ------------------------------
 
-      wsRef.current.onopen = () => console.log(`CONNECTED TO: ${wsUrl}`);
       wsRef.current.onopen = () => {
-          console.log(`Connected to ${targetIp}:8080 physically. Waiting for C++ Admin Handshake...`);
+        console.log(`CONNECTED TO: ${wsUrl}`);
+        console.log(`Connected to ${targetIp} physically. Waiting for C++ Admin Handshake...`);
       };
 
       wsRef.current.onerror = (err) => {
-          console.error("WebSocket Error:", err);
-          setIsConnecting(false);
-          if (!isIntentionalDisconnect.current && !isAccessFullRef.current) setConnectionFailed(true);
+        console.error("WebSocket Error:", err);
+        setIsConnecting(false);
+        if (!isIntentionalDisconnect.current && !isAccessFullRef.current) setConnectionFailed(true);
       };
 
-      wsRef.current.onclose = () => { 
-          setIsConnected(false); 
-          setIsConnecting(false);
-          if (!isAccessFullRef.current && !isIntentionalDisconnect.current) setConnectionFailed(true); 
+      wsRef.current.onclose = () => {
+        setIsConnected(false);
+        setIsConnecting(false);
+        if (!isAccessFullRef.current && !isIntentionalDisconnect.current) setConnectionFailed(true);
       };
 
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        
+
         if (data.type === "connection_accepted") {
           console.log("C++ Admin Accepted Connection!");
-          setIsConnected(true); 
+          setIsConnected(true);
           setIsConnecting(false);
-          setAccessFull(false); 
+          setAccessFull(false);
           setConnectionFailed(false);
-        } 
+        }
         else if (data.type === "connection_rejected" || data.type === "access_full") {
           console.warn("C++ Admin Rejected Connection.");
-          setIsConnected(false); setIsConnecting(false); setAccessFull(true); 
+          setIsConnected(false); setIsConnecting(false); setAccessFull(true);
           setRejectMessage(data.message || "Connection denied by the server administrator.");
-          isAccessFullRef.current = true; 
+          isAccessFullRef.current = true;
           wsRef.current.close();
         }
         else if (data.type === "force_disconnect") {
@@ -119,25 +121,25 @@ wsRef.current = new WebSocket(wsUrl);
         else if (data.type === "graph_update") {
           // --> FIXED: Only process graph data if Frontend Lock is TRUE
           if (isGraphReadingRef.current) {
-              setRobotState(prevState => {
-                const newGraphData = [...(prevState.graph_data || []), data.data];
-                if (newGraphData.length > 100) newGraphData.shift(); 
-                return { ...prevState, graph_data: newGraphData };
-              });
+            setRobotState(prevState => {
+              const newGraphData = [...(prevState.graph_data || []), data.data];
+              if (newGraphData.length > 100) newGraphData.shift();
+              return { ...prevState, graph_data: newGraphData };
+            });
           }
         }
         else if (data.type === "status_update" || data.type === "motion_update") {
           setRobotState(prevState => {
             let finalTpList = prevState.tp_list;
             if (data.tp_list) {
-                if (data.tp_list.length !== finalTpList.length) finalTpList = data.tp_list;
-                else if (data.tp_list.length > 0 && finalTpList.length > 0 && data.tp_list[0].value !== finalTpList[0].value) finalTpList = data.tp_list;
+              if (data.tp_list.length !== finalTpList.length) finalTpList = data.tp_list;
+              else if (data.tp_list.length > 0 && finalTpList.length > 0 && data.tp_list[0].value !== finalTpList[0].value) finalTpList = data.tp_list;
             }
 
             let finalPrList = prevState.pr_program_data;
             if (data.pr_program_data) {
-                if (data.pr_program_data.length !== finalPrList.length) finalPrList = data.pr_program_data;
-                else if (data.pr_program_data.length > 0 && finalPrList.length > 0 && data.pr_program_data[0].value !== finalPrList[0].value) finalPrList = data.pr_program_data;
+              if (data.pr_program_data.length !== finalPrList.length) finalPrList = data.pr_program_data;
+              else if (data.pr_program_data.length > 0 && finalPrList.length > 0 && data.pr_program_data[0].value !== finalPrList[0].value) finalPrList = data.pr_program_data;
             }
 
             const newErrStr = JSON.stringify(data.error_pos_data || {});
@@ -150,40 +152,40 @@ wsRef.current = new WebSocket(wsUrl);
             const finalMech = newMechStr !== prevState._mechStr ? data.mech_data : prevState.mech_data;
 
             return {
-                ...prevState, 
-                mode: data.mode !== undefined ? data.mode : prevState.mode,
-                started: data.started !== undefined ? data.started : prevState.started,
-                paused: data.paused !== undefined ? data.paused : prevState.paused,
-                servo_on: data.servo_on !== undefined ? data.servo_on : prevState.servo_on,
-                error_message: data.error_message || prevState.error_message,
-                cartesian: data.cartesian || prevState.cartesian,
-                joints: data.joints || prevState.joints,
-                tp_file_list: data.tp_file_list || prevState.tp_file_list || [],
-                pr_file_list: data.pr_file_list || prevState.pr_file_list || [],
-                current_tp_name: data.current_tp_name || prevState.current_tp_name || "None",
-                current_pr_name: data.current_pr_name || prevState.current_pr_name || "None",
-                program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
-                is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory,
-                is_physically_moving: data.is_physically_moving !== undefined ? data.is_physically_moving : prevState.is_physically_moving,
-                speed_op: data.speed_op !== undefined ? data.speed_op : prevState.speed_op,
-                di_val: data.di_val !== undefined ? data.di_val : prevState.di_val,
-                do_val: data.do_val !== undefined ? data.do_val : prevState.do_val,
-                variable_data: data.variable_data || prevState.variable_data || {},
-                staging_data: data.staging_data || prevState.staging_data || {},
-                
-                tp_list: finalTpList,
-                pr_program_data: finalPrList,
-                error_pos_data: finalErr, _errStr: newErrStr,
-                ether_cat_data: finalEth, _ethStr: newEthStr,
-                mech_data: finalMech, _mechStr: newMechStr
+              ...prevState,
+              mode: data.mode !== undefined ? data.mode : prevState.mode,
+              started: data.started !== undefined ? data.started : prevState.started,
+              paused: data.paused !== undefined ? data.paused : prevState.paused,
+              servo_on: data.servo_on !== undefined ? data.servo_on : prevState.servo_on,
+              error_message: data.error_message || prevState.error_message,
+              cartesian: data.cartesian || prevState.cartesian,
+              joints: data.joints || prevState.joints,
+              tp_file_list: data.tp_file_list || prevState.tp_file_list || [],
+              pr_file_list: data.pr_file_list || prevState.pr_file_list || [],
+              current_tp_name: data.current_tp_name || prevState.current_tp_name || "None",
+              current_pr_name: data.current_pr_name || prevState.current_pr_name || "None",
+              program_count_output: data.program_count_output !== undefined ? data.program_count_output : prevState.program_count_output,
+              is_calculating_trajectory: data.is_calculating_trajectory !== undefined ? data.is_calculating_trajectory : prevState.is_calculating_trajectory,
+              is_physically_moving: data.is_physically_moving !== undefined ? data.is_physically_moving : prevState.is_physically_moving,
+              speed_op: data.speed_op !== undefined ? data.speed_op : prevState.speed_op,
+              di_val: data.di_val !== undefined ? data.di_val : prevState.di_val,
+              do_val: data.do_val !== undefined ? data.do_val : prevState.do_val,
+              variable_data: data.variable_data || prevState.variable_data || {},
+              staging_data: data.staging_data || prevState.staging_data || {},
+
+              tp_list: finalTpList,
+              pr_program_data: finalPrList,
+              error_pos_data: finalErr, _errStr: newErrStr,
+              ether_cat_data: finalEth, _ethStr: newEthStr,
+              mech_data: finalMech, _mechStr: newMechStr
             };
           });
         }
         else if (data.type === "trajectory_chunk") {
-          const color = data.color; 
+          const color = data.color;
           const flatPoints = data.points || [];
           const newPts = [];
-          for (let i = 0; i < flatPoints.length; i += 3) newPts.push([flatPoints[i], flatPoints[i+1], flatPoints[i+2]]);
+          for (let i = 0; i < flatPoints.length; i += 3) newPts.push([flatPoints[i], flatPoints[i + 1], flatPoints[i + 2]]);
           setRobotState(prevState => {
             if (color === "blue") return { ...prevState, blueTrajectory: (prevState.blueTrajectory || []).concat(newPts) };
             else if (color === "red") return { ...prevState, redTrajectory: (prevState.redTrajectory || []).concat(newPts) };
@@ -202,7 +204,7 @@ wsRef.current = new WebSocket(wsUrl);
   };
 
   const disconnectWebSocket = () => {
-    isIntentionalDisconnect.current = true; 
+    isIntentionalDisconnect.current = true;
     setIsConnecting(false);
     setIsConnected(false);
     if (wsRef.current) wsRef.current.close();
@@ -211,13 +213,13 @@ wsRef.current = new WebSocket(wsUrl);
   const sendCommand = (cmd, value = "", dataObj = null) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       const payload = { command: cmd, value: value.toString() };
-      if (dataObj) payload.data = dataObj; 
+      if (dataObj) payload.data = dataObj;
       wsRef.current.send(JSON.stringify(payload));
     }
   };
 
   return (
-    <WebSocketContext.Provider value={{ 
+    <WebSocketContext.Provider value={{
       isConnected, isConnecting, ipAddress, setIpAddress, connectWebSocket, disconnectWebSocket, sendCommand, robotState,
       accessFull, setAccessFull, connectionFailed, setConnectionFailed, rejectMessage,
       isGraphReading, setGraphReading // Exported for RightPart.js

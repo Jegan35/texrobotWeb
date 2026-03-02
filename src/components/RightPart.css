@@ -67,7 +67,32 @@
 .speed-config-body { display: flex; flex-direction: column; flex: 1; }
 .fluid-speed-row { display: grid; grid-template-columns: 55px 1fr; align-items: center; height: 35px; gap: 10px; margin-bottom: 8px; }
 .fluid-speed-label { font-size: clamp(10px, 1.5vw, 14px); font-weight: bold; color: #ccc; white-space: nowrap; text-transform: uppercase; text-align: left; }
-.fluid-speed-input { width: 100%; height: 35px; box-sizing: border-box; background: #fff; color: #111; border: 2px solid #555; border-radius: 0; padding: 4px 6px; font-size: clamp(10px, 1.5vw, 14px); font-weight: bold; outline: none; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2); }
+/* 1. இதை பழைய .fluid-speed-input-க்கு பதிலாக ரீப்ளேஸ் செய்யவும் */
+.fluid-speed-input { 
+    width: 100%; 
+    height: 35px; 
+    box-sizing: border-box; 
+    background: #fff; 
+    color: #111; 
+    border: 2px solid #555; 
+    border-radius: 0; 
+    padding: 0; /* Padding 0 கொடுத்தால் தான் 100% சென்டர் வரும் */
+    font-size: clamp(10px, 1.5vw, 14px); 
+    font-weight: 900; 
+    outline: none; 
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2); 
+    text-align: center !important; /* எழுத்துகளை சென்டர் செய்ய */
+}
+
+/* 2. இதை புதிதாக கீழே சேர்க்கவும் (இதுதான் அந்த Arrow-வை முழுமையாக நீக்கும்) */
+.fluid-speed-input::-webkit-outer-spin-button,
+.fluid-speed-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.fluid-speed-input[type=number] {
+    -moz-appearance: textfield;
+}
 .speed-range-group { display: flex; width: 100%; align-items: center; gap: 5px; height: 35px; }
 .speed-range-group input[type="range"] { flex: 1; min-width: 50px; cursor: pointer; margin: 0; }
 .speed-range-group input[type="number"] { width: 60px; text-align: center; padding: 0 4px; }
@@ -119,7 +144,6 @@
 .io-module-title { border-left: 4px solid; padding-left: 8px; font-weight: 900; color: #333; margin-bottom: 10px; font-size: clamp(9px, 1vw, 12px); }
 .io-module-flex { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; width: 100%; justify-items: center; }
 .io-led-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.io-led { width: 10px; height: 10px; border-radius: 50%; transition: 0.2s; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); border: 1px solid #111; }
 .io-led-col span { font-size: 8px; font-weight: bold; color: #555; }
 
 .light-input { border: 1px solid #888; padding: 4px; border-radius: 0; width: 100%; box-sizing: border-box; font-weight: 900; font-size: clamp(10px, 1vw, 12px); color: #111; background: #fff; outline: none; box-shadow: inset 0px 1px 2px rgba(0,0,0,0.1); height: 32px; cursor: pointer; text-align: center; }
@@ -183,28 +207,26 @@
 .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
 .empty-table-text { color: #555; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding: 20px !important; }
 
-/* Fixed Table Min/Max Button that never scrolls away */
 /* Fixed Table Min/Max Button that never scrolls away - MOVED TO BOTTOM RIGHT */
 .table-min-max-btn { 
     position: absolute; 
     right: 0; 
-    bottom: 0; /* மேலிருந்து கீழே மாற்றியாச்சு */
+    bottom: 0; 
     background: #039BE5; 
     color: #fff; 
     font-weight: 900; 
     font-size: 0.75rem; 
     padding: 6px 12px; 
     cursor: pointer; 
-    border-top: 2px solid #111; /* Border-ஐயும் மேல்நோக்கி மாற்றியாச்சு */
+    border-top: 2px solid #111; 
     border-left: 2px solid #111; 
     z-index: 10; 
     transition: 0.1s;
-    box-shadow: -2px -2px 5px rgba(0,0,0,0.4); /* ஷேடோவும் மேல்நோக்கி மாற்றப்பட்டது */
+    box-shadow: -2px -2px 5px rgba(0,0,0,0.4); 
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.table-min-max-btn:active { background: #0277bd; color: #fff; }
 .table-min-max-btn:active { background: #0277bd; color: #fff; }
 
 .rel-flex { position: relative; display: flex; }
@@ -260,9 +282,13 @@
 @keyframes spinCounter { 100% { transform: rotate(-360deg); } }
 .spinner-outer { width: 64px; height: 64px; border-radius: 50%; border: 4px solid transparent; border-top-color: #039BE5; border-right-color: #039BE5; animation: spinClockwise 1s linear infinite; position: relative; }
 .spinner-inner { position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px; border-radius: 50%; border: 4px solid transparent; border-bottom-color: #4CAF50; border-left-color: #4CAF50; animation: spinCounter 1.5s linear infinite; }
+
+/* ==============================================================
+   IO MODULES LED (GREEN = OFF, RED = ON)
+   ============================================================== */
 .io-led { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #111; transition: 0.2s; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
-.io-led.on { background: #00E676; box-shadow: 0 0 8px #00E676, inset 1px 1px 2px rgba(255,255,255,0.6); }
-.io-led.off { background: #333; }
+.io-led.off { background: #00E676; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
+.io-led.on { background: #FF3B30; box-shadow: 0 0 10px #FF3B30, inset 1px 1px 2px rgba(255,255,255,0.6); }
 
 .debug-btn { font-weight: 900; border-radius: 0; border: 1px solid #555; cursor: pointer; background: #e0e0e0; color: #111; padding: 4px; font-size: 0.8rem; text-transform: uppercase; height: 35px; box-sizing: border-box; }
 .debug-btn:active { background: #aaa; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.3); }
@@ -327,6 +353,7 @@
 
 .custom-select-item { padding: 10px 15px; font-size: 0.85rem; font-weight: 900; color: #111; border-bottom: 1px solid #999; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.1s; }
 .custom-select-item:hover, .custom-select-item:active { background: #039BE5; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
 /* ==============================================================
    ROW 1 ENHANCE BUTTON (COLLAPSE LEFT PANEL)
    ============================================================== */
