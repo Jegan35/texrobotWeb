@@ -1,6 +1,7 @@
-import React, { useMemo, Suspense } from "react";
+import React, { useMemo, Suspense, useRef, useEffect } from "react";
+import * as THREE from "three"; // Added THREE for BufferGeometry
 import { Canvas, useLoader } from "@react-three/fiber";
-import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard, Line } from "@react-three/drei";
+import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard } from "@react-three/drei";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import HamburgerMenu from "./components/HamburgerMenu"; 
 import { useWebSocket } from "./context/WebSocketContext";
@@ -8,8 +9,43 @@ import { useWebSocket } from "./context/WebSocketContext";
 // Original Colors Restored
 const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1" };
 
-// 100% Code-Based 3D Arrows
-const Custom3DArrows = () => {
+// ==========================================
+// OPTIMIZATION 1: O(N) Fast Line Renderer
+// Bypasses React rendering logic and injects 
+// coordinates directly into GPU memory.
+// ==========================================
+const FastLine = React.memo(({ points, color }) => {
+  const geomRef = useRef();
+
+  useEffect(() => {
+    if (geomRef.current && points && points.length > 1) {
+      // Flatten the array O(N) complexity
+      const flatPoints = new Float32Array(points.length * 3);
+      for (let i = 0; i < points.length; i++) {
+        flatPoints[i * 3] = points[i][0];
+        flatPoints[i * 3 + 1] = points[i][1];
+        flatPoints[i * 3 + 2] = points[i][2];
+      }
+      // Direct GPU Memory update
+      geomRef.current.setAttribute('position', new THREE.BufferAttribute(flatPoints, 3));
+      geomRef.current.setDrawRange(0, points.length);
+    }
+  }, [points]);
+
+  if (!points || points.length < 2) return null;
+
+  return (
+    <line>
+      <bufferGeometry ref={geomRef} />
+      <lineBasicMaterial color={color} depthTest={false} transparent opacity={0.9} />
+    </line>
+  );
+});
+
+// ==========================================
+// OPTIMIZATION 2: React.memo() to cache static models
+// ==========================================
+const Custom3DArrows = React.memo(() => {
   const shaftLength = 0.35;
   const shaftRadius = 0.0035;
   const headLength = 0.05;
@@ -35,7 +71,7 @@ const Custom3DArrows = () => {
       <Arrow color={COLORS.Z_BLUE} rotation={[Math.PI / 2, 0, 0]} />
     </group>
   );
-};
+});
 
 const RealRobot = () => {
   const link0 = useLoader(STLLoader, "/meshes/link0.stl");
@@ -49,7 +85,6 @@ const RealRobot = () => {
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
   const rad = (deg) => (deg * Math.PI) / 180;
 
-  // Added metalness and roughness to make the robot look shiny and realistic
   const matProps = { metalness: 0.6, roughness: 0.3 };
 
   return (
@@ -80,10 +115,8 @@ const RealRobot = () => {
   );
 };
 
-// ==========================================
-// NEW: MULTI-COLORED WALL GRIDS & TEXT
-// ==========================================
-const CustomGridWalls = () => {
+// Cached so React doesn't redraw thousands of lines 60 times a second
+const CustomGridWalls = React.memo(() => {
   const size = 2500;
   const step = 100;
   const height = 3000;
@@ -91,8 +124,8 @@ const CustomGridWalls = () => {
   const floorGrid = useMemo(() => {
     const pts = [];
     for (let i = -size; i <= size; i += step) {
-      pts.push(-size, i, 0, size, i, 0); // Horizontal
-      pts.push(i, -size, 0, i, size, 0); // Vertical
+      pts.push(-size, i, 0, size, i, 0); 
+      pts.push(i, -size, 0, i, size, 0); 
     }
     return new Float32Array(pts);
   }, []);
@@ -113,13 +146,11 @@ const CustomGridWalls = () => {
 
   return (
     <group>
-      {/* 1. Floor (Light Green) */}
       <lineSegments>
         <bufferGeometry><bufferAttribute attach="attributes-position" count={floorGrid.length / 3} array={floorGrid} itemSize={3} /></bufferGeometry>
         <lineBasicMaterial color="#81c784" transparent opacity={0.6} /> 
       </lineSegments>
 
-      {/* 2. Back Wall (Blue) */}
       <group position={[0, size, 0]}>
         <lineSegments>
           <bufferGeometry><bufferAttribute attach="attributes-position" count={backWallGrid.length / 3} array={backWallGrid} itemSize={3} /></bufferGeometry>
@@ -127,7 +158,6 @@ const CustomGridWalls = () => {
         </lineSegments>
       </group>
 
-      {/* 3. Left Side Wall (Red) */}
       <group position={[-size, 0, 0]}>
         <lineSegments>
           <bufferGeometry><bufferAttribute attach="attributes-position" count={sideWallGrid.length / 3} array={sideWallGrid} itemSize={3} /></bufferGeometry>
@@ -135,7 +165,6 @@ const CustomGridWalls = () => {
         </lineSegments>
       </group>
 
-      {/* 4. TEXSONICS Text on Back Wall */}
       <group position={[0, size - 10, 1600]} rotation={[Math.PI / 2, 0, 0]}>
         <Text fontSize={220} color="#333" fontWeight="900" anchorX="center" anchorY="bottom" letterSpacing={0.1}>
           TEXSONICS
@@ -146,11 +175,12 @@ const CustomGridWalls = () => {
       </group>
     </group>
   );
-};
+});
 
-const WorldCoordinates = () => {
+// Cached so React doesn't recreate Heavy Text Meshes on every tick
+const WorldCoordinates = React.memo(() => {
   const labels = [];
-  const step = 100; // திரும்பவும் 100-க்கு மாற்றியாச்சு!
+  const step = 100; 
   const fontSize = 40; 
   const axisLabelSize = 120;
   
@@ -166,7 +196,7 @@ const WorldCoordinates = () => {
     labels.push(<Billboard key={`zn-${z}`} position={[2550, 2550, z]}><Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="bold">{z}</Text></Billboard>);
   }
   return <group>{labels}</group>;
-};
+});
 
 const RobotScene = () => {
   const { robotState } = useWebSocket();
@@ -181,13 +211,7 @@ const RobotScene = () => {
       
       <HamburgerMenu />
 
-      {/* TABLET OPTIMIZED JOINTS PANEL */}
-      <div style={{
-        position: 'absolute', top: 0, right: 0, width: 'clamp(60px, 12vw, 110px)', bottom: 0,
-        backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', 
-        paddingTop: '15px', paddingBottom: '15px', justifyContent: 'space-evenly'
-      }}>
+      <div style={{ position: 'absolute', top: 0, right: 0, width: 'clamp(60px, 12vw, 110px)', bottom: 0, backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '15px', paddingBottom: '15px', justifyContent: 'space-evenly' }}>
         <div style={{ color: '#00bcd4', fontSize: 'clamp(0.6rem, 1vw, 0.9rem)', fontWeight: '900', letterSpacing: '1px' }}>JOINTS</div>
         {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
           const val = j[`j${idx+1}`];
@@ -202,12 +226,7 @@ const RobotScene = () => {
         })}
       </div>
 
-      {/* TABLET OPTIMIZED CARTESIAN PANEL */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', height: 'clamp(50px, 10vh, 85px)',
-        backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10,
-        display: 'flex', alignItems: 'center', padding: '0 clamp(5px, 2vw, 20px)'
-      }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', height: 'clamp(50px, 10vh, 85px)', backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10, display: 'flex', alignItems: 'center', padding: '0 clamp(5px, 2vw, 20px)' }}>
         <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(0.7rem, 1.2vw, 1rem)', letterSpacing: '1px', marginRight: 'clamp(5px, 2vw, 20px)' }}>CARTESIAN</div>
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between', overflow: 'hidden' }}>
           {[ {l: 'X(mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y(mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z(mm)', v: c.z, clr: '#00bcd4'},
@@ -223,12 +242,10 @@ const RobotScene = () => {
         </div>
       </div>
 
-      {/* 3D CANVAS */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', bottom: 'clamp(50px, 10vh, 85px)' }}>
         <Canvas camera={{ position: [0, -6500, 3000], up: [0, 0, 1], fov: 45, near: 1, far: 30000 }}>
           
-          {/* Enhanced Light Studio Environment */}
-          <color attach="background" args={["#f0f4f8"]} /> {/* Light grayish-blue background */}
+          <color attach="background" args={["#f0f4f8"]} /> 
           <ambientLight intensity={1.2} />
           <hemisphereLight skyColor="#ffffff" groundColor="#444444" intensity={1.0} />
           <directionalLight position={[2000, -4000, 4000]} intensity={2.5} castShadow />
@@ -244,8 +261,9 @@ const RobotScene = () => {
           <Suspense fallback={null}>
             <group rotation={[0, 0, -Math.PI / 2]}>
               <RealRobot />
-              {bluePts.length > 1 && <Line points={bluePts} color="#039BE5" lineWidth={1} />}
-              {redPts.length > 1 && <Line points={redPts} color="#E53935" lineWidth={3} />}
+              {/* Using the highly optimized O(N) FastLine component! */}
+              {bluePts.length > 1 && <FastLine points={bluePts} color="#039BE5" />}
+              {redPts.length > 1 && <FastLine points={redPts} color="#E53935" />}
             </group>
           </Suspense>
 
