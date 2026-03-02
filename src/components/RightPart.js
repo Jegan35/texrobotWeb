@@ -79,6 +79,35 @@ const RightPart = () => {
   const [expandedTable, setExpandedTable] = useState('NONE'); 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [instInput, setInstInput] = useState('');
+  // --> NEW STATES FOR CUSTOM DROPDOWNS IN ROW 5 <--
+  const [selInst, setSelInst] = useState(INST_OPTIONS[0]);
+  const [selDi1, setSelDi1] = useState(DI_OPTIONS[0]);
+  const [selDi2, setSelDi2] = useState(DI2_OPTIONS[0]);
+  const [selHL, setSelHL] = useState(DIG_STATE_OPTIONS[0]);
+  const [selVar1, setSelVar1] = useState(VAR1_OPTIONS[0]);
+  const [selVar2, setSelVar2] = useState(VAR2_OPTIONS[0]);
+
+  // --> HELPER FUNCTION FOR CUSTOM SELECT <--
+  const renderCustomSelect = (menuKey, options, currentValue, setValue, command) => (
+      <div className="rel-flex" style={{ width: '100%', height: '100%' }}>
+          <button className="tp-standalone-input custom-select-btn" onClick={() => toggleDropdown(menuKey)}>
+              {currentValue}
+          </button>
+          {openDropdown === menuKey && (
+              <div className="custom-select-menu">
+                  {options.map(o => (
+                      <div key={o} className="custom-select-item" onClick={() => {
+                          setValue(o);
+                          sendCommand(command, o);
+                          setOpenDropdown(null);
+                      }}>
+                          {o}
+                      </div>
+                  ))}
+              </div>
+          )}
+      </div>
+  );
   const [displayTpMode, setDisplayTpMode] = useState('TP Mode');
   const [selectedTpIndex, setSelectedTpIndex] = useState(0);
   const [selectedPrIndex, setSelectedPrIndex] = useState(0);
@@ -830,21 +859,17 @@ const RightPart = () => {
                 </div>
             </div>
 
-            <div className="rp-row-5">
+           <div className="rp-row-5">
                 <div className="grid-11-col">
-                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_INSTRUCTION_TYPE", e.target.value)}>
-                        {INST_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_DIGI_1", e.target.value)}>
-                        {DI_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_DIGI_2", e.target.value)}>
-                        {DI2_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
+                    {/* Replaced native <select> with our Custom Select */}
+                    {renderCustomSelect('R5_INST', INST_OPTIONS, selInst, setSelInst, "SET_INSTRUCTION_TYPE")}
+                    {renderCustomSelect('R5_DI1', DI_OPTIONS, selDi1, setSelDi1, "SET_DIGI_1")}
+                    {renderCustomSelect('R5_DI2', DI2_OPTIONS, selDi2, setSelDi2, "SET_DIGI_2")}
+                    
                     <button className="tp-btn btn-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
-                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_HIGH_LOW", e.target.value)}>
-                        {DIG_STATE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
+                    
+                    {renderCustomSelect('R5_HL', DIG_STATE_OPTIONS, selHL, setSelHL, "SET_HIGH_LOW")}
+                    
                     <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_DELAY', delayVal)}>⏱ delay</button>
                     <input className="tp-standalone-input" value={delayVal} onChange={e => setDelayVal(e.target.value)} />
                     <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_GOTO_PROGRAM', gotoVal)}>→ go to</button>
@@ -857,20 +882,21 @@ const RightPart = () => {
                     <input className="tp-standalone-input" value={progSpeedVal} onChange={e => setProgSpeedVal(e.target.value)} />
                     <button className="tp-btn btn-dark" onClick={() => {}}>🎯 Radius</button>
                     <input className="tp-standalone-input" value={radiusVal} onChange={e => setRadiusVal(e.target.value)} />
-                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_VAR1", e.target.value)}>
-                        {VAR1_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
+                    
+                    {/* Replaced native <select> with our Custom Select */}
+                    {renderCustomSelect('R5_VAR1', VAR1_OPTIONS, selVar1, setSelVar1, "SET_VAR1")}
+                    
                     <input className="tp-standalone-input" value={varInputVal} onChange={e => setVarInputVal(e.target.value)} onBlur={(e) => sendCommand('SET_VAR_VAL', e.target.value)} />
-                    <select className="tp-standalone-input" onChange={(e) => sendCommand("SET_VAR2", e.target.value)}>
-                        {VAR2_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
+                    
+                    {/* Replaced native <select> with our Custom Select */}
+                    {renderCustomSelect('R5_VAR2', VAR2_OPTIONS, selVar2, setSelVar2, "SET_VAR2")}
+                    
                     <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN ip</button>
                     <input className="tp-standalone-input" value={anIpVal} onChange={e => setAnIpVal(e.target.value)} />
                     <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN op</button>
                     <input className="tp-standalone-input" value={anOpVal} onChange={e => setAnOpVal(e.target.value)} />
                 </div>
             </div>
-
         </div>
         
         <RightMenuSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onSelectView={setCurrentView} activeView={currentView} />

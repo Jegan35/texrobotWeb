@@ -20,15 +20,16 @@
     grid-column: span 2;
 }
 
-/* INCREASED FONT SIZES FOR TABLET READABILITY */
+/* ==============================================================
+   INDUSTRIAL UNIFORM BUTTON STYLES (MATCHING RIGHT PART ROW 3)
+   ============================================================== */
 .btn {
     width: 100%;
-    min-height: 45px;
+    height: clamp(35px, 6vh, 45px); /* Matches dynamic tablet sizing */
     box-sizing: border-box;
-    padding: 5px;
-    border-radius: 0px;
+    border-radius: 0px; /* Sharp edges for industrial look */
     font-weight: 900;
-    font-size: clamp(10px, 1.2vw, 14px); /* Increased clamp bounds */
+    font-size: clamp(10px, 1.2vw, 14px);
     color: white;
     cursor: pointer;
     display: flex;
@@ -37,11 +38,16 @@
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border: 1px solid rgba(0,0,0,0.8);
-    transition: all 0.1s ease-in-out;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: 0 5px;
+    
+    /* EXACT STYLING FROM RIGHT PART ROW 3 */
+    border: 1px solid rgba(0,0,0,0.8);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    transition: all 0.1s ease-in-out;
 }
 
 .btn:hover {
@@ -49,33 +55,44 @@
 }
 
 .btn:active {
-    transform: translateY(4px);
-    box-shadow: 0 0px 0px rgba(0,0,0,0.8), inset 0 3px 5px rgba(0,0,0,0.6) !important;
+    transform: translateY(2px); /* Uniform click depth */
+    box-shadow: none; /* Shadow disappears on click like real buttons */
+    border-color: rgba(0,0,0,0.8);
 }
 
-/* BUTTON COLOR THEMES (With depth and shadows) */
-.btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); box-shadow: 0 4px 0 #151822, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); }
-.btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 0 5px rgba(0,255,0,0.5); }
-.btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.4); color: #000; text-shadow: none; }
-.btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); box-shadow: 0 4px 0 #002171, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
-.btn-yellow { background: linear-gradient(180deg, #FFEE58 0%, #F57F17 100%); box-shadow: 0 4px 0 #BC5100, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.5); color: #111; text-shadow: none; }
-.btn-orange { background: linear-gradient(180deg, #FFA726 0%, #E65100 100%); box-shadow: 0 4px 0 #822C00, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-.btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); box-shadow: 0 4px 0 #7F0000, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); text-shadow: 0 0 5px rgba(255,0,0,0.5); }
-.btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); box-shadow: 0 4px 0 #4A148C, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
-.btn-pink { background: linear-gradient(180deg, #F06292 0%, #880E4F 100%); box-shadow: 0 4px 0 #4A0024, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
-.btn-purple-dark { background: linear-gradient(180deg, #9575CD 0%, #4527A0 100%); box-shadow: 0 4px 0 #311B92, 0 5px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); }
+/* ==============================================================
+   BUTTON COLOR THEMES (Sleek Gradients)
+   ============================================================== */
+.btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); }
+.btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); }
+.btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); color: #000; text-shadow: none; }
+.btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); }
+.btn-yellow { background: linear-gradient(180deg, #FFEE58 0%, #F57F17 100%); color: #111; text-shadow: none; }
+.btn-orange { background: linear-gradient(180deg, #FFA726 0%, #E65100 100%); }
+.btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); }
+.btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); }
+.btn-pink { background: linear-gradient(180deg, #F06292 0%, #880E4F 100%); }
+.btn-purple-dark { background: linear-gradient(180deg, #9575CD 0%, #4527A0 100%); }
 
+/* UNIQUE OUTLINE BUTTON FOR SIM MODE */
 .btn-outline-green { 
     background: #1a1e29; 
     border: 2px solid #4CAF50; 
     color: #4CAF50; 
-    box-shadow: 0 4px 0 #003300, 0 5px 5px rgba(0,0,0,0.4); 
-    text-shadow: 0 0 5px rgba(76,175,80,0.4); 
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.05); 
+    text-shadow: none; 
+}
+.btn-outline-green:active {
+    transform: translateY(2px);
+    box-shadow: none;
 }
 
-/* INFO BOXES */
+/* ==============================================================
+   INFO BOXES (Displays & Indicators)
+   ============================================================== */
 .info-box { 
     width: 100%; 
+    height: clamp(35px, 6vh, 45px);
     box-sizing: border-box; 
     display: flex; 
     align-items: center; 
@@ -92,11 +109,9 @@
 
 .dark-box { 
     background-color: #0a0e17; 
-    border: 2px solid #333; 
-    border-top-color: #000; 
-    border-left-color: #000; 
+    border: 2px solid rgba(0,0,0,0.8); 
     color: #00bcd4; 
-    box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); 
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
     text-shadow: 0 0 3px rgba(0,188,212,0.4); 
 }
 
@@ -109,13 +124,11 @@
 
 .text-green { 
     background-color: #0a0e17; 
-    border: 2px solid #333; 
-    border-top-color: #000; 
-    border-left-color: #000; 
+    border: 2px solid rgba(0,0,0,0.8); 
     color: #00e676; 
     font-size: clamp(10px, 1.2vw, 15px); 
     text-shadow: 0 0 5px rgba(0,230,118,0.5); 
-    box-shadow: inset 0 3px 6px rgba(0,0,0,0.8); 
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
 }
 
 /* POPUP MENU BUTTON */

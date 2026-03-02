@@ -332,3 +332,52 @@ select.gas-dropdown {
 select::-ms-expand {
     display: none;
 }
+/* ==============================================================
+   FINAL FIX: CUSTOM INDUSTRIAL SELECT DROPDOWN FOR TABLETS
+   ============================================================== */
+.custom-select-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.custom-select-menu {
+    position: absolute;
+    bottom: 100%; /* Pops UPwards so it doesn't go off-screen */
+    left: 0;
+    width: 100%;
+    min-width: 100px; /* Ensures it's wide enough to read */
+    max-height: 250px; /* Scrollable if options are many */
+    overflow-y: auto;
+    background: #e3f2fd; /* Light blue industrial tint */
+    border: 2px solid #111;
+    z-index: 10000;
+    box-shadow: 4px -4px 10px rgba(0,0,0,0.6); /* Shadow upwards */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Custom sharp scrollbar for the menu */
+.custom-select-menu::-webkit-scrollbar { width: 12px; }
+.custom-select-menu::-webkit-scrollbar-track { background: #202430; border-left: 1px solid #111; }
+.custom-select-menu::-webkit-scrollbar-thumb { background: #555; border: 1px solid #111; border-radius: 0; }
+
+.custom-select-item {
+    padding: 10px 5px;
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: #111;
+    border-bottom: 1px solid #999;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-align: center;
+    transition: 0.1s;
+}
+
+.custom-select-item:hover, 
+.custom-select-item:active {
+    background: #039BE5;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
