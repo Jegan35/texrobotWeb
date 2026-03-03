@@ -445,3 +445,21 @@
     user-select: none;
     outline: none;
 }
+/* ==============================================================
+   PREVENT LONG PRESS POPUPS (COPY / SHARE / DOWNLOAD) 100% FIX
+   ============================================================== */
+body, html {
+    -webkit-touch-callout: none !important;
+}
+
+.jib-btn, .dpad-btn, .tp-btn, .rms-btn, .panel-action-btn, button {
+    -webkit-touch-callout: none !important; /* iOS/iPad popup-ஐ தடுக்கும் */
+    -webkit-user-select: none !important; /* Safari */
+    -khtml-user-select: none !important; /* Konqueror HTML */
+    -moz-user-select: none !important; /* Firefox */
+    -ms-user-select: none !important; /* IE/Edge */
+    user-select: none !important; /* Chrome/Android */
+    -webkit-user-drag: none !important; /* Drag செய்வதை தடுக்கும் */
+    -webkit-tap-highlight-color: transparent !important; /* க்ளிக் செய்யும் போது வரும் நீல நிறத்தை தடுக்கும் */
+    touch-action: manipulation !important; /* Browser-ன் Default Touch-ஐ தடுக்கும் */
+}
