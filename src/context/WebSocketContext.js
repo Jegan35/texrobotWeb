@@ -5,8 +5,8 @@ const WebSocketContext = createContext(null);
 export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  //const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
-  const [ipAddress, setIpAddress] = useState("unirritated-offensively-javon.ngrok-free.dev");
+  const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
+  //const [ipAddress, setIpAddress] = useState("lucretia-spriggiest-scrawnily.ngrok-free.dev");
   const [accessFull, setAccessFull] = useState(false);
   const [connectionFailed, setConnectionFailed] = useState(false);
   const [rejectMessage, setRejectMessage] = useState("");
