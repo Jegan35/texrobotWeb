@@ -1,5 +1,5 @@
 import React, { useState, useMemo, Suspense, useRef, useEffect } from "react";
-import * as THREE from "three"; 
+// import * as THREE from "three"; 
 import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls, GizmoHelper, GizmoViewport, Text, Billboard, Line } from "@react-three/drei";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
