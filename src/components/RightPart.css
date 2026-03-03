@@ -434,3 +434,14 @@
     border-radius: 0 4px 4px 0;
     box-shadow: 2px 0 5px rgba(0,0,0,0.5);
 }
+/* PREVENT LONG PRESS COPY/SHARE MENU ON TABLETS */
+* {
+    -webkit-touch-callout: none; /* iOS/iPad popup-ஐ தடுக்கும் */
+}
+.jib-btn, .dpad-btn, button, .tp-btn, .rms-btn, .panel-action-btn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    outline: none;
+}

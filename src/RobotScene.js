@@ -10,72 +10,91 @@ const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1" };
 
 // ==========================================
 // OPTIMIZATION 1: THE ULTIMATE ZERO-LAG THICK LINE
-// O(K) Complexity + 150ms Throttling + 1D Array Injection
+// O(K) Complexity + 150ms Throttling + Tail Effect (Fixed Marking)
 // ==========================================
-const FastThickLine = React.memo(({ points, color, lineWidth }) => {
-  const [renderPoints, setRenderPoints] = useState([]);
-  const latestPoints = useRef(points);
-  
-  // Persistent JS Array - Prevents Memory/Garbage Collection Lag
-  const flatArr = useRef([]);
-  const lastLen = useRef(0);
+// ==========================================
+// OPTIMIZATION 1: THE ULTIMATE ZERO-LAG CHUNKING ALGORITHM
+// லைன் முழுமையாக இருக்கும், மறையாது! ஆனால் 0% Lag!
+// ==========================================
 
-  // Silently keep track of incoming websocket points
+// 1. Static Line: இது பழைய லைன்களை "Freeze" செய்துவிடும். CPU-வை துளியும் பாதிக்காது!
+const StaticLine = React.memo(({ points, color, lineWidth }) => {
+  return (
+    <Line points={points} color={color} lineWidth={lineWidth} transparent opacity={0.9} />
+  );
+});
+
+// 2. Main Logic: லைன்களை 250 புள்ளிகளாக துண்டாக்கும் மூளை (Chunker)
+const FastThickLine = React.memo(({ points, color, lineWidth }) => {
+  const [renderData, setRenderData] = useState({ chunks: [], active: [] });
+  const chunksRef = useRef([]);
+  const lastLen = useRef(0);
+  const latestPoints = useRef(points);
+
   latestPoints.current = points;
 
   useEffect(() => {
-    // Throttle: Update the 3D line only every 150ms (~6 FPS). 
-    // The Robot will still move at 60 FPS perfectly without hanging!
+    // 150ms Throttling + Chunking
     const interval = setInterval(() => {
       const pts = latestPoints.current;
       if (!pts) return;
 
-      const currentLen = pts.length;
+      const len = pts.length;
 
-      // 1. FAST CLEAR (Instant wipe without lag)
-      if (currentLen < 2) {
+      // FAST CLEAR (பழைய டேட்டாவை அழித்தால் உடனே க்ளியர் ஆகும்)
+      if (len < 2) {
         if (lastLen.current > 0) {
-          flatArr.current = [];
-          setRenderPoints([]);
+          chunksRef.current = [];
+          setRenderData({ chunks: [], active: [] });
           lastLen.current = 0;
         }
         return;
       }
 
-      // 2. O(K) FAST APPEND (Only processes the newly added points)
-      if (currentLen !== lastLen.current) {
-        
-        // Safety check: If trajectory was reset
-        if (currentLen < lastLen.current) {
-          flatArr.current = [];
-          lastLen.current = 0;
+      if (len !== lastLen.current) {
+        // ட்ராஜெக்டரி ரீசெட் ஆனால் க்ளியர் செய்ய
+        if (len < lastLen.current) chunksRef.current = [];
+
+        const CHUNK_SIZE = 250; // 250 புள்ளிகளாக துண்டாக்குகிறது
+        const numChunks = Math.floor(len / CHUNK_SIZE);
+
+        // புது Chunk உருவாகி இருந்தால், அதை Static ஆக மாற்று
+        if (numChunks > chunksRef.current.length) {
+          for (let i = chunksRef.current.length; i < numChunks; i++) {
+            // முந்தைய துண்டோடு ஒட்டிக்கொள்ள (Overlap) 1 புள்ளி முன்னால் இருந்து வெட்டுகிறோம்
+            const start = Math.max(0, i * CHUNK_SIZE - 1);
+            const end = (i + 1) * CHUNK_SIZE;
+            chunksRef.current.push(pts.slice(start, end));
+          }
         }
 
-        // Push ONLY the new points into the 1D flat array
-        for (let i = lastLen.current; i < currentLen; i++) {
-          flatArr.current.push(pts[i][0], pts[i][1], pts[i][2]);
-        }
-        lastLen.current = currentLen;
+        // மீதமுள்ள புதிய புள்ளிகள் (எப்போதும் 250-க்கு குறைவாகவே இருக்கும், அதனால் Lag ஆகாது)
+        const activeStart = Math.max(0, chunksRef.current.length * CHUNK_SIZE - 1);
+        const activePts = pts.slice(activeStart, len);
 
-        // Shallow copy triggers React to draw the line without .flat() errors
-        setRenderPoints([...flatArr.current]);
+        // React-ஐ ஏமாற்றி Static ஆக்க Shallow Copy பயன்படுத்துகிறோம்
+        setRenderData({ chunks: [...chunksRef.current], active: activePts });
+        lastLen.current = len;
       }
     }, 150); 
 
     return () => clearInterval(interval);
   }, []);
 
-  // Requires at least 2 points (6 floats) to draw a line
-  if (renderPoints.length < 6) return null;
+  if (renderData.chunks.length === 0 && renderData.active.length < 2) return null;
 
   return (
-    <Line
-      points={renderPoints} // Direct 1D array - super fast!
-      color={color}
-      lineWidth={lineWidth || 2.5}
-      transparent
-      opacity={0.9}
-    />
+    <group>
+      {/* ஃப்ரீஸ் செய்யப்பட்ட பழைய மார்க்கிங் லைன்கள் (CPU: 0%) */}
+      {renderData.chunks.map((chunk, idx) => (
+         <StaticLine key={idx} points={chunk} color={color} lineWidth={lineWidth || 2.5} />
+      ))}
+      
+      {/* தற்போதைய லைன் முனை (CPU: Very Low) */}
+      {renderData.active.length > 1 && (
+         <StaticLine points={renderData.active} color={color} lineWidth={lineWidth || 2.5} />
+      )}
+    </group>
   );
 });
 
@@ -248,37 +267,46 @@ const RobotScene = () => {
       
       <HamburgerMenu />
 
-      <div style={{ position: 'absolute', top: 0, right: 0, width: 'clamp(60px, 12vw, 110px)', bottom: 0, backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '15px', paddingBottom: '15px', justifyContent: 'space-evenly' }}>
-        <div style={{ color: '#00bcd4', fontSize: 'clamp(0.6rem, 1vw, 0.9rem)', fontWeight: '900', letterSpacing: '1px' }}>JOINTS</div>
-        {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
-          const val = j[`j${idx+1}`];
-          return (
-            <div key={label} style={{ textAlign: 'center', width: '100%' }}>
-              <div style={{ color: '#aaa', fontSize: 'clamp(0.5rem, 0.8vw, 0.8rem)', fontWeight: 'bold' }}>{label}</div>
-              <div style={{ color: '#4CAF50', fontSize: 'clamp(0.7rem, 1.2vw, 1.1rem)', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
-                {val !== undefined ? val.toFixed(2) : "0.00"}°
+      {/* ================= JOINTS PANEL (PERFECT FIT) ================= */}
+      <div style={{ position: 'absolute', top: 0, right: 0, width: 'clamp(60px, 10vw, 85px)', bottom: 0, backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', userSelect: 'none' }}>
+        
+        <div style={{ color: '#00bcd4', fontSize: 'clamp(0.6rem, 1vw, 0.8rem)', fontWeight: '900', letterSpacing: '1px', marginTop: '15px' }}>JOINTS</div>
+        
+        {/* flex: 1 மற்றும் space-evenly மூலம் சீராக பிரிக்கிறோம். 
+            marginBottom கொடுத்திருப்பதால், Cartesian பேனல் உயரத்திற்கு மேல் சரியாக J6 வந்து நிற்கும்! */}
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, justifyContent: 'space-evenly', marginBottom: 'clamp(40px, 8vh, 55px)' }}>
+          {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
+            const val = j[`j${idx+1}`];
+            return (
+              <div key={label} style={{ textAlign: 'center', width: '100%' }}>
+                <div style={{ color: '#aaa', fontSize: 'clamp(0.5rem, 0.75vw, 0.7rem)', fontWeight: 'bold', marginBottom: '2px' }}>{label}</div>
+                <div style={{ color: '#4CAF50', fontSize: 'clamp(0.7rem, 1vw, 0.95rem)', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                  {val !== undefined ? val.toFixed(2) : "0.00"}°
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', height: 'clamp(50px, 10vh, 85px)', backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10, display: 'flex', alignItems: 'center', padding: '0 clamp(5px, 2vw, 20px)' }}>
-        <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(0.7rem, 1.2vw, 1rem)', letterSpacing: '1px', marginRight: 'clamp(5px, 2vw, 20px)' }}>CARTESIAN</div>
-        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between', overflow: 'hidden' }}>
+      {/* ================= CARTESIAN PANEL ================= */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 'clamp(60px, 10vw, 85px)', height: 'clamp(40px, 8vh, 55px)', backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10, display: 'flex', alignItems: 'center', padding: '0 clamp(10px, 2vw, 20px)', userSelect: 'none' }}>
+        
+        <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(0.6rem, 1vw, 0.8rem)', letterSpacing: '1px', marginRight: 'clamp(10px, 3vw, 30px)' }}>CARTESIAN</div>
+        
+        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
           {[ {l: 'X(mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y(mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z(mm)', v: c.z, clr: '#00bcd4'},
              {l: 'A(°)', v: c.rx, clr: '#fff'}, {l: 'B(°)', v: c.ry, clr: '#fff'}, {l: 'C(°)', v: c.rz, clr: '#fff'} 
           ].map(item => (
-            <div key={item.l} style={{ textAlign: 'center', minWidth: 0, flex: 1 }}>
-              <div style={{ color: '#aaa', fontSize: 'clamp(0.5rem, 0.9vw, 0.75rem)', marginBottom: '2px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{item.l}</div>
-              <div style={{ color: item.clr, fontSize: 'clamp(0.75rem, 1.4vw, 1.3rem)', fontWeight: '900', textShadow: '0 1px 2px rgba(0,0,0,0.8)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.v !== undefined ? item.v.toFixed(3) : "0.000"}
+            <div key={item.l} style={{ textAlign: 'center' }}>
+              <div style={{ color: '#aaa', fontSize: 'clamp(0.5rem, 0.75vw, 0.7rem)', marginBottom: '2px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{item.l}</div>
+              <div style={{ color: item.clr, fontSize: 'clamp(0.7rem, 1vw, 0.95rem)', fontWeight: '900', textShadow: '0 1px 2px rgba(0,0,0,0.8)', whiteSpace: 'nowrap' }}>
+                {item.v !== undefined ? item.v.toFixed(2) : "0.00"}
               </div>
             </div>
           ))}
         </div>
       </div>
-
       <div style={{ position: 'absolute', top: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', bottom: 'clamp(50px, 10vh, 85px)' }}>
         <Canvas camera={{ position: [0, -6500, 3000], up: [0, 0, 1], fov: 45, near: 1, far: 30000 }}>
           

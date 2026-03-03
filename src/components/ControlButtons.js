@@ -211,7 +211,7 @@ const ControlButtons = () => {
         <button className={`btn ${servoOn ? 'btn-green' : 'btn-dark'}`} onClick={handleServoToggle}>⚡SERVO:{servoOn ? 'ON' : 'OFF'}</button>
         <button className="btn btn-blue" onClick={handleHomeClick}>⌂ HOME</button>
         <button className={`btn ${isRunning ? 'btn-green' : 'btn-yellow'}`} onClick={handleRunPauseToggle}>{isRunning ? '⏵ RUN' : '⏸ PAUSE'}</button>
-        <button className={`btn ${isStarted ? 'btn-red' : 'btn-orange'}`} onClick={handleStartStopToggle}>{isStarted ? '⏹ STOP' : '⏻ START'}</button>
+        <button className={`btn ${isStarted ? 'btn-red' : 'btn-orange'}`} onClick={handleStartStopToggle}>{isStarted ? '⏹ STOP' : '▶ START'}</button>
         <button className="btn btn-red" onClick={handleExitClick}>✖ EXIT</button>
         <div style={{ position: "relative", display: "flex", width: "100%" }}>
           <button className="btn btn-outline-green" style={{ width: "100%" }} onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}>{mode}</button>
