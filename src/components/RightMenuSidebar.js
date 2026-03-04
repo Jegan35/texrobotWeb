@@ -65,5 +65,5 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
         </div>
   );
 };
-//control panel .com
+//control panel .com ghun
 export default RightMenuSidebar;
