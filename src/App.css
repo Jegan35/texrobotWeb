@@ -145,3 +145,20 @@
 .dark-box { background-color: #111; border: 1px solid #333; color: #ccc; }
 .empty-box { background-color: transparent; border: 1px dashed #555; color: #666; }
 .text-green { color: #4CAF50; font-weight: bold; justify-content: flex-end; font-size: clamp(0.8rem, 1.2vw, 1rem); }
+
+/* Touch fixes */
+body, html {
+    -webkit-touch-callout: none !important;
+}
+
+.jib-btn, .dpad-btn, .tp-btn, .rms-btn, .panel-action-btn, button {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+}

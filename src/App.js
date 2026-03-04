@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { WebSocketProvider, useWebSocket } from './context/WebSocketContext';
 
-// Components
-import RobotScene from './RobotScene';
-import ControlButtons from './components/ControlButtons';
+// Components (Make sure paths are correct)
+import LeftPart from './components/LeftPart';
+import CenterPart from './components/CenterPart';
 import RightPart from './components/RightPart';
 
 function AppContent() {
@@ -15,6 +15,13 @@ function AppContent() {
 
   useEffect(() => { if (connectionFailed) setFailedFocus('retry'); }, [connectionFailed]);
   useEffect(() => { if (showReloadWarning) setReloadFocus('cancel'); }, [showReloadWarning]);
+
+  // 🔴 TABLET LONG PRESS PREVENTION 🔴
+  useEffect(() => {
+    const disableContextMenu = (e) => e.preventDefault();
+    document.addEventListener("contextmenu", disableContextMenu);
+    return () => document.removeEventListener("contextmenu", disableContextMenu);
+  }, []);
 
   // --- RELOAD INTERCEPTOR LOGIC ---
   useEffect(() => {
@@ -55,6 +62,12 @@ function AppContent() {
 
   return (
     <>
+      <style>{`
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+        input, textarea { -webkit-user-select: auto; user-select: auto; }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #151822; }
+      `}</style>
+
       {/* ==========================================
           WARNING MODALS
           ========================================== */}
@@ -95,31 +108,22 @@ function AppContent() {
       )}
 
       {/* ==========================================
-          MAIN CONTAINER
+          THE NEW 11-INCH TABLET 3-COLUMN COCKPIT (25-50-25)
           ========================================== */}
-      <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#1a1e29', color: 'white', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#151822', color: 'white', overflow: 'hidden' }}>
         
-        {/* LEFT PANEL */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', borderRight: '2px solid #333' }}>
-          
-          <div style={{ height: '40px', flexShrink: 0, backgroundColor: '#151822', borderBottom: '2px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
-            <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TEXSONICS</div>
-            <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '0.5px' }}>ROBOT CONTROLLER V1.0</div>
-          </div>
-
-          {/* DYNAMIC SCENE WRAPPER: Let RobotScene render its own Cartesian & Joints perfectly! */}
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-            <RobotScene />
-          </div>
-
-          <div style={{ backgroundColor: '#202430', padding: '10px', flexShrink: 0, borderTop: '2px solid #111' }}>
-            <ControlButtons />
-          </div>
-          
+        {/* 1. LEFT THUMB ZONE (25%) */}
+        <div style={{ width: '25%', minWidth: '240px', backgroundColor: '#1a1e29', borderRight: '2px solid #111', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
+          <LeftPart />
         </div>
 
-        {/* RIGHT PANEL */}
-        <div style={{ flex: 1, minWidth: 0, backgroundColor: '#202430', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* 2. CENTER STAGE (50%) */}
+        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+          <CenterPart />
+        </div>
+
+        {/* 3. RIGHT THUMB ZONE (25%) */}
+        <div style={{ width: '25%', minWidth: '240px', backgroundColor: '#1a1e29', borderLeft: '2px solid #111', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
           <RightPart />
         </div>
 

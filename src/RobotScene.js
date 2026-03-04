@@ -254,6 +254,8 @@ const WorldCoordinates = React.memo(() => {
   return <group>{labels}</group>;
 });
 
+// ... (மேலே உள்ள இம்போர்ட்கள், FastThickLine, Custom3DArrows, RealRobot, CustomGridWalls எல்லாம் அப்படியே இருக்கட்டும்)
+
 const RobotScene = () => {
   const { robotState } = useWebSocket();
   const c = robotState?.cartesian || { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 };
@@ -262,18 +264,61 @@ const RobotScene = () => {
   const bluePts = robotState?.blueTrajectory || [];
   const redPts = robotState?.redTrajectory || [];
 
+  // 🔴 NEW: Camera Reset லாஜிக்கிற்கான State மற்றும் Reference 🔴
+  const controlsRef = useRef();
+  
+  const resetCamera = () => {
+    if (controlsRef.current) {
+      // கேமராவை டீஃபால்ட் இடத்திற்கு (Default Position) கொண்டு வருவது
+      controlsRef.current.object.position.set(0, -6500, 3000);
+      controlsRef.current.target.set(0, 0, 800); // ரோபோட்டின் மையம்
+      controlsRef.current.update();
+    }
+  };
+
   return (
-    <div style={{ width: "100%", height: "100%", position: "relative" }}>
+    <div style={{ width: "100%", height: "100%", position: "relative", backgroundColor: "#f0f4f8" }}>
       
       <HamburgerMenu />
 
-      {/* ================= JOINTS PANEL (PERFECT FIT) ================= */}
+      <HamburgerMenu />
+
+      {/* 🔴 NEW PROFESSIONAL INDUSTRIAL RECENTER BUTTON (HUD STYLE) 🔴 */}
+      <div 
+        onClick={resetCamera}
+        style={{
+          position: 'absolute', 
+          bottom: 'calc(clamp(40px, 8vh, 55px) + 15px)', /* Cartesian பேனலுக்குச் சற்று மேலே கச்சிதமாக இருக்கும் */
+          left: '15px', 
+          zIndex: 50, 
+          background: 'rgba(21, 24, 34, 0.8)', 
+          color: '#aaa', 
+          border: '1px solid #444', 
+          borderRadius: '4px',
+          padding: '6px 12px', 
+          fontSize: 'clamp(0.6rem, 0.8vw, 0.75rem)', 
+          fontWeight: '900', 
+          cursor: 'pointer',
+          letterSpacing: '1px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '6px',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.5)',
+          userSelect: 'none',
+          transition: 'all 0.1s'
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = '#00bcd4'; e.currentTarget.style.borderColor = '#00bcd4'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = '#aaa'; e.currentTarget.style.borderColor = '#444'; }}
+        onPointerDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+        onPointerUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        title="Reset Camera View"
+      >
+        <span style={{ fontSize: '0.9rem' }}>⛶</span> RECENTER
+      </div>
+
+      {/* ================= JOINTS PANEL ================= */}
       <div style={{ position: 'absolute', top: 0, right: 0, width: 'clamp(60px, 10vw, 85px)', bottom: 0, backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', userSelect: 'none' }}>
-        
         <div style={{ color: '#00bcd4', fontSize: 'clamp(0.6rem, 1vw, 0.8rem)', fontWeight: '900', letterSpacing: '1px', marginTop: '15px' }}>JOINTS</div>
-        
-        {/* flex: 1 மற்றும் space-evenly மூலம் சீராக பிரிக்கிறோம். 
-            marginBottom கொடுத்திருப்பதால், Cartesian பேனல் உயரத்திற்கு மேல் சரியாக J6 வந்து நிற்கும்! */}
         <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, justifyContent: 'space-evenly', marginBottom: 'clamp(40px, 8vh, 55px)' }}>
           {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
             const val = j[`j${idx+1}`];
@@ -291,9 +336,7 @@ const RobotScene = () => {
 
       {/* ================= CARTESIAN PANEL ================= */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 'clamp(60px, 10vw, 85px)', height: 'clamp(40px, 8vh, 55px)', backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10, display: 'flex', alignItems: 'center', padding: '0 clamp(10px, 2vw, 20px)', userSelect: 'none' }}>
-        
         <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(0.6rem, 1vw, 0.8rem)', letterSpacing: '1px', marginRight: 'clamp(10px, 3vw, 30px)' }}>CARTESIAN</div>
-        
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
           {[ {l: 'X(mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y(mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z(mm)', v: c.z, clr: '#00bcd4'},
              {l: 'A(°)', v: c.rx, clr: '#fff'}, {l: 'B(°)', v: c.ry, clr: '#fff'}, {l: 'C(°)', v: c.rz, clr: '#fff'} 
@@ -307,16 +350,26 @@ const RobotScene = () => {
           ))}
         </div>
       </div>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', bottom: 'clamp(50px, 10vh, 85px)' }}>
+
+      {/* ================= CANVAS (3D SCENE) ================= */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 'clamp(60px, 10vw, 85px)', bottom: 'clamp(40px, 8vh, 55px)' }}>
         <Canvas camera={{ position: [0, -6500, 3000], up: [0, 0, 1], fov: 45, near: 1, far: 30000 }}>
           
-          <color attach="background" args={["#f0f4f8"]} /> 
           <ambientLight intensity={1.2} />
           <hemisphereLight skyColor="#ffffff" groundColor="#444444" intensity={1.0} />
           <directionalLight position={[2000, -4000, 4000]} intensity={2.5} castShadow />
           <pointLight position={[-2000, -2000, 3000]} intensity={1.8} />
 
-          <OrbitControls makeDefault target={[0, 0, 800]} maxDistance={12000} minDistance={200} />
+          {/* 🔴 FIX: கேமரா முரட்டுத்தனமாக வெளியே போவதைத் தடுக்க PAN லிமிட் மற்றும் LOCK சேர்க்கப்பட்டுள்ளது 🔴 */}
+          <OrbitControls 
+            ref={controlsRef} 
+            makeDefault 
+            target={[0, 0, 800]} 
+            maxDistance={15000}  // ஜூம் அவுட் செய்யும் எல்லை
+            minDistance={500}    // ஜூம் இன் செய்யும் எல்லை
+            maxPolarAngle={Math.PI / 2 + 0.1} // ரோபோட்டுக்குக் கீழே (Underneath) போகவிடாமல் தடுக்கும்
+            enablePan={false} // 🔴 முக்கியமான மாற்றம்: இரண்டு விரலால் தள்ளி ரோபோட்டைத் திரையை விட்டு வெளியேற்றுவதைத் தடுக்கிறது (Pan Lock) 🔴
+          />
           
           <group>
             <CustomGridWalls />
@@ -326,7 +379,6 @@ const RobotScene = () => {
           <Suspense fallback={null}>
             <group rotation={[0, 0, -Math.PI / 2]}>
               <RealRobot />
-              {/* Using the Ultra-Optimized, Lag-Free ThickLine Component! */}
               {bluePts.length > 1 && <FastThickLine points={bluePts} color="#039BE5" lineWidth={2.5} />}
               {redPts.length > 1 && <FastThickLine points={redPts} color="#E53935" lineWidth={4} />}
             </group>
