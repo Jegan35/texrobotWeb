@@ -1,306 +1,309 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, memo } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
-import RightHeader from './RightHeader';
 import RightMenuSidebar from './RightMenuSidebar';
 import './RightPart.css'; 
 
-const INST_OPTIONS = ["Inst", "MOVJ", "MOVJ_dg", "MOVL", "MOVC", "MVLEX_Deg", "MVLEX_mm", "Pallet_Matrix", "Num_of_row", "Num_of_colm", "pos_add_x", "pos_add_y", "pos_add_z", "delay_ms", "go_to", "loop", "Start If", "End If", "Start-Con", "End-Con", "Wait", "DI-1", "DI-2", "DI-3", "DI-4", "DI-5", "DI-6", "DI-7", "DI-8", "DI-9", "DI-10", "DI-11", "DI-12", "DI-13", "DI-14", "DI-15", "DI-16", "DO-1", "DO-2", "DO-3", "DO-4", "DO-5", "DO-6", "DO-7", "DO-8", "DO-9", "DO-10", "DO-11", "DO-12", "DO-13", "DO-14", "DO-15", "DO-16", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4", "DI-1 Chk", "DI-2 Chk", "DI-3 Chk", "DI-4 Chk", "DI-5 Chk", "DI-6 Chk", "DI-7 Chk", "DI-8 Chk", "DI-9 Chk", "DI-10 Chk", "DI-11 Chk", "DI-12 Chk", "DI-13 Chk", "DI-14 Chk", "DI-15 Chk", "DI-16 Chk", "DI-1 Un Chk", "DI-2 Un Chk", "DI-3 Un Chk", "DI-4 Un Chk", "DI-5 Un Chk", "DI-6 Un Chk", "DI-7 Un Chk", "DI-8 Un Chk", "DI-9 Un Chk", "DI-10 Un Chk", "DI-11 Un Chk", "DI-12 Un Chk", "DI-13 Un Chk", "DI-14 Un Chk", "DI-15 Un Chk", "DI-16 Un Chk", "= Assign", "== Equal", "!= Not Eql", "<", ">", "<=", ">=", "+", "-", "&", "stop", "Servo off"];
-const DI_OPTIONS = ["Di-1", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
-const DI2_OPTIONS = ["Di-2", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
-const DIG_STATE_OPTIONS = ["DIG-S", "High", "Low"];
-const VAR1_OPTIONS = ["Vr_1", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
-const VAR2_OPTIONS = ["Vr_2", "V-1", "V-2", "V-3", "V-4", "V-5", "V-6", "V-7", "V-8", "V-9", "V-10", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4"];
-const MM_OPTIONS = ["mm", "50", "25", "15", "10", "5", "2", "1", "0.1", "0.01", "0.001"];
-const DEG_OPTIONS = ["deg", "20", "15", "10", "5", "2", "1", "0.1", "0.01", "0.0001"];
-const FRAME_OPTIONS = ["frames", "Base", "Tool", "User"];
+const LocalRightHeader = ({ onMenuClick, onSettingsClick, currentView }) => (
+    <div className="local-header">
+        <button className="hd-menu-btn" onClick={onMenuClick}>≡ MENU</button>
+        <div className="hd-indicator">● {currentView}</div>
+        <button className="hd-standby-btn">STANDBY</button>
+        <button className="hd-settings-btn" onClick={onSettingsClick}>⚙ SETTINGS</button>
+    </div>
+);
+
+const MemoizedTpTableBody = memo(({ tpList }) => {
+    if (!tpList || tpList.length === 0) return <tbody><tr><td colSpan={4} className="empty-table-text">No TP Data</td></tr></tbody>;
+    return <tbody>{tpList.map((item, i) => (<tr key={i}><td>{i + 1}</td><td>{item.name}</td><td>{item.value}</td><td>{item.deg}</td></tr>))}</tbody>;
+});
+
+const MemoizedPrTableBody = memo(({ prList }) => {
+    if (!prList || prList.length === 0) return <tbody><tr><td colSpan={4} className="empty-table-text">No PR Data</td></tr></tbody>;
+    return <tbody>{prList.map((item, i) => (<tr key={i}><td>{i + 1}</td><td>{item.inst}</td><td>{item.name}</td><td>{item.value}</td></tr>))}</tbody>;
+});
 
 const RightPart = () => {
   const { sendCommand, robotState } = useWebSocket();
   const rs = robotState || {};
+
+  const [currentView, setCurrentView] = useState('JOG JOINTS');
+  const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
+  const [debugGoto, setDebugGoto] = useState('');
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('JOG JOINTS');
-
-  const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
-  const [openDropdown, setOpenDropdown] = useState(null);
-
-  const [selInst, setSelInst] = useState(INST_OPTIONS[0]);
-  const [selDi1, setSelDi1] = useState(DI_OPTIONS[0]);
-  const [selDi2, setSelDi2] = useState(DI2_OPTIONS[0]);
-  const [selHL, setSelHL] = useState(DIG_STATE_OPTIONS[0]);
-  const [selVar1, setSelVar1] = useState(VAR1_OPTIONS[0]);
-  const [selVar2, setSelVar2] = useState(VAR2_OPTIONS[0]);
-
-  const [delayVal, setDelayVal] = useState('0');
-  const [gotoVal, setGotoVal] = useState('0');
-  const [loopVal, setLoopVal] = useState('0');
-  const [progSpeedVal, setProgSpeedVal] = useState('0');
-  const [radiusVal, setRadiusVal] = useState('0');
-  const [varInputVal, setVarInputVal] = useState('0');
-  const [anIpVal, setAnIpVal] = useState('0');
-  const [anOpVal, setAnOpVal] = useState('0');
-  const [debugGoto, setDebugGoto] = useState('');
-
-  const [globalSpeed, setGlobalSpeed] = useState(50);
-  const [frameVal, setFrameVal] = useState(FRAME_OPTIONS[0]);
-  const [mmIncVal, setMmIncVal] = useState(MM_OPTIONS[0]);
-  const [degIncVal, setDegIncVal] = useState(DEG_OPTIONS[0]);
-  const [mmSpeedText, setMmSpeedText] = useState("50.0");
-  const [degSpeedText, setDegSpeedText] = useState("50.0");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsCategory, setSettingsCategory] = useState('ROW1');
+  const [activeSetRow1, setActiveSetRow1] = useState('Error Pos');
+  const [activeSetRow2, setActiveSetRow2] = useState('Encoder Offset'); 
 
   const isJog = currentView.includes('JOG');
   const isJoints = currentView.includes('JOINTS');
   const motionType = isJog ? 'JOG' : 'MOVE';
-  const staging = rs.staging_data || {};
 
   const handlePointerDown = (axis) => sendCommand(motionType === 'JOG' ? "BTN_PRESS" : "BTN_CLICK", axis);
   const handlePointerUp = (axis) => { if (motionType === 'JOG') sendCommand("BTN_RELEASE", axis); };
-  const handleGlobalSpeedChange = (e) => { setGlobalSpeed(e.target.value); sendCommand("SET_GLOBAL_SPEED", e.target.value); };
-  const applyMmSpeed = () => sendCommand("SET_MM_SPEED", mmSpeedText);
-  const applyDegSpeed = () => sendCommand("SET_DEG_SPEED", degSpeedText);
 
-  const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
-
-  const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "ind-input", direction = "down") => (
-      <div className="rel-flex">
-          <button className={btnClass} onClick={() => toggleDropdown(menuKey)}>
-              {currentValue}
-          </button>
-          {openDropdown === menuKey && (
-              <div className={`custom-select-menu custom-select-menu-${direction}`}>
-                  {options.map(o => (
-                      <div key={o} className="custom-select-item" onClick={() => { onSelect(o); setOpenDropdown(null); }}>
-                          {o}
-                      </div>
-                  ))}
-              </div>
-          )}
-      </div>
-  );
-
-  const renderSpeedConfig = () => (
-    <div className="speed-config-container">
-      <div className="speed-config-title">SPEED SETTINGS</div>
-      <div className="speed-config-body">
-        <div className="fluid-speed-row"><span className="fluid-speed-label">MM</span>
-            {renderDropdown('SPEED_MM', MM_OPTIONS, mmIncVal, (v) => { setMmIncVal(v); sendCommand("SET_MM_INC", v); }, "ind-input", "down")}
-        </div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">MM/S</span><input type="number" className="ind-input" value={mmSpeedText} onChange={(e) => setMmSpeedText(e.target.value)} onBlur={applyMmSpeed} /></div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">DEG</span>
-            {renderDropdown('SPEED_DEG', DEG_OPTIONS, degIncVal, (v) => { setDegIncVal(v); sendCommand("SET_DEG_INC", v); }, "ind-input", "down")}
-        </div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">DEG/S</span><input type="number" className="ind-input" value={degSpeedText} onChange={(e) => setDegSpeedText(e.target.value)} onBlur={applyDegSpeed} /></div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">FRAME</span>
-            {renderDropdown('SPEED_FRAME', FRAME_OPTIONS, frameVal, (v) => { setFrameVal(v); sendCommand("SET_FRAME", v); }, "ind-input", "down")}
-        </div>
-        <div className="fluid-speed-row">
-          <span className="fluid-speed-label">SPEED</span>
-          <div className="speed-range-group">
-              <input type="range" min="1" max="100" value={globalSpeed} onChange={(e) => setGlobalSpeed(e.target.value)} onMouseUp={handleGlobalSpeedChange} onTouchEnd={handleGlobalSpeedChange} />
-              <input type="number" className="ind-input speed-num-input" value={globalSpeed} onChange={handleGlobalSpeedChange} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderJogPanel = () => {
+  const renderTopMain = () => {
+    if (currentView === 'SPEED CONFIG') {
+        return (
+            <div className="speed-config-container">
+                <div className="speed-config-title">SPEED SETTINGS</div>
+                <div className="speed-config-body">
+                    <div className="fluid-speed-row"><span className="fluid-speed-label">MM</span><button className="ind-input">mm</button></div>
+                    <div className="fluid-speed-row"><span className="fluid-speed-label">MM/S</span><input type="number" className="ind-input" defaultValue="50" /></div>
+                    <div className="fluid-speed-row"><span className="fluid-speed-label">DEG</span><button className="ind-input">deg</button></div>
+                    <div className="fluid-speed-row"><span className="fluid-speed-label">DEG/S</span><input type="number" className="ind-input" defaultValue="50" /></div>
+                    <div className="fluid-speed-row"><span className="fluid-speed-label">FRAME</span><button className="ind-input">Base</button></div>
+                </div>
+            </div>
+        );
+    }
     if (isJoints) {
         return (
-          <div className="jog-panel-container">
-            <div className="jog-panel-title">JOINTS CONTROL</div>
-            <div className="joints-two-col-layout">
-              <div className="joints-col">
-                 <div className="joints-col-title">BASE / ARM</div>
-                 {['J1', 'J2', 'J3'].map(id => {
-                     const ax = { id, m: `${id}-`, p: `${id}+` };
-                     return (
-                         <div key={ax.id} className="joint-industrial-block">
-                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>{ax.id}-</button>
-                             <div className="jib-label">{ax.id}</div>
-                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>{ax.id}+</button>
+            <div className="jog-panel-container">
+                <div className="joints-two-col-layout">
+                  <div className="joints-col">
+                     <div className="joints-col-title">BASE / ARM</div>
+                     {['J1', 'J2', 'J3'].map(id => (
+                         <div key={id} className="joint-industrial-block">
+                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(`${id}-`)} onPointerUp={()=>handlePointerUp(`${id}-`)}>{id}-</button>
+                             <div className="jib-label">{id}</div>
+                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(`${id}+`)} onPointerUp={()=>handlePointerUp(`${id}+`)}>{id}+</button>
                          </div>
-                     )
-                 })}
-              </div>
-              <div className="joints-divider"></div>
-              <div className="joints-col">
-                 <div className="joints-col-title">WRIST</div>
-                 {['J4', 'J5', 'J6'].map(id => {
-                     const ax = { id, m: `${id}-`, p: `${id}+` };
-                     return (
-                         <div key={ax.id} className="joint-industrial-block">
-                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>{ax.id}-</button>
-                             <div className="jib-label">{ax.id}</div>
-                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>{ax.id}+</button>
+                     ))}
+                  </div>
+                  <div className="joints-divider"></div>
+                  <div className="joints-col">
+                     <div className="joints-col-title">WRIST</div>
+                     {['J4', 'J5', 'J6'].map(id => (
+                         <div key={id} className="joint-industrial-block">
+                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(`${id}-`)} onPointerUp={()=>handlePointerUp(`${id}-`)}>{id}-</button>
+                             <div className="jib-label">{id}</div>
+                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(`${id}+`)} onPointerUp={()=>handlePointerUp(`${id}+`)}>{id}+</button>
                          </div>
-                     )
-                 })}
-              </div>
+                     ))}
+                  </div>
+                </div>
             </div>
-          </div>
         );
-    } else {
-        return (
-          <div className="jog-panel-container">
-            <div className="jog-panel-title">CARTESIAN D-PAD</div>
+    }
+    // 🔴 FIXED: CARTESIAN RENDER LOGIC 🔴
+    return (
+        <div className="jog-panel-container">
             <div className="dpad-two-col-layout">
                 <div className="dpad-col">
                     <div className="dpad-col-title">TRANSLATION</div>
                     <div className="dpad-cross">
-                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Y+')} onPointerUp={()=>handlePointerUp('Y+')} onPointerLeave={()=>handlePointerUp('Y+')}>Y+</button>
-                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('X-')} onPointerUp={()=>handlePointerUp('X-')} onPointerLeave={()=>handlePointerUp('X-')}>X-</button>
+                        <button className="dpad-btn dpad-up text-pos">Y+</button>
+                        <button className="dpad-btn dpad-left text-neg">X-</button>
                         <div className="dpad-center">XYZ</div>
-                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('X+')} onPointerUp={()=>handlePointerUp('X+')} onPointerLeave={()=>handlePointerUp('X+')}>X+</button>
-                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Y-')} onPointerUp={()=>handlePointerUp('Y-')} onPointerLeave={()=>handlePointerUp('Y-')}>Y-</button>
+                        <button className="dpad-btn dpad-right text-pos">X+</button>
+                        <button className="dpad-btn dpad-down text-neg">Y-</button>
                     </div>
                     <div className="dpad-z-row">
-                        <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Z-')} onPointerUp={()=>handlePointerUp('Z-')} onPointerLeave={()=>handlePointerUp('Z-')}>Z-</button>
-                        <button className="dpad-btn text-pos" onPointerDown={()=>handlePointerDown('Z+')} onPointerUp={()=>handlePointerUp('Z+')} onPointerLeave={()=>handlePointerUp('Z+')}>Z+</button>
+                        <button className="dpad-btn text-neg">Z-</button>
+                        <button className="dpad-btn text-pos">Z+</button>
                     </div>
                 </div>
                 <div className="joints-divider"></div>
                 <div className="dpad-col">
                     <div className="dpad-col-title">ROTATION</div>
                     <div className="dpad-cross">
-                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Ry+')} onPointerUp={()=>handlePointerUp('Ry+')} onPointerLeave={()=>handlePointerUp('Ry+')}>Ry+</button>
-                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('Rx-')} onPointerUp={()=>handlePointerUp('Rx-')} onPointerLeave={()=>handlePointerUp('Rx-')}>Rx-</button>
+                        <button className="dpad-btn dpad-up text-pos">Ry+</button>
+                        <button className="dpad-btn dpad-left text-neg">Rx-</button>
                         <div className="dpad-center">ROT</div>
-                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('Rx+')} onPointerUp={()=>handlePointerUp('Rx+')} onPointerLeave={()=>handlePointerUp('Rx+')}>Rx+</button>
-                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerUp={()=>handlePointerUp('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
+                        <button className="dpad-btn dpad-right text-pos">Rx+</button>
+                        <button className="dpad-btn dpad-down text-neg">Ry-</button>
                     </div>
                     <div className="dpad-z-row">
-                        <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
-                        <button className="dpad-btn text-pos" onPointerDown={()=>handlePointerDown('Rz+')} onPointerUp={()=>handlePointerUp('Rz+')} onPointerLeave={()=>handlePointerUp('Rz+')}>Rz+</button>
+                        <button className="dpad-btn text-neg">Rz-</button>
+                        <button className="dpad-btn text-pos">Rz+</button>
                     </div>
                 </div>
-            </div>
-          </div>
-        );
-    }
-  };
-
-  return (
-    <div className="rp-master-container">
-        <div className="rp-main-content">
-            
-            <div className="rp-upper-half">
-                <div className="rp-header-col">
-                    <RightHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} currentMode={currentView} isOpen={isSidebarOpen} />
-                </div>
-                <div className="rp-content-col">
-                    <div className={`rp-panel-left ${currentView === 'SPEED CONFIG' ? 'bg-dark' : 'bg-light-dark'}`}>
-                        {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
-                    </div>
-                </div>
-            </div>
-
-            <div className="rp-lower-half">
-                
-                <div className="rp-row-4">
-                    <div className="dark-tabs bg-dark-deep">
-                        {['Inst', 'Debug', 'Jog Deg'].map(tab => (
-                            <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>
-                                {tab}
-                            </div>
-                        ))}
-                    </div>
-                    
-                    <div className="row2-content-fixed">
-                        {activeRow4Tab === 'Inst' && (
-                            <div className="table-wrapper-fixed">
-                                <table className="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>S.No</th><th>Inst</th><th>Name</th><th>Val 1</th><th>Deg 1</th>
-                                            <th>Name</th><th>Val 2</th><th>Deg 2</th><th>Speed</th>
-                                            <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td className="sno-col">1</td>
-                                            <td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
-                                            <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
-                                            <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                        {activeRow4Tab === 'Debug' && (
-                            <div className="debug-panel">
-                                 <button className="ind-btn bg-red" onClick={() => sendCommand('TOGGLE_START')}>Start_Stop</button>
-                                 <button className="ind-btn bg-dark">Step</button>
-                                 <button className="ind-btn bg-dark" onClick={() => sendCommand('EXIT')}>Exit</button>
-                                 <button className="ind-btn bg-dark">Jump In</button>
-                                 <button className="ind-btn bg-dark">Jump Out</button>
-                                 <button className="ind-btn bg-dark" style={{border: '2px solid black'}} onClick={() => sendCommand('SET_GOTO_PROGRAM', debugGoto)}>Go To</button>
-                                 <input className="ind-input" value={debugGoto} onChange={e => setDebugGoto(e.target.value)} />
-                                 <button className="ind-btn bg-dark">Prv</button>
-                            </div>
-                        )}
-                        {activeRow4Tab === 'Jog Deg' && (
-                            <div className="jog-deg-panel">Jog Degrees not set</div>
-                        )}
-                    </div>
-                </div>
-
-                {/* 🔴 FIXED: ROW 5 LA CUSTOMIZED 6-ROW LAYOUT 🔴 */}
-                <div className="rp-row-5">
-                    
-                    {/* 1st Row: 3 Buttons */}
-                    <div className="ind-grid-3">
-                        {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "ind-btn bg-blue", "up")}
-                        {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "ind-btn bg-dark", "up")}
-                        {renderDropdown('R5_DI2', DI2_OPTIONS, selDi2, (v) => { setSelDi2(v); sendCommand("SET_DIGI_2", v); }, "ind-btn bg-dark", "up")}
-                    </div>
-
-                    {/* 2nd Row: 4 Buttons */}
-                    <div className="ind-grid-4">
-                        <button className="ind-btn bg-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
-                        {renderDropdown('R5_HL', DIG_STATE_OPTIONS, selHL, (v) => { setSelHL(v); sendCommand("SET_HIGH_LOW", v); }, "ind-btn bg-dark", "up")}
-                        <button className="ind-btn bg-dark" onClick={() => sendCommand('SET_DELAY', delayVal)}>⏱ DELAY</button>
-                        <input className="ind-input" value={delayVal} onChange={e => setDelayVal(e.target.value)} />
-                    </div>
-
-                    {/* 3rd Row: 4 Buttons */}
-                    <div className="ind-grid-4">
-                        <button className="ind-btn bg-dark" onClick={() => sendCommand('SET_GOTO_PROGRAM', gotoVal)}>→ GO TO</button>
-                        <input className="ind-input" value={gotoVal} onChange={e => setGotoVal(e.target.value)} />
-                        <button className="ind-btn bg-dark" onClick={() => sendCommand('SET_LOOP', loopVal)}>↺ LOOP</button>
-                        <input className="ind-input" value={loopVal} onChange={e => setLoopVal(e.target.value)} />
-                    </div>
-
-                    {/* 4th Row: 4 Buttons */}
-                    <div className="ind-grid-4">
-                        <button className="ind-btn bg-dark" onClick={() => sendCommand('SET_PROGRAM_SPEED', progSpeedVal)}>⏱ MM/S</button>
-                        <input className="ind-input" value={progSpeedVal} onChange={e => setProgSpeedVal(e.target.value)} />
-                        <button className="ind-btn bg-dark" onClick={() => {}}>🎯 RAD</button>
-                        <input className="ind-input" value={radiusVal} onChange={e => setRadiusVal(e.target.value)} />
-                    </div>
-                    
-                    {/* 5th Row: 3 Buttons */}
-                    <div className="ind-grid-3">
-                        {renderDropdown('R5_VAR1', VAR1_OPTIONS, selVar1, (v) => { setSelVar1(v); sendCommand("SET_VAR1", v); }, "ind-btn bg-dark", "up")}
-                        <input className="ind-input" value={varInputVal} onChange={e => setVarInputVal(e.target.value)} onBlur={(e) => sendCommand('SET_VAR_VAL', e.target.value)} />
-                        {renderDropdown('R5_VAR2', VAR2_OPTIONS, selVar2, (v) => { setSelVar2(v); sendCommand("SET_VAR2", v); }, "ind-btn bg-dark", "up")}
-                    </div>
-
-                    {/* 6th Row: 4 Buttons */}
-                    <div className="ind-grid-4">
-                        <button className="ind-btn bg-dark" onClick={() => {}}>🌍 AN ip</button>
-                        <input className="ind-input" value={anIpVal} onChange={e => setAnIpVal(e.target.value)} />
-                        <button className="ind-btn bg-dark" onClick={() => {}}>🌍 AN op</button>
-                        <input className="ind-input" value={anOpVal} onChange={e => setAnOpVal(e.target.value)} />
-                    </div>
-
-                </div>
-
             </div>
         </div>
+    );
+  };
+
+ const renderSettingsContent = () => {
+      if (settingsCategory === 'ROW1') {
+          return (
+              <>
+                  <div className="set-tabs-grid">
+                      {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(t => (
+                          <button key={t} className={`set-tab-btn ${activeSetRow1 === t ? 'active-red' : ''}`} onClick={()=>setActiveSetRow1(t)}>{t}</button>
+                      ))}
+                  </div>
+                  <div className="set-panel-content">
+                      {activeSetRow1 === 'Error Pos' && (
+                          <div className="light-panel">
+                              <div className="error-pos-grid">
+                                  {['X','Y','Z','a','b','c'].map((ax, i) => (
+                                      <React.Fragment key={ax}>
+                                          <span className="light-label">{ax}-S</span><input className="light-input" value="0.00" readOnly />
+                                          <span className="light-label">J{i+1}-S</span><input className="light-input" value="0.00" readOnly />
+                                          <span className="light-label">{ax}-E</span><input className="light-input" value="0.00" readOnly />
+                                          <span className="light-label">J{i+1}-E</span><input className="light-input" value="0.00" readOnly />
+                                      </React.Fragment>
+                                  ))}
+                              </div>
+                          </div>
+                      )}
+                      {activeSetRow1 === 'IO Modules' && (
+                           <div className="light-panel">
+                               <div className="io-modules-wrapper">
+                                   <div className="io-module-box">
+                                       <div className="io-module-title" style={{ borderColor: '#4CAF50' }}>DIGITAL INPUTS (DI 1-16)</div>
+                                       <div className="io-module-flex">
+                                           {[...Array(16)].map((_, i) => (<div key={i} className="io-led-col"><div className="io-led off"></div><span>{i + 1}</span></div>))}
+                                       </div>
+                                   </div>
+                                   <div className="io-module-box">
+                                       <div className="io-module-title" style={{ borderColor: '#039BE5' }}>DIGITAL OUTPUTS (DO 1-16)</div>
+                                       <div className="io-module-flex">
+                                           {[...Array(16)].map((_, i) => (<div key={i} className="io-led-col"><div className="io-led off"></div><span>{i + 1}</span></div>))}
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                      )}
+                      {activeSetRow1 === 'Ether Cat' && <div className="light-panel">Ether Cat Data...</div>}
+                      {activeSetRow1 === 'Graph' && <div className="light-panel">Graph View...</div>}
+                  </div>
+              </>
+          );
+      }
+      return (
+          <>
+              <div className="set-tabs-grid">
+                  {['Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings'].map(t => (
+                      <button key={t} className={`set-tab-btn ${activeSetRow2 === t ? 'active-green' : ''}`} onClick={()=>setActiveSetRow2(t)}>{t}</button>
+                  ))}
+              </div>
+              <div className="set-panel-content">
+                  {activeSetRow2 === 'Mech Settings' && (
+                      <div className="light-panel" style={{ padding: 0 }}>
+                          <table className="mech-table">
+                              <thead><tr><th></th><th>Dh-nal</th><th>Encod</th><th>Gear R</th><th>deg c</th><th>couple</th><th>j min</th><th>j max</th></tr></thead>
+                              <tbody>
+                                  {['l1', 'l2', 'l3', 'l4', 'l5', 'l6'].map((row) => (
+                                      <tr key={row}>
+                                          <td style={{fontWeight: '900', fontSize: '0.8rem'}}>{row}</td>
+                                          <td><input defaultValue="0" /></td><td><input defaultValue="0" /></td>
+                                          <td><input defaultValue="0" /></td><td><input defaultValue="0" /></td>
+                                          <td><input defaultValue="0" /></td><td><input defaultValue="0" /></td>
+                                          <td><input defaultValue="0" /></td>
+                                      </tr>
+                                  ))}
+                              </tbody>
+                          </table>
+                      </div>
+                  )}
+                  {activeSetRow2 === 'Encoder Offset' && (
+                      <div className="light-panel">
+                          <div className="encoder-offset-grid">
+                              {[1,2,3,4,5,6].map(i => (
+                                  <React.Fragment key={i}>
+                                      <span className="light-label">J{i}-Encoder Pos</span><input className="light-input" readOnly placeholder="0" />
+                                      <span className="light-label">J{i}-Offset</span><input className="light-input" placeholder="0" />
+                                      <button className="light-btn">J{i} - Zero</button><input className="light-input" placeholder="0" />
+                                  </React.Fragment>
+                              ))}
+                          </div>
+                      </div>
+                  )}
+                  {activeSetRow2 === 'Settings View' && <div className="light-panel">Settings Data...</div>}
+                  {activeSetRow2 === 'Data Variable' && <div className="light-panel">Variables Data...</div>}
+                  {activeSetRow2 === 'Axis Limit' && <div className="light-panel">Axis Limit Data...</div>}
+              </div>
+          </>
+      );
+  };
+  return (
+    <div className="rp-master-container">
         
-        <RightMenuSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onSelectView={setCurrentView} activeView={currentView} />
+        {/* OVERLAY SETTINGS */}
+        <div className={`rp-settings-overlay ${isSettingsOpen ? 'open' : ''}`}>
+            <div className="rp-settings-header">
+                <button className="set-cat-btn" onClick={()=>setSettingsCategory('ROW1')} style={{background: settingsCategory === 'ROW1' ? '#E53935' : '#111'}}>DIAGNOSTICS</button>
+                <button className="set-cat-btn" onClick={()=>setSettingsCategory('ROW2')} style={{background: settingsCategory === 'ROW2' ? '#4CAF50' : '#111'}}>CONFIG</button>
+                <button className="set-close-btn" onClick={()=>setIsSettingsOpen(false)}>✖</button>
+            </div>
+            <div className="rp-settings-body">
+                {renderSettingsContent()}
+            </div>
+        </div>
+
+        <div className="rp-main-content">
+            <div className="rp-header-col">
+                <LocalRightHeader 
+                    onMenuClick={() => setIsSidebarOpen(true)} 
+                    onSettingsClick={() => setIsSettingsOpen(true)} 
+                    currentView={currentView} 
+                />
+            </div>
+
+            <div className="rp-upper-40">
+                {renderTopMain()}
+            </div>
+
+            <div className="rp-middle-40">
+                <div className="dark-tabs bg-dark-deep">
+                    <div className="dark-tab active" style={{color: '#4CAF50', borderTopColor: '#4CAF50'}}>PROGRAMS FILE</div>
+                </div>
+                <div className="table-split-view">
+                    <div className="table-wrapper-fixed"><MemoizedTpTableBody tpList={rs.tp_list} /></div>
+                    <div className="table-wrapper-fixed"><MemoizedPrTableBody prList={rs.pr_program_data} /></div>
+                </div>
+            </div>
+
+            <div className="rp-lower-20">
+                <div className="dark-tabs bg-dark-deep" style={{marginBottom: 0}}>
+                    {['Inst', 'Debug', 'Jog Deg'].map(tab => (
+                        <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>{tab}</div>
+                    ))}
+                </div>
+                
+                <div className="row2-content-fixed">
+                    {activeRow4Tab === 'Inst' && (
+                        <div className="table-wrapper-fixed" style={{borderTop: 'none'}}>
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th><th>Inst</th><th>Name</th><th>Val 1</th><th>Deg 1</th>
+                                        <th>Name</th><th>Val 2</th><th>Deg 2</th><th>Speed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="sno-col">1</td>
+                                        <td>{rs.staging_data?.instruction || '--'}</td><td>--</td><td>--</td><td>--</td>
+                                        <td>--</td><td>--</td><td>--</td><td>--</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                    {activeRow4Tab === 'Debug' && (
+                        <div className="debug-panel">
+                             <button className="ind-btn bg-red">Start_Stop</button>
+                             <button className="ind-btn bg-dark">Step</button>
+                             <button className="ind-btn bg-dark">Exit</button>
+                             <button className="ind-btn bg-dark">Jump In</button>
+                        </div>
+                    )}
+                    {activeRow4Tab === 'Jog Deg' && (<div className="jog-deg-panel">Jog Degrees</div>)}
+                </div>
+            </div>
+        </div>
+
+        {/* 🔴 RIGHT MENU SIDEBAR INCLUDED HERE 🔴 */}
+        <RightMenuSidebar 
+            isOpen={isSidebarOpen} 
+            onClose={() => setIsSidebarOpen(false)} 
+            onSelectView={setCurrentView} 
+            activeView={currentView} 
+        />
     </div>
   );
 };

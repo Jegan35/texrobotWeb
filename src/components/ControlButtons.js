@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
-import './ControlButtons.css'; // <--- The CSS is now cleanly imported!
+import './ControlButtons.css';
 
 const ControlButtons = () => {
   const { sendCommand, robotState } = useWebSocket();
@@ -109,24 +109,24 @@ const ControlButtons = () => {
       if (fileModalStep === 'CLOSED') return null;
 
       return (
-          <div style={{ position: 'absolute', bottom: '110%', left: 0, width: '300px', background: '#151822', border: '2px solid #333', zIndex: 9999, borderRadius: '8px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.9)' }}>
+          <div style={{ position: 'absolute', bottom: 'calc(100% + 5px)', left: 0, width: '300px', background: '#151822', border: '2px solid #333', zIndex: 9999, borderRadius: '4px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.9)' }}>
               {fileModalStep === 'TYPE' && (
                   <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ color: '#aaa', fontWeight: '900', textAlign: 'center', fontSize: '0.85rem', marginBottom: '5px', letterSpacing: '1px' }}>SELECT TYPE</div>
-                      <button className="btn" style={{ background: '#00897B', minHeight: '40px' }} onClick={() => selectType('TP')}>TARGET POINT FILES</button>
-                      <button className="btn" style={{ background: '#039BE5', minHeight: '40px' }} onClick={() => selectType('PR')}>PROGRAM FILES</button>
-                      <button className="btn" style={{ background: '#7E57C2', minHeight: '40px' }}>TRAJECTORY FILES</button>
-                      <button className="btn" style={{ background: '#2b303b', marginTop: '10px', minHeight: '40px' }} onClick={() => setFileModalStep('CLOSED')}>CLOSE</button>
+                      <button className="btn btn-teal" onClick={() => selectType('TP')}>TARGET POINT FILES</button>
+                      <button className="btn btn-blue" onClick={() => selectType('PR')}>PROGRAM FILES</button>
+                      <button className="btn btn-purple">TRAJECTORY FILES</button>
+                      <button className="btn btn-dark" style={{marginTop: '10px'}} onClick={() => setFileModalStep('CLOSED')}>CLOSE</button>
                   </div>
               )}
 
               {fileModalStep === 'OPS' && (
                   <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ color: '#aaa', fontWeight: '900', textAlign: 'center', fontSize: '0.85rem', marginBottom: '5px', letterSpacing: '1px', textTransform: 'uppercase' }}>{fileType} OPERATIONS</div>
-                      <button className="btn" style={{ background: '#43A047', minHeight: '40px' }} onClick={() => { setFileModalStep('NEW'); setFileNameInput(''); }}>NEW {fileType} FILE</button>
-                      <button className="btn" style={{ background: '#039BE5', minHeight: '40px' }} onClick={() => { setFileModalStep('OPEN'); setSearchQuery(''); }}>OPEN {fileType} FILE</button>
-                      <button className="btn" style={{ background: '#E53935', minHeight: '40px' }} onClick={() => { setFileModalStep('DELETE'); setSelectedChecks({}); }}>DELETE {fileType} FILE</button>
-                      <button className="btn" style={{ background: '#2b303b', marginTop: '10px', minHeight: '40px' }} onClick={() => setFileModalStep('TYPE')}>BACK</button>
+                      <button className="btn btn-green" onClick={() => { setFileModalStep('NEW'); setFileNameInput(''); }}>NEW {fileType} FILE</button>
+                      <button className="btn btn-blue" onClick={() => { setFileModalStep('OPEN'); setSearchQuery(''); }}>OPEN {fileType} FILE</button>
+                      <button className="btn btn-red" onClick={() => { setFileModalStep('DELETE'); setSelectedChecks({}); }}>DELETE {fileType} FILE</button>
+                      <button className="btn btn-dark" style={{marginTop: '10px'}} onClick={() => setFileModalStep('TYPE')}>BACK</button>
                   </div>
               )}
 
@@ -139,8 +139,8 @@ const ControlButtons = () => {
                           {fileExists && <div style={{ color: '#E53935', fontSize: '0.7rem', marginTop: '5px', fontWeight: 'bold' }}>File already exists!</div>}
                       </div>
                       <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                          <button className="btn" style={{ background: '#E53935', minHeight: '40px' }} onClick={() => setFileModalStep('OPS')}>CANCEL</button>
-                          <button className="btn" style={{ background: canCreate ? '#43A047' : '#333', color: canCreate ? 'white' : '#888', minHeight: '40px' }} onClick={executeNewFile}>CREATE</button>
+                          <button className="btn btn-red" onClick={() => setFileModalStep('OPS')}>CANCEL</button>
+                          <button className={`btn ${canCreate ? 'btn-green' : 'btn-dark'}`} style={{ color: canCreate ? 'white' : '#888' }} onClick={executeNewFile}>CREATE</button>
                       </div>
                   </div>
               )}
@@ -150,25 +150,24 @@ const ControlButtons = () => {
                       <div style={{ padding: '15px', borderBottom: '1px solid #333', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <div style={{ color: '#039BE5', fontWeight: '900', fontSize: '1rem' }}>SELECT TO OPEN</div>
-                              <button onClick={forceRefresh} style={{ background: '#333', color: 'white', border: '1px solid #555', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>↻ REFRESH</button>
+                              <button onClick={forceRefresh} style={{ background: '#333', color: 'white', border: '1px solid #555', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>↻</button>
                           </div>
-                          <input type="text" placeholder={`Search ${fileType} files...`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '8px', background: '#111', border: '1px solid #444', color: 'white', borderRadius: '4px', outline: 'none' }} />
+                          <input type="text" placeholder={`Search ${fileType}...`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '8px', background: '#111', border: '1px solid #444', color: 'white', borderRadius: '4px', outline: 'none' }} />
                       </div>
                       <div style={{ flex: 1, overflowY: 'auto', padding: '10px', display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '250px' }}>
                           {filteredList.map(f => (
-                              <label key={f.name} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', cursor: 'pointer', background: selectedRadio === f.name ? 'rgba(3,155,229,0.2)' : '#1a1e29', borderLeft: selectedRadio === f.name ? '4px solid #039BE5' : '4px solid transparent', borderRadius: '4px', transition: '0.1s' }}>
+                              <label key={f.name} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', cursor: 'pointer', background: selectedRadio === f.name ? 'rgba(3,155,229,0.2)' : '#1a1e29', borderLeft: selectedRadio === f.name ? '4px solid #039BE5' : '4px solid transparent', transition: '0.1s' }}>
                                   <input type="radio" name="file_open" checked={selectedRadio === f.name} onChange={() => setSelectedRadio(f.name)} style={{ transform: 'scale(1.2)', accentColor: '#039BE5' }} />
                                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                      <span style={{ color: selectedRadio === f.name ? '#039BE5' : 'white', fontWeight: 'bold', fontSize: '0.9rem' }}>{f.name}</span>
-                                      <span style={{ color: '#aaa', fontSize: '0.7rem' }}>Created: {f.date}</span>
+                                      <span style={{ color: selectedRadio === f.name ? '#039BE5' : 'white', fontWeight: 'bold', fontSize: '0.85rem' }}>{f.name}</span>
                                   </div>
                               </label>
                           ))}
                           {filteredList.length === 0 && <div style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No files found.</div>}
                       </div>
                       <div style={{ padding: '15px', borderTop: '1px solid #333', display: 'flex', gap: '10px' }}>
-                          <button className="btn" style={{ background: '#2b303b', minHeight: '40px' }} onClick={() => { setSelectedRadio(''); setFileModalStep('OPS'); }}>  BACK</button>
-                          <button className="btn" style={{ background: selectedRadio ? '#039BE5' : '#333', color: selectedRadio ? 'white' : '#888', minHeight: '40px' }} onClick={executeOpenFile}>OPEN FILE</button>
+                          <button className="btn btn-dark" onClick={() => { setSelectedRadio(''); setFileModalStep('OPS'); }}>BACK</button>
+                          <button className={`btn ${selectedRadio ? 'btn-blue' : 'btn-dark'}`} style={{ color: selectedRadio ? 'white' : '#888' }} onClick={executeOpenFile}>OPEN</button>
                       </div>
                   </div>
               )}
@@ -178,25 +177,24 @@ const ControlButtons = () => {
                       <div style={{ padding: '15px', borderBottom: '1px solid #333', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <div style={{ color: '#E53935', fontWeight: '900', fontSize: '1rem' }}>SELECT TO DELETE</div>
-                              <button onClick={forceRefresh} style={{ background: '#333', color: 'white', border: '1px solid #555', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>↻ REFRESH</button>
+                              <button onClick={forceRefresh} style={{ background: '#333', color: 'white', border: '1px solid #555', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>↻</button>
                           </div>
-                          <input type="text" placeholder={`Search ${fileType} files...`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '8px', background: '#111', border: '1px solid #444', color: 'white', borderRadius: '4px', outline: 'none' }} />
+                          <input type="text" placeholder={`Search ${fileType}...`} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', padding: '8px', background: '#111', border: '1px solid #444', color: 'white', borderRadius: '4px', outline: 'none' }} />
                       </div>
                       <div style={{ flex: 1, overflowY: 'auto', padding: '10px', display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '250px' }}>
                           {filteredList.map(f => (
-                              <label key={f.name} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', cursor: 'pointer', background: selectedChecks[f.name] ? 'rgba(229,57,53,0.2)' : '#1a1e29', borderLeft: selectedChecks[f.name] ? '4px solid #E53935' : '4px solid transparent', borderRadius: '4px', transition: '0.1s' }}>
+                              <label key={f.name} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', cursor: 'pointer', background: selectedChecks[f.name] ? 'rgba(229,57,53,0.2)' : '#1a1e29', borderLeft: selectedChecks[f.name] ? '4px solid #E53935' : '4px solid transparent', transition: '0.1s' }}>
                                   <input type="checkbox" checked={!!selectedChecks[f.name]} onChange={(e) => setSelectedChecks({...selectedChecks, [f.name]: e.target.checked})} style={{ transform: 'scale(1.2)', accentColor: '#E53935' }} />
                                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                      <span style={{ color: selectedChecks[f.name] ? '#E53935' : 'white', fontWeight: 'bold', fontSize: '0.9rem' }}>{f.name}</span>
-                                      <span style={{ color: '#aaa', fontSize: '0.7rem' }}>Created: {f.date}</span>
+                                      <span style={{ color: selectedChecks[f.name] ? '#E53935' : 'white', fontWeight: 'bold', fontSize: '0.85rem' }}>{f.name}</span>
                                   </div>
                               </label>
                           ))}
                           {filteredList.length === 0 && <div style={{ color: '#888', textAlign: 'center', padding: '20px' }}>No files found.</div>}
                       </div>
                       <div style={{ padding: '15px', borderTop: '1px solid #333', display: 'flex', gap: '10px' }}>
-                          <button className="btn" style={{ background: '#2b303b', minHeight: '40px' }} onClick={() => { setSelectedChecks({}); setFileModalStep('OPS'); }}>  BACK</button>
-                          <button className="btn" style={{ background: Object.values(selectedChecks).some(v=>v) ? '#E53935' : '#333', color: Object.values(selectedChecks).some(v=>v) ? 'white' : '#888', minHeight: '40px' }} onClick={executeDeleteFiles}>DELETE</button>
+                          <button className="btn btn-dark" onClick={() => { setSelectedChecks({}); setFileModalStep('OPS'); }}>BACK</button>
+                          <button className={`btn ${Object.values(selectedChecks).some(v=>v) ? 'btn-red' : 'btn-dark'}`} style={{ color: Object.values(selectedChecks).some(v=>v) ? 'white' : '#888' }} onClick={executeDeleteFiles}>DELETE</button>
                       </div>
                   </div>
               )}
@@ -211,13 +209,13 @@ const ControlButtons = () => {
         <button className={`btn ${servoOn ? 'btn-green' : 'btn-dark'}`} onClick={handleServoToggle}>⚡SERVO:{servoOn ? 'ON' : 'OFF'}</button>
         <button className="btn btn-blue" onClick={handleHomeClick}>⌂ HOME</button>
         <button className={`btn ${isRunning ? 'btn-green' : 'btn-yellow'}`} onClick={handleRunPauseToggle}>{isRunning ? '► RUN' : '❚❚ PAUSE'}</button>
-        <button className={`btn ${isStarted ? 'btn-red' : 'btn-orange'}`} onClick={handleStartStopToggle}>{isStarted ? '⏹ STOP' : '▶ START'}</button>
+        <button className={`btn ${isStarted ? 'btn-red' : 'btn-purple'}`} onClick={handleStartStopToggle}>{isStarted ? '⏹ STOP' : '▶ START'}</button>
         <button className="btn btn-red" onClick={handleExitClick}>✖ EXIT</button>
         <div style={{ position: "relative", display: "flex", width: "100%" }}>
           <button className="btn btn-outline-green" style={{ width: "100%" }} onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}>{mode}</button>
           {isModeMenuOpen && (
-            <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '100%', background: '#111', border: '2px solid #4CAF50', zIndex: 1000, borderRadius: '6px', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.8)' }}>
-              <button className="popup-menu-btn" style={{ borderBottom: '1px solid #333' }} onClick={() => handleModeSelect('SIM')}>SIM</button>
+            <div style={{ position: 'absolute', bottom: 'calc(100% + 5px)', left: 0, width: '100%', background: '#111', border: '2px solid #4CAF50', zIndex: 1000, overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.8)' }}>
+              <button className="popup-menu-btn" onClick={() => handleModeSelect('SIM')}>SIM</button>
               <button className="popup-menu-btn" onClick={() => handleModeSelect('REAL')}>REAL</button>
             </div>
           )}
@@ -226,14 +224,14 @@ const ControlButtons = () => {
 
       <div className="btn-row">
         <div style={{ position: "relative", display: "flex", width: "100%" }}>
-            <button className="btn btn-purple" style={{ width: "100%" }} onClick={openFileMenu}>📁 FILES</button>
+            <button className="btn btn-teal" style={{ width: "100%" }} onClick={openFileMenu}>📁 FILES</button>
             {renderFileModal()}
         </div>
-        <div className="info-box dark-box" title={lastAction.TP || `Open TP: ${currentTp}`}>
-            {lastAction.TP || `Open TP: ${currentTp}`}
+        <div className="info-box dark-box" title={lastAction.TP || `TP: ${currentTp}`}>
+            {lastAction.TP || `TP: ${currentTp}`}
         </div>
-        <div className="info-box dark-box" title={lastAction.PR || `Open PR: ${currentPr}`}>
-            {lastAction.PR || `Open PR: ${currentPr}`}
+        <div className="info-box dark-box" title={lastAction.PR || `PR: ${currentPr}`}>
+            {lastAction.PR || `PR: ${currentPr}`}
         </div>
         <div className="info-box dark-box">Op: ppp</div>
         <button className="btn btn-pink">+ TOOLS</button>
@@ -246,10 +244,10 @@ const ControlButtons = () => {
             {hasError ? "⚠️ VIEW ERROR" : "✓ SYSTEM OK"}
           </button>
           {isSystemOkOpen && (
-            <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '200%', background: '#1e222b', border: hasError ? '2px solid #fc0606' : '2px solid #00E676', zIndex: 1000, borderRadius: '6px', padding: '15px', color: 'white', boxShadow: '0 10px 25px rgba(0,0,0,0.9)' }}>
+            <div style={{ position: 'absolute', bottom: 'calc(100% + 5px)', left: 0, width: '200%', background: '#1e222b', border: hasError ? '2px solid #fc0606' : '2px solid #00E676', zIndex: 1000, padding: '15px', color: 'white', boxShadow: '0 10px 25px rgba(0,0,0,0.9)' }}>
               <h4 style={{ margin: '0 0 10px 0', color: hasError ? '#f50707' : '#00E676', textTransform: 'uppercase', letterSpacing: '1px' }}>SYSTEM STATUS</h4>
               <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1.1rem' }}>{currentError}</p>
-              <button style={{ marginTop: '15px', width: '100%', padding: '10px', background: '#333', color: 'white', border: '1px solid #555', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase' }} onClick={() => setIsSystemOkOpen(false)}>CLOSE</button>
+              <button style={{ marginTop: '15px', width: '100%', padding: '10px', background: '#333', color: 'white', border: '1px solid #555', cursor: 'pointer', fontWeight: 'bold', textTransform: 'uppercase' }} onClick={() => setIsSystemOkOpen(false)}>CLOSE</button>
             </div>
           )}
         </div>

@@ -1,7 +1,6 @@
-// src/components/RightMenuSidebar.js
 import React, { useState } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
-import './RightPart.css'; // <-- ALL CSS MOVED HERE
+import './RightPart.css'; // <-- Colors are completely handled by this CSS file now
 
 const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
   const { sendCommand } = useWebSocket();
@@ -10,17 +9,18 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
 
   if (!isOpen) return null;
 
-  // FIXED: Now sends exact commands like "SET_AUTO" instead of "SET_MODE"
   const handleModeClick = (mode) => {
     sendCommand("SET_" + mode, ""); 
-    setActiveMode(mode); // Set Active to show white border
+    setActiveMode(mode); 
     setMenuLevel('MAIN');
+    onClose(); // 🔴 FIXED: Auto-close sidebar after clicking a mode
   };
 
   const handleViewClick = (viewName) => {
       onSelectView(viewName);
-      setActiveMode(''); // Clear mode if changing views
+      setActiveMode(''); 
       setMenuLevel('MAIN');
+      onClose(); // 🔴 FIXED: Auto-close sidebar after selecting a view
   }
 
   // Determine active states for highlighting
@@ -38,7 +38,6 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
                     <button className={`rms-btn btn-jog ${isJogActive ? 'rms-active' : ''}`} onClick={() => setMenuLevel('JOG_SUB')}><span>〰</span> JOG <span>▶</span></button>
                     <button className={`rms-btn btn-move ${isMoveActive ? 'rms-active' : ''}`} onClick={() => setMenuLevel('MOVE_SUB')}><span>🎯</span> MOVE <span>▶</span></button>
                     
-                    {/* Fixed to send correct backend requests with active indication */}
                     <button className={`rms-btn btn-auto ${activeMode === 'AUTO' ? 'rms-active' : ''}`} onClick={() => handleModeClick('AUTO')}><span>↻</span> AUTO</button>
                     <button className={`rms-btn btn-manual ${activeMode === 'MANUAL' ? 'rms-active' : ''}`} onClick={() => handleModeClick('MANUAL')}><span>⚙</span> MANUAL</button>
                     <button className={`rms-btn btn-remote ${activeMode === 'REMOTE' ? 'rms-active' : ''}`} onClick={() => handleModeClick('REMOTE')}><span>🌍</span> REMOTE</button>
@@ -65,4 +64,5 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
         </div>
   );
 };
+
 export default RightMenuSidebar;

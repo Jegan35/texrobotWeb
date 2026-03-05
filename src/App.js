@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { WebSocketProvider, useWebSocket } from './context/WebSocketContext';
 
-// Components (Make sure paths are correct)
+// Components
 import LeftPart from './components/LeftPart';
-import CenterPart from './components/CenterPart';
 import RightPart from './components/RightPart';
+// CenterPart removed as per the new 60/40 layout
 
 function AppContent() {
   const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket } = useWebSocket(); 
@@ -108,22 +108,17 @@ function AppContent() {
       )}
 
       {/* ==========================================
-          THE NEW 11-INCH TABLET 3-COLUMN COCKPIT (25-50-25)
+          THE NEW 11-INCH TABLET 2-COLUMN COCKPIT (60 - 40)
           ========================================== */}
       <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#151822', color: 'white', overflow: 'hidden' }}>
         
-        {/* 1. LEFT THUMB ZONE (25%) */}
-        <div style={{ width: '25%', minWidth: '240px', backgroundColor: '#1a1e29', borderRight: '2px solid #111', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
+        {/* 1. LEFT STAGE (60%) - Contains 3D Scene and Operations */}
+        <div style={{ width: '60%', backgroundColor: '#1a1e29', display: 'flex', flexDirection: 'column', zIndex: 10, borderRight: '2px solid #111' }}>
           <LeftPart />
         </div>
 
-        {/* 2. CENTER STAGE (50%) */}
-        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-          <CenterPart />
-        </div>
-
-        {/* 3. RIGHT THUMB ZONE (25%) */}
-        <div style={{ width: '25%', minWidth: '240px', backgroundColor: '#1a1e29', borderLeft: '2px solid #111', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
+        {/* 2. RIGHT THUMB ZONE (40%) - Contains Settings, Jog, Table */}
+        <div style={{ width: '40%', backgroundColor: '#1a1e29', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
           <RightPart />
         </div>
 

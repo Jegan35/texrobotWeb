@@ -3,18 +3,19 @@
 .control-buttons-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
     width: 100%;
-    padding-top: 5px;
+    height: 100%; /* 🔴 FIX: Parent-ன் முழு உயரத்தையும் எடுக்கும் */
+    padding: 2px 0;
+    box-sizing: border-box;
 }
 
-/* Reduced gap slightly on tablets to give more breathing room for buttons */
 .btn-row {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: clamp(4px, 0.8vw, 10px); 
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px; 
     width: 100%;
-    align-items: stretch;
+    flex: 1; /* 🔴 FIX: 3 வரிசைகளும் உயரத்தை சரிசமமாகப் பிரித்துக்கொள்ளும் */
 }
 
 .span-2 {
@@ -22,16 +23,17 @@
 }
 
 /* ==============================================================
-   INDUSTRIAL UNIFORM BUTTON STYLES (COMPACT FIX)
+   INDUSTRIAL UNIFORM BUTTON STYLES (PERFECT NEAT FIT)
    ============================================================== */
 .btn {
     width: 100%;
-    height: clamp(35px, 6vh, 45px); 
+    height: 100%; /* 🔴 FIX: Row-ன் உயரத்தை முழுமையாக நிரப்பும் */
+    min-height: 28px; /* ரொம்பவும் சிறுசாகிவிடாமல் தடுக்கும் */
+    max-height: 42px; /* ரொம்பவும் பெரிதாகிவிடாமல் தடுக்கும் */
     box-sizing: border-box;
-    border-radius: 0px; 
+    border-radius: 0px !important; /* Industrial Sharp Edges */
     font-weight: 900;
-    /* Font size shrunk slightly to fit SERVO:OFF perfectly */
-    font-size: clamp(9px, 1.1vw, 13px);
+    font-size: clamp(0.65rem, 0.8vw, 0.85rem); /* Scalable Text */
     color: white;
     cursor: pointer;
     display: flex;
@@ -39,112 +41,105 @@
     justify-content: center;
     text-align: center;
     text-transform: uppercase;
-    letter-spacing: 0px; /* Removed letter spacing to keep it compact */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding: 0 2px; /* Minimal padding to maximize internal space */
+    padding: 0 4px; 
     
-    border: 1px solid rgba(0,0,0,0.8);
-    box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+    border: 1px solid #444;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.5);
     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
     transition: all 0.1s ease-in-out;
-}
-
-.btn:hover {
-    filter: brightness(1.15);
+    outline: none;
 }
 
 .btn:active {
-    transform: translateY(2px);
-    box-shadow: none; 
-    border-color: rgba(0,0,0,0.8);
+    transform: scale(0.96);
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); 
+    border-color: #222;
 }
 
 /* BUTTON COLOR THEMES */
-.btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); }
+.btn-dark { background: linear-gradient(180deg, #37474F 0%, #263238 100%); }
 .btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); }
-.btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); color: #000; text-shadow: none; }
-.btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); }
-.btn-yellow { background: linear-gradient(180deg, #FFEE58 0%, #F57F17 100%); color: #111; text-shadow: none; }
+.btn-green-full { background: #00E676; color: #111; text-shadow: none; border-color: #00C853;}
+.btn-blue { background: linear-gradient(180deg, #039BE5 0%, #0277bd 100%); }
+.btn-yellow { background: linear-gradient(180deg, #FBC02D 0%, #F57F17 100%); color: #111; text-shadow: none; }
 .btn-orange { background: linear-gradient(180deg, #FFA726 0%, #E65100 100%); }
-.btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); }
-.btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); }
-.btn-pink { background: linear-gradient(180deg, #F06292 0%, #880E4F 100%); }
-.btn-purple-dark { background: linear-gradient(180deg, #9575CD 0%, #4527A0 100%); }
+.btn-red { background: linear-gradient(180deg, #E53935 0%, #b71c1c 100%); }
+.btn-purple { background: linear-gradient(180deg, #8E24AA 0%, #6A1B9A 100%); }
+.btn-pink { background: linear-gradient(180deg, #D81B60 0%, #880E4F 100%); }
+.btn-purple-dark { background: linear-gradient(180deg, #4527a0 0%, #311b92 100%); }
+.btn-teal { background: linear-gradient(180deg, #00897B 0%, #004D40 100%); }
 
 .btn-outline-green { 
-    background: #1a1e29; 
+    background: transparent; 
     border: 2px solid #4CAF50; 
     color: #4CAF50; 
-    box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.05); 
+    box-shadow: none;
     text-shadow: none; 
 }
-.btn-outline-green:active {
-    transform: translateY(2px);
-    box-shadow: none;
-}
+.btn-outline-green:active { transform: scale(0.96); }
 
 /* ==============================================================
-   INFO BOXES (FIXED OVERFLOW & EDGES)
+   INFO BOXES (PERFECT MATCH WITH BUTTONS)
    ============================================================== */
 .info-box { 
     width: 100%; 
-    height: clamp(35px, 6vh, 45px);
+    height: 100%; 
+    min-height: 28px;
+    max-height: 42px;
     box-sizing: border-box; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    padding: 0 2px; /* Minimized padding so text doesn't hide */
-    border-radius: 0px; 
-    font-size: clamp(8px, 0.95vw, 12px); /* Shrunk font slightly for "Open TP: None" to fit */
-    font-family: 'Consolas', monospace; 
+    padding: 0 4px; 
+    border-radius: 0px !important; 
+    font-size: clamp(0.65rem, 0.75vw, 0.8rem); 
     overflow: hidden; 
     white-space: nowrap; 
     text-overflow: ellipsis; 
     font-weight: bold;
-    letter-spacing: -0.3px; /* Pulls text together slightly to prevent edge cutoff */
 }
 
 .dark-box { 
-    background-color: #0a0e17; 
-    border: 2px solid rgba(0,0,0,0.8); 
-    color: #00bcd4; 
+    background-color: #111; 
+    border: 1px solid #333; 
+    color: #aaa; 
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
-    text-shadow: 0 0 3px rgba(0,188,212,0.4); 
 }
 
 .empty-box { 
     background-color: #111; 
-    border: 1px dashed #444; 
+    border: 1px dashed #555; 
     color: #555; 
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
 }
 
 .text-green { 
-    background-color: #0a0e17; 
-    border: 2px solid rgba(0,0,0,0.8); 
-    color: #00e676; 
-    font-size: clamp(9px, 1.1vw, 14px); 
-    text-shadow: 0 0 5px rgba(0,230,118,0.5); 
+    background-color: #111; 
+    border: 1px solid #333; 
+    color: #00E676; 
+    font-weight: 900;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); 
 }
 
 /* POPUP MENU BUTTON */
 .popup-menu-btn { 
     width: 100%; 
-    padding: 12px; 
+    padding: 8px 12px; 
     background: transparent; 
     color: white; 
-    border: none; 
+    border: none;
+    border-bottom: 1px solid #333;
     cursor: pointer; 
     font-weight: 900; 
-    font-size: 1rem; 
+    font-size: 0.85rem; 
     transition: 0.1s; 
     text-transform: uppercase; 
+    outline: none;
 }
+.popup-menu-btn:last-child { border-bottom: none; }
+.popup-menu-btn:hover { background: #4CAF50; color: #000; }
 
-.popup-menu-btn:hover { 
-    background: #4CAF50; 
-    color: #000; 
-}
+* { -webkit-touch-callout: none; }
+button, input[readonly] { -webkit-user-select: none; user-select: none; outline: none; }
