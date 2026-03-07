@@ -1,7 +1,7 @@
 import React from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
 
-const RightHeader = ({ onMenuToggle, currentMode, isOpen }) => {
+const RightHeader = ({ onMenuToggle, currentMode, isOpen, onSettingsClick }) => {
     const { robotState } = useWebSocket();
     
     // Automatically read the physically moving state from context
@@ -69,8 +69,28 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen }) => {
                 )}
             </div>
             
-            {/* 4. RIGHT: ANY EXTRA ACTIONS YOU MIGHT HAVE LATER */}
-            <div style={{ flex: 1 }}></div>
+            {/* 4. RIGHT: SETTINGS BUTTON */}
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                <button 
+                    onClick={onSettingsClick}
+                    style={{
+                        background: 'linear-gradient(180deg, #373d49 0%, #262b33 100%)',
+                        border: '1px solid #111',
+                        color: '#00bcd4',
+                        padding: '6px 20px',
+                        borderRadius: '4px',
+                        fontWeight: '900',
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.1), 0 3px 5px rgba(0,0,0,0.4)',
+                        letterSpacing: '1px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}>
+                    <span style={{ fontSize: '1.2rem' }}>⚙</span> SETTINGS
+                </button>
+            </div>
             
         </div>
     );

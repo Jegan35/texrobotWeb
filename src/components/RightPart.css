@@ -1,110 +1,93 @@
-/* src/components/RightPart.css */
-
+/* ==============================================================
+   1. MAIN LAYOUT & GRID STRUCTURE
+   ============================================================== */
 .rp-master-container { display: flex; flex-direction: row; height: 100%; width: 100%; background-color: #202430; overflow: hidden; position: relative; }
 .rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; overflow: hidden; box-sizing: border-box; }
 
-.rp-upper-half { display: flex; flex-direction: column; flex: 1 1 50%; min-height: 0; overflow: hidden; }
+.rp-upper-half { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 
-.rp-row-1 { flex: 1; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; }
+/* FIX: Shrink Row 1 slightly (38%) to give more space to Row 2 */
+.rp-row-1 { flex: 0 0 38%; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; }
 .rp-row-2 { flex: 1; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; min-height: 0; } 
+
+/* Row 4 Shrink Height */
+.rp-row-4 { flex: 0 0 auto !important; height: max-content; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; position: relative; z-index: 10; } 
+
+/* FIX: Ensure Row 5 only takes up exactly as much vertical space as it needs */
+.rp-row-5 { flex: 0 0 auto !important; height: max-content !important; display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 8px 10px; position: relative; z-index: 50; }
 
 .row-maximized { flex: 1 1 100% !important; min-height: 100% !important; } 
 .row-minimized { display: none !important; } 
-
-.rp-row-3 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #202430; padding: 5px 0px; overflow: visible; position: relative; z-index: 50; }
-
-.rp-row-4 { flex: 1 1 30%; min-height: 0; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; position: relative; z-index: 10; } 
-.rp-row-5 { flex: 0 0 auto; display: flex; flex-direction: column; justify-content: center; background: #1a1e29; padding: 5px 0px 8px 0px; position: relative; z-index: 50; }
-
-/* ==============================================================
-   NEW INDUSTRIAL CORNER PANEL BUTTON (ROW 1 & 2)
-   ============================================================== */
-.panel-action-btn { 
-    position: sticky; 
-    right: 0; 
-    margin-left: auto; 
-    background: #151822; 
-    color: #00bcd4; 
-    border-left: 2px solid #00bcd4; 
-    cursor: pointer; 
-    font-weight: 900; 
-    padding: 0 15px; 
-    font-size: 0.8rem; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    z-index: 20; 
-    box-shadow: -5px 0 10px rgba(0,0,0,0.5);
-    transition: all 0.1s;
-}
-.panel-action-btn:hover { background: #00bcd4; color: #111; }
-.panel-action-btn:active { background: #008ba3; border-left-color: #008ba3; }
 
 .rp-header-col { flex: 0 0 40px; width: 100%; overflow: hidden; background: #1a1e29; }
 .rp-content-col { flex: 1; display: flex; flex-direction: row; min-width: 0; overflow: hidden; }
 
 .rp-panel-left { flex: 0 0 clamp(320px, 40%, 480px); display: flex; flex-direction: column; border-right: 2px solid #111; overflow-y: auto; overflow-x: hidden; }
 .rp-panel-right { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.rp-panel-full { flex: 1; display: flex; flex-direction: column; width: 100%; overflow-y: auto; overflow-x: hidden; position: relative; }
+
 .bg-dark { background-color: #1a1e29; }
 .bg-light-dark { background-color: #151822; }
-
 .blurred-content { filter: blur(4px); opacity: 0.5; pointer-events: none; overflow: hidden !important; }
-
-.view-full-overlay { position: absolute; top: 35px; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: rgba(32, 36, 48, 0.3); z-index: 15; }
-.view-full-btn { background: linear-gradient(180deg, #00bcd4, #008ba3); color: white; font-weight: 900; padding: 12px 30px; border: 2px solid #fff; border-radius: 8px; cursor: pointer; font-size: 1.1rem; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.2s; text-transform: uppercase; }
-.view-full-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-
-.row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; width: 100%; min-height: 0; transition: filter 0.3s; }
-.light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; width: 100%; box-sizing: border-box; }
 
 .grid-7-col { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 .grid-11-col { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 
 /* ==============================================================
-   SPEED SETTINGS (FIXED SPINNERS & CENTERED TEXT)
+   2. BUTTONS, TABS & OVERLAYS
    ============================================================== */
-.speed-config-container { display: flex; flex-direction: column; width: 100%; min-height: 100%; padding: 15px 10px; box-sizing: border-box; color: white; }
-.speed-config-title { font-size: clamp(12px, 1.8vw, 16px); font-weight: 900; letter-spacing: 1px; margin-bottom: 20px; color: #00bcd4; text-align: center; flex-shrink: 0; }
-.speed-config-body { display: flex; flex-direction: column; flex: 1; }
-.fluid-speed-row { display: grid; grid-template-columns: 55px 1fr; align-items: center; height: 35px; gap: 10px; margin-bottom: 8px; }
-.fluid-speed-label { font-size: clamp(10px, 1.5vw, 14px); font-weight: bold; color: #ccc; white-space: nowrap; text-transform: uppercase; text-align: left; }
-
-.fluid-speed-input { 
-    width: 100%; 
-    height: 35px; 
-    box-sizing: border-box; 
-    background: #fff; 
-    color: #111; 
-    border: 2px solid #555; 
-    border-radius: 0; 
-    padding: 0; 
-    font-size: clamp(10px, 1.5vw, 14px); 
-    font-weight: 900; 
-    outline: none; 
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2); 
-    text-align: center !important; 
+.panel-action-btn { 
+    background: #151822; color: #00bcd4; border-left: 2px solid #00bcd4; cursor: pointer; 
+    font-weight: 900; padding: 0 15px; font-size: 0.8rem; display: flex; align-items: center; 
+    justify-content: center; letter-spacing: 1px; text-transform: uppercase; transition: all 0.1s;
 }
+.panel-action-btn:hover { background: #00bcd4; color: #111; }
+.panel-action-btn:active { background: #008ba3; border-left-color: #008ba3; }
 
-/* REMOVE UP/DOWN ARROWS FOR NUMBER INPUTS */
-.fluid-speed-input::-webkit-outer-spin-button,
-.fluid-speed-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-/* இதை இப்படி மாற்றுங்கள் */
-.fluid-speed-input[type=number] {
-    -moz-appearance: textfield; /* Firefox-க்காக */
-    appearance: textfield;      /* Standard - இதைச் சேர்த்தால் Error போய்விடும்! */
-}
+.view-full-overlay { position: absolute; top: 35px; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: rgba(32, 36, 48, 0.3); z-index: 15; }
+.view-full-btn { background: linear-gradient(180deg, #00bcd4, #008ba3); color: white; font-weight: 900; padding: 12px 30px; border: 2px solid #fff; border-radius: 8px; cursor: pointer; font-size: 1.1rem; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.2s; text-transform: uppercase; }
+.view-full-btn:active { transform: scale(0.95); box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 
-.speed-range-group { display: flex; width: 100%; align-items: center; gap: 5px; height: 35px; }
-.speed-range-group input[type="range"] { flex: 1; min-width: 50px; cursor: pointer; margin: 0; }
-.speed-range-group input[type="number"] { width: 60px; text-align: center; padding: 0 4px; }
+.dark-tabs { display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; overflow-x: auto; overflow-y: hidden; -ms-overflow-style: none; scrollbar-width: none; }
+.dark-tabs::-webkit-scrollbar { display: none; } 
+.bg-dark-deep { background: #202430; }
+.dark-tab { padding: 6px 10px; color: #aaa; font-weight: bold; font-size: clamp(9px, 1vw, 13px); cursor: pointer; border-radius: 0; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; }
+.dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-top: 2px solid #00bcd4; border-bottom: none; z-index: 10; }
+
+.row1-enhance-btn { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 25px; height: 50px; background: #151822; color: #00bcd4; border: 1px solid #111; border-left: none; border-radius: 0 6px 6px 0; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; font-weight: 900; font-size: 1.2rem; box-shadow: 3px 2px 5px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.1); transition: all 0.2s; }
+.row1-enhance-btn:hover { background: #00bcd4; color: #111; }
+.row1-enhance-btn:active { background: #008ba3; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
+.row1-enhance-btn.expanded { left: 0; border-left: 1px solid #111; border-right: 2px solid #00bcd4; border-radius: 0 4px 4px 0; box-shadow: 2px 0 5px rgba(0,0,0,0.5); }
 
 /* ==============================================================
-   JOG PANEL
+   3. PREMIUM 50/50 SPEED CONFIG VIEW STYLES
+   ============================================================== */
+.modern-speed-config-view { display: flex; flex-direction: column; height: 100%; padding: 20px 30px 30px 30px; box-sizing: border-box; background: #1e222b; }
+.modern-speed-config-view .config-header-label { color: #00bcd4; font-weight: 900; font-size: 1.1rem; letter-spacing: 1.5px; margin-bottom: 25px; text-transform: uppercase; }
+.modern-speed-config-view .config-layout { display: grid; grid-template-columns: 1fr 2px 1.2fr; gap: 40px; flex: 1; align-items: center; }
+
+.layout-controls { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
+.m-input-row { display: grid; grid-template-columns: 85px 1fr; align-items: center; gap: 15px; }
+.m-label { color: #e0e0e0; font-weight: 900; font-size: 0.95rem; text-align: right; letter-spacing: 0.5px; }
+
+.config-input { width: 100%; height: 35px; background: #ffffff; color: #111; border: 2px solid #ccc; border-radius: 4px; padding: 0 10px; font-size: 0.95rem; font-weight: 900; text-align: center; box-sizing: border-box; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
+.config-input:focus { border-color: #00bcd4; box-shadow: 0 0 5px rgba(0,188,212,0.5); }
+.config-input.custom-select-btn { justify-content: center; }
+
+.config-divider { width: 2px; height: 90%; background: linear-gradient(to bottom, transparent, #333, transparent); }
+
+.layout-gauge { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+.premium-gauge-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.gauge-title { color: #ffffff; font-weight: 900; font-size: 1.1rem; margin-bottom: 5px; letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.premium-svg-gauge { width: 100%; max-width: 280px; display: block; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3)); }
+
+.premium-slider-wrapper { width: 100%; max-width: 250px; margin-top: 15px; }
+.premium-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 0px; background: linear-gradient(to right, #00bcd4 0%, #00bcd4 var(--val, 50%), #2b303b var(--val, 50%), #2b303b 100%); outline: none; box-shadow: inset 0 2px 5px rgba(0,0,0,0.6); border: 1px solid #111; }
+.premium-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #ffffff; cursor: pointer; border: 2px solid #00bcd4; box-shadow: 0 0 10px rgba(0,0,0,0.5), inset 0 -2px 5px rgba(0,0,0,0.2); transition: transform 0.1s; }
+.premium-slider::-webkit-slider-thumb:active { transform: scale(1.1); }
+
+/* ==============================================================
+   4. JOG PANEL (CARTESIAN & JOINTS)
    ============================================================== */
 .jog-panel-container { display: flex; flex-direction: column; width: 100%; min-height: 100%; padding: 10px 5px; box-sizing: border-box; }
 .jog-panel-title { text-align: center; font-size: clamp(10px, 1.6vw, 14px); font-weight: 900; color: #00bcd4; padding-bottom: 10px; letter-spacing: 1px; flex-shrink: 0; border-bottom: 1px solid #333; margin-bottom: 10px; }
@@ -122,7 +105,6 @@
 .dpad-cross { display: grid; grid-template-columns: 45px 45px 45px; grid-template-rows: 45px 45px 45px; gap: 3px; margin-bottom: 25px; }
 .dpad-btn { background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 6px; font-weight: 900; font-size: 0.95rem; cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 3px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; transition: 0.1s; }
 .dpad-btn:active { transform: scale(0.95); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
-
 .text-pos { color: #4caf50 !important; text-shadow: 0 0 2px rgba(76, 175, 80, 0.4); }
 .text-neg { color: #ff5252 !important; text-shadow: 0 0 2px rgba(255, 82, 82, 0.4); }
 
@@ -135,8 +117,11 @@
 .dpad-z-row .dpad-btn { width: 55px; height: 38px; }
 
 /* ==============================================================
-   DATA PANELS
+   5. DATA PANELS & SETTINGS TABLES
    ============================================================== */
+.row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; width: 100%; min-height: 0; transition: filter 0.3s; }
+.light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; width: 100%; box-sizing: border-box; }
+
 .error-pos-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 4px 10px; align-items: center; width: 100%; }
 .ether-cat-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 8px 10px; align-items: center; width: 100%; }
 .encoder-offset-grid { display: grid; grid-template-columns: max-content minmax(60px, 1fr) max-content minmax(60px, 1fr) max-content minmax(60px, 1fr); gap: 12px 20px; align-items: center; min-width: 800px; padding: 10px 5px; }
@@ -151,9 +136,6 @@
 .data-var-title { font-weight: 900; margin-bottom: 15px; text-align: center; color: #333; font-size: clamp(10px, 1.2vw, 14px); }
 .data-var-flex { display: flex; gap: 10px; align-items: center; }
 
-/* ==============================================================
-   IO MODULES LED (FIXED: GREEN = OFF, RED = ON)
-   ============================================================== */
 .io-modules-wrapper { display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; padding: 5px 0; min-width: 600px; }
 .io-module-box { background: #fff; border: 1px solid #ccc; border-radius: 0; padding: 10px; box-sizing: border-box; width: 100%; min-height: max-content; }
 .io-module-title { border-left: 4px solid; padding-left: 8px; font-weight: 900; color: #333; margin-bottom: 10px; font-size: clamp(9px, 1vw, 12px); }
@@ -162,22 +144,9 @@
 .io-led-col span { font-size: 8px; font-weight: bold; color: #555; }
 
 .io-led { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #111; transition: 0.2s; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
+.io-led.off { background: #00E676; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
+.io-led.on { background: #FF3B30; box-shadow: 0 0 10px #FF3B30, inset 1px 1px 2px rgba(255,255,255,0.6); }
 
-/* OFF state = Green */
-.io-led.off { 
-    background: #00E676; 
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); 
-}
-
-/* ON state = Red */
-.io-led.on { 
-    background: #FF3B30; 
-    box-shadow: 0 0 10px #FF3B30, inset 1px 1px 2px rgba(255,255,255,0.6); 
-}
-
-/* ==============================================================
-   FORMS & INPUTS
-   ============================================================== */
 .light-input { border: 1px solid #888; padding: 4px; border-radius: 0; width: 100%; box-sizing: border-box; font-weight: 900; font-size: clamp(10px, 1vw, 12px); color: #111; background: #fff; outline: none; box-shadow: inset 0px 1px 2px rgba(0,0,0,0.1); height: 32px; cursor: pointer; text-align: center; }
 .light-input:focus { border-color: #039BE5; background: #e3f2fd; }
 .light-btn { background: #e0e0e0; border: 1px solid #555; padding: 4px 6px; cursor: pointer; font-weight: 900; text-align: center; border-radius: 0; color: #111; font-size: clamp(9px, 1vw, 12px); transition: 0.1s; white-space: nowrap; text-transform: uppercase; height: 32px; }
@@ -189,34 +158,34 @@
 .mech-table td { padding: 3px 5px; border: 1px solid #ccc; }
 .mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 4px; font-weight: 900; font-size: 0.75rem; border-radius: 0; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
 
-.dark-tabs { display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; overflow-x: auto; overflow-y: hidden; -ms-overflow-style: none; scrollbar-width: none; }
-.dark-tabs::-webkit-scrollbar { display: none; } 
-.bg-dark-deep { background: #202430; }
-.dark-tab { padding: 6px 10px; color: #aaa; font-weight: bold; font-size: clamp(9px, 1vw, 13px); cursor: pointer; border-radius: 0; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; }
-.dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-top: 2px solid #00bcd4; border-bottom: none; z-index: 10; }
-
 /* ==============================================================
-   TABLE SCROLL FIX (Min/Max Buttons Float OVER the scroll now)
+   6. TABLE, SCROLL, AND ACTION BARS
    ============================================================== */
 .table-container { flex: 1; display: flex; flex-direction: row; min-height: 0; padding: 0; background: #2b303b; }
+.table-wrapper { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; border: 2px solid #111; border-radius: 0; overflow: hidden; }
 
-.table-wrapper { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    background: #fff; 
-    position: relative; 
-    border: 2px solid #111; 
-    border-radius: 0; 
-    overflow: hidden; 
+/* EDIT BUTTONS IN ROW 4 HEADER */
+.pro-th-btn {
+    background: linear-gradient(180deg, #373d49 0%, #262b33 100%);
+    color: #fff;
+    border: 1px solid #111;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.1s;
+    text-transform: uppercase;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 2px 3px rgba(0,0,0,0.5);
+    height: 26px; 
 }
+.pro-th-btn:active { transform: translateY(2px); box-shadow: none; }
+.pro-th-btn.edit-btn.active { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); color: #fff; border-color: #111; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), 0 0 8px rgba(76, 175, 80, 0.6); }
 
-.table-scroller {
-    flex: 1;
-    overflow: auto;
-    width: 100%;
-    height: 100%;
-}
+.table-scroller { flex: 1; overflow: auto; width: 100%; height: 100%; }
 .table-scroller::-webkit-scrollbar { width: 14px; height: 14px; }
 .table-scroller::-webkit-scrollbar-track { background: #1a1e29; border-left: 1px solid #444; border-top: 1px solid #444; }
 .table-scroller::-webkit-scrollbar-thumb { background: #555; border-radius: 0; border: 1px solid #111; }
@@ -229,7 +198,7 @@
 .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 30px; }
 .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 60px; }
 .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 70px; }
-.data-table th:last-child, .data-table td:last-child { width: 20%; padding-right: 45px !important; text-align: left; }
+.data-table th:last-child, .data-table td:last-child { width: 20%; padding-right: 15px !important; text-align: left; }
 
 .rp-row-2 .data-table th, .rp-row-2 .data-table td { padding: 8px 6px; height: 38px; }
 .rp-row-4 .data-table th, .rp-row-4 .data-table td { padding: 14px 12px; font-size: clamp(12px, 1.5vw, 16px); }
@@ -238,30 +207,13 @@
 .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
 .empty-table-text { color: #555; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding: 20px !important; }
 
-/* Fixed Table Min/Max Button that never scrolls away - MOVED TO BOTTOM RIGHT */
-.table-min-max-btn { 
-    position: absolute; 
-    right: 0; 
-    bottom: 0; 
-    background: #039BE5; 
-    color: #fff; 
-    font-weight: 900; 
-    font-size: 0.75rem; 
-    padding: 6px 12px; 
-    cursor: pointer; 
-    border-top: 2px solid #111; 
-    border-left: 2px solid #111; 
-    z-index: 10; 
-    transition: 0.1s;
-    box-shadow: -2px -2px 5px rgba(0,0,0,0.4); 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.table-min-max-btn:active { background: #0277bd; color: #fff; }
+/* Fixed Row 4 Shrink */
+.row4-auto-height { flex: 0 0 auto !important; height: auto !important; }
+.row4-table-wrapper { flex: 0 0 auto !important; height: auto !important; border: none; }
+.row4-scroller { overflow-y: hidden !important; height: auto; padding-bottom: 0; }
 
 /* ==============================================================
-   CONTROL BUTTONS & MENUS
+   7. CONTROL BUTTONS & DROPDOWNS
    ============================================================== */
 .rel-flex { position: relative; display: flex; }
 .gap-flex { display: flex; gap: 5px; }
@@ -280,6 +232,18 @@
 .tp-standalone-input { width: 100%; height: 35px; box-sizing: border-box; background: #fff; border: 2px solid rgba(0,0,0,0.8); border-radius: 0; text-align: center; font-weight: 900; font-size: clamp(6px, 0.8vw, 12px); color: #111; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); cursor: pointer; text-transform: uppercase; margin: 0; padding: 0; }
 .tp-standalone-input:focus { border-color: #039BE5; background: #e3f2fd; }
 
+.custom-select-btn { display: flex; align-items: center; justify-content: center; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.custom-select-menu { position: absolute; left: 0; width: 100%; min-width: max-content; max-height: 250px; overflow-y: auto; background: #e3f2fd; border: 2px solid #111; z-index: 10000; display: flex; flex-direction: column; }
+.custom-select-menu-up { bottom: 100%; box-shadow: 4px -4px 10px rgba(0,0,0,0.6); }
+.custom-select-menu-down { top: 100%; box-shadow: 4px 4px 10px rgba(0,0,0,0.6); }
+
+.custom-select-menu::-webkit-scrollbar { width: 12px; }
+.custom-select-menu::-webkit-scrollbar-track { background: #202430; border-left: 1px solid #111; }
+.custom-select-menu::-webkit-scrollbar-thumb { background: #555; border: 1px solid #111; border-radius: 0; }
+
+.custom-select-item { padding: 10px 15px; font-size: 0.85rem; font-weight: 900; color: #111; border-bottom: 1px solid #999; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.1s; }
+.custom-select-item:hover, .custom-select-item:active { background: #039BE5; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
 .dropdown-menu { position: absolute; bottom: calc(100% + 8px); left: 0; transform: none; width: max-content; min-width: 140px; background-color: #263238; padding: 8px; border-radius: 0; box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8); display: flex; flex-direction: column; gap: 6px; z-index: 1000; border: 2px solid #00bcd4; }
 .dropdown-menu::after { content: ''; position: absolute; top: 100%; left: 20px; border-width: 8px; border-style: solid; border-color: #00bcd4 transparent transparent transparent; }
 .dropdown-menu input { background-color: #fff; color: #111; border-radius: 0 !important; border: 1px solid #111 !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3); }
@@ -296,7 +260,29 @@
 .inst-qty-input { width: 50px; text-align: center; border: 1px solid #111; font-weight: 900; font-size: 0.9rem; outline: none; border-radius: 0; height: 35px; box-sizing: border-box; }
 
 /* ==============================================================
-   MODALS & ALERTS
+   8. SETTINGS OVERLAY
+   ============================================================== */
+.settings-master-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #1a1e29; z-index: 9000; display: flex; flex-direction: column; animation: slideInFade 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+@keyframes slideInFade { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.settings-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: #151822; border-bottom: 2px solid #00bcd4; box-shadow: 0 4px 10px rgba(0,0,0,0.6); z-index: 10; }
+.settings-title { color: #00bcd4; font-weight: 900; font-size: 1.4rem; letter-spacing: 2px; text-shadow: 0 0 8px rgba(0,188,212,0.5); display: flex; align-items: center; gap: 10px; }
+
+.settings-close-btn { background: linear-gradient(180deg, #E53935 0%, #b71c1c 100%); color: white; border: 1px solid #111; padding: 8px 25px; font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2), 0 4px 6px rgba(0,0,0,0.5); border-radius: 4px; transition: 0.1s; letter-spacing: 1px; }
+.settings-close-btn:active { transform: translateY(2px); box-shadow: none; }
+
+.settings-body { display: flex; flex: 1; min-height: 0; }
+.settings-sidebar { width: 260px; background: #202430; border-right: 2px solid #111; display: flex; flex-direction: column; padding: 15px 0; z-index: 5; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+
+.set-tab-btn { background: transparent; color: #888; border: none; border-left: 4px solid transparent; padding: 18px 20px; text-align: left; font-weight: 900; font-size: 0.95rem; cursor: pointer; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+.set-tab-btn:hover { background: rgba(0,188,212,0.05); color: #ccc; }
+.set-tab-btn.active { background: #151822; color: #00bcd4; border-left: 4px solid #00bcd4; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); text-shadow: 0 0 5px rgba(0,188,212,0.3); }
+
+.settings-content-area { flex: 1; display: flex; flex-direction: column; background: #2b303b; min-width: 0; }
+.settings-scroll-content { flex: 1; overflow-y: auto; background: #f4f3ef; display: flex; flex-direction: column; padding: 0; }
+
+/* ==============================================================
+   9. MODALS & ALERTS
    ============================================================== */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; }
 .modal-box { background-color: #202430; border-top: 4px solid #8e24aa; padding: 20px; width: 320px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
@@ -325,7 +311,7 @@
 .debug-red { background: #e53935; color: white; border-color: #b71c1c; }
 
 /* ==============================================================
-   SIDEBAR MENU
+   10. SIDEBAR MENU
    ============================================================== */
 .rms-container { position: absolute; top: 0; right: 0; z-index: 9999; width: 260px; height: 100%; background-color: #1a1e29; border-left: 2px solid #00bcd4; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; overflow-y: auto; box-shadow: -10px 0 20px rgba(0,0,0,0.8); }
 .rms-title { color: white; font-weight: 900; font-size: 1rem; margin-bottom: 20px; letter-spacing: 1px; }
@@ -338,11 +324,12 @@
 .btn-auto { background: linear-gradient(180deg, #9c27b0, #6a1b9a); }
 .btn-manual { background: linear-gradient(180deg, #673ab7, #4527a0); }
 .btn-remote { background: linear-gradient(180deg, #ff9800, #ef6c00); }
+.btn-graph { background: linear-gradient(180deg, #546e7a, #263238); }
 .btn-close { background: linear-gradient(180deg, #f44336, #c62828); margin-top: auto; }
 .btn-back { background: #333947; color: #fff; border: 2px solid #111; }
 
 /* ==============================================================
-   GRAPH VIEW
+   11. GRAPH VIEW
    ============================================================== */
 .modern-graph-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #fdfdfd; padding: 10px 15px; box-sizing: border-box; overflow-x: auto; }
 .mg-scroll-wrapper { min-width: 650px; flex: 1; display: flex; flex-direction: column; }
@@ -351,7 +338,7 @@
 .mg-start { background: linear-gradient(180deg, #4CAF50, #2E7D32); }
 .mg-stop { background: linear-gradient(180deg, #F44336, #C62828); }
 .mg-toggle-btn:active { transform: translateY(2px); box-shadow: none; }
-.mg-axis-selector { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.mg-axis-selector { display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 90px; }
 .mg-axis-selector label { font-weight: 900; font-size: 0.8rem; color: #333; }
 .gas-dropdown { padding: 4px 8px; border: 1px solid #888; border-radius: 3px; font-weight: bold; font-size: 0.8rem; outline: none; background: #fff; cursor: pointer; }
 
@@ -374,92 +361,20 @@
 .mg-x-label { text-align: center; font-weight: 900; font-size: 0.85rem; color: #333; margin-top: 2px; }
 
 /* ==============================================================
-   UNIVERSAL CUSTOM INDUSTRIAL SELECT DROPDOWN (LAG-FREE)
+   12. UNIVERSAL FIXES (TOUCH, SELECTION, POINTER)
    ============================================================== */
-.custom-select-btn { display: flex; align-items: center; justify-content: center; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.custom-select-menu { position: absolute; left: 0; width: 100%; min-width: max-content; max-height: 250px; overflow-y: auto; background: #e3f2fd; border: 2px solid #111; z-index: 10000; display: flex; flex-direction: column; }
-
-.custom-select-menu-up { bottom: 100%; box-shadow: 4px -4px 10px rgba(0,0,0,0.6); }
-.custom-select-menu-down { top: 100%; box-shadow: 4px 4px 10px rgba(0,0,0,0.6); }
-
-.custom-select-menu::-webkit-scrollbar { width: 12px; }
-.custom-select-menu::-webkit-scrollbar-track { background: #202430; border-left: 1px solid #111; }
-.custom-select-menu::-webkit-scrollbar-thumb { background: #555; border: 1px solid #111; border-radius: 0; }
-
-.custom-select-item { padding: 10px 15px; font-size: 0.85rem; font-weight: 900; color: #111; border-bottom: 1px solid #999; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.1s; }
-.custom-select-item:hover, .custom-select-item:active { background: #039BE5; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-
-/* ==============================================================
-   ROW 1 ENHANCE BUTTON (COLLAPSE LEFT PANEL)
-   ============================================================== */
-.row1-enhance-btn {
-    position: absolute;
-    left: 0; 
-    top: 50%;
-    transform: translateY(-50%);
-    width: 25px;
-    height: 50px;
-    background: #151822;
-    color: #00bcd4;
-    border: 1px solid #111;
-    border-left: none; /* Flush with the left border */
-    border-radius: 0 6px 6px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 100;
-    font-weight: 900;
-    font-size: 1.2rem;
-    box-shadow: 3px 2px 5px rgba(0,0,0,0.5), inset 1px 1px 0 rgba(255,255,255,0.1);
-    transition: all 0.2s;
-}
-
-.row1-enhance-btn:hover { 
-    background: #00bcd4; 
-    color: #111; 
-}
-
-.row1-enhance-btn:active {
-    background: #008ba3;
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8);
-}
-
-/* When the right panel is expanded, the button flips to the left edge neatly */
-.row1-enhance-btn.expanded {
-    left: 0;
-    border-left: 1px solid #111;
-    border-right: 2px solid #00bcd4;
-    border-radius: 0 4px 4px 0;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
-}
-/* PREVENT LONG PRESS COPY/SHARE MENU ON TABLETS */
-* {
-    -webkit-touch-callout: none; /* iOS/iPad popup-ஐ தடுக்கும் */
-}
-.jib-btn, .dpad-btn, button, .tp-btn, .rms-btn, .panel-action-btn {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    outline: none;
-}
-/* ==============================================================
-   PREVENT LONG PRESS POPUPS (COPY / SHARE / DOWNLOAD) 100% FIX
-   ============================================================== */
-body, html {
-    -webkit-touch-callout: none !important;
-}
+body, html { -webkit-touch-callout: none !important; }
+* { -webkit-touch-callout: none; }
 
 .jib-btn, .dpad-btn, .tp-btn, .rms-btn, .panel-action-btn, button {
-    -webkit-touch-callout: none !important; /* iOS/iPad popup-ஐ தடுக்கும் */
-    -webkit-user-select: none !important; /* Safari */
-    -khtml-user-select: none !important; /* Konqueror HTML */
-    -moz-user-select: none !important; /* Firefox */
-    -ms-user-select: none !important; /* IE/Edge */
-    user-select: none !important; /* Chrome/Android */
-    -webkit-user-drag: none !important; /* Drag செய்வதை தடுக்கும் */
-    -webkit-tap-highlight-color: transparent !important; /* க்ளிக் செய்யும் போது வரும் நீல நிறத்தை தடுக்கும் */
-    touch-action: manipulation !important; /* Browser-ன் Default Touch-ஐ தடுக்கும் */
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+    outline: none;
 }

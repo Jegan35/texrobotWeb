@@ -3,6 +3,7 @@ import { useWebSocket } from '../context/WebSocketContext';
 import RightHeader from './RightHeader';
 import RightMenuSidebar from './RightMenuSidebar';
 import './RightPart.css'; 
+
 const INST_OPTIONS = ["Inst", "MOVJ", "MOVJ_dg", "MOVL", "MOVC", "MVLEX_Deg", "MVLEX_mm", "Pallet_Matrix", "Num_of_row", "Num_of_colm", "pos_add_x", "pos_add_y", "pos_add_z", "delay_ms", "go_to", "loop", "Start If", "End If", "Start-Con", "End-Con", "Wait", "DI-1", "DI-2", "DI-3", "DI-4", "DI-5", "DI-6", "DI-7", "DI-8", "DI-9", "DI-10", "DI-11", "DI-12", "DI-13", "DI-14", "DI-15", "DI-16", "DO-1", "DO-2", "DO-3", "DO-4", "DO-5", "DO-6", "DO-7", "DO-8", "DO-9", "DO-10", "DO-11", "DO-12", "DO-13", "DO-14", "DO-15", "DO-16", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4", "DI-1 Chk", "DI-2 Chk", "DI-3 Chk", "DI-4 Chk", "DI-5 Chk", "DI-6 Chk", "DI-7 Chk", "DI-8 Chk", "DI-9 Chk", "DI-10 Chk", "DI-11 Chk", "DI-12 Chk", "DI-13 Chk", "DI-14 Chk", "DI-15 Chk", "DI-16 Chk", "DI-1 Un Chk", "DI-2 Un Chk", "DI-3 Un Chk", "DI-4 Un Chk", "DI-5 Un Chk", "DI-6 Un Chk", "DI-7 Un Chk", "DI-8 Un Chk", "DI-9 Un Chk", "DI-10 Un Chk", "DI-11 Un Chk", "DI-12 Un Chk", "DI-13 Un Chk", "DI-14 Un Chk", "DI-15 Un Chk", "DI-16 Un Chk", "= Assign", "== Equal", "!= Not Eql", "<", ">", "<=", ">=", "+", "-", "&", "stop", "Servo off"];
 const DI_OPTIONS = ["Di-1", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
 const DI2_OPTIONS = ["Di-2", "D-1", "D-2", "D-3", "D-4", "D-5", "D-6", "D-7", "D-8", "D-9", "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "D-16"];
@@ -67,36 +68,68 @@ const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, onRo
     );
 });
 
+const PremiumSpeedGauge = memo(({ speedVal }) => {
+    const radius = 40;
+    const circumference = Math.PI * radius; 
+    const fillLength = (speedVal / 100) * circumference;
+    const angle = ((speedVal / 100) * 180) - 90; 
+    
+    return (
+        <div className="premium-gauge-container">
+            <div className="gauge-title">GLOBAL SPEED</div>
+            <svg className="premium-svg-gauge" viewBox="0 0 100 65" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <linearGradient id="gauge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#00E676" />
+                        <stop offset="100%" stopColor="#FFEB3B" />
+                    </linearGradient>
+                </defs>
+                <path d="M 10,50 A 40,40 0 0,1 90,50" fill="none" stroke="#2a2d35" strokeWidth="12" />
+                <path d="M 10,50 A 40,40 0 0,1 90,50" fill="none" stroke="url(#gauge-grad)" strokeWidth="12" strokeDasharray={`${fillLength} ${circumference}`} />
+                <g transform={`rotate(${angle}, 50, 50)`}>
+                    <path d="M 48.5,50 L 50,18 L 51.5,50 Z" fill="#fff" />
+                </g>
+                <path d="M 42,50 A 8,8 0 0,1 58,50" fill="#039BE5" />
+                <g transform="translate(37, 46)">
+                    <rect x="0" y="0" width="26" height="14" rx="2" fill="#151822" stroke="#039BE5" strokeWidth="1" />
+                    <text x="13" y="10" fill="#039BE5" fontSize="8" fontWeight="bold" textAnchor="middle">{speedVal}%</text>
+                </g>
+            </svg>
+        </div>
+    );
+});
+
 const RightPart = () => {
-    useEffect(() => {
-    const disableContextMenu = (e) => {
-      e.preventDefault();
-    };
+  useEffect(() => {
+    const disableContextMenu = (e) => { e.preventDefault(); };
     document.addEventListener("contextmenu", disableContextMenu);
-    return () => {
-      document.removeEventListener("contextmenu", disableContextMenu);
-    };
+    return () => { document.removeEventListener("contextmenu", disableContextMenu); };
   }, []);
+  
   const { sendCommand, robotState, isGraphReading, setGraphReading } = useWebSocket();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
-  const [expandedTable, setExpandedTable] = useState('NONE'); 
-  
-  // ---> NEW STATE: ENHANCE ROW 1 RIGHT PART <---
-  const [isRow1RightExpanded, setIsRow1RightExpanded] = useState(false);
-
   const [openDropdown, setOpenDropdown] = useState(null);
   
-  // Custom Dropdown States
+  // --- NEW: ROW 2 TABBED FILE STATE ---
+  const [activeFileTab, setActiveFileTab] = useState('TP'); // Defaults to Target Point
+  const [bottomPanelMode, setBottomPanelMode] = useState('TP_CTRL'); // Defaults to TP Controls
+  
+  // SETTINGS OVERLAY STATE
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [mainSettingsTab, setMainSettingsTab] = useState('DIAGNOSTIC'); 
+  const [activeDiagTab, setActiveDiagTab] = useState('Error Pos'); 
+  const [activeConfigTab, setActiveConfigTab] = useState('Encoder Offset');
+  
+  // Custom Dropdowns
   const [selInst, setSelInst] = useState(INST_OPTIONS[0]);
   const [selDi1, setSelDi1] = useState(DI_OPTIONS[0]);
   const [selDi2, setSelDi2] = useState(DI2_OPTIONS[0]);
   const [selHL, setSelHL] = useState(DIG_STATE_OPTIONS[0]);
   const [selVar1, setSelVar1] = useState(VAR1_OPTIONS[0]);
   const [selVar2, setSelVar2] = useState(VAR2_OPTIONS[0]);
-  
   const [varOutSel, setVarOutSel] = useState(VAR_MONITOR_LIST[0]);
   const [varInSel, setVarInSel] = useState(VAR_MONITOR_LIST[0]);
   const [simDiNum, setSimDiNum] = useState(DI_SIM_NUM_LIST[0]);
@@ -132,9 +165,6 @@ const RightPart = () => {
   const [selectedPrIndex, setSelectedPrIndex] = useState(0);
   const [showModTpModal, setShowModTpModal] = useState(false);
   const [modTpData, setModTpData] = useState({ name: '', x: '', y: '', z: '' });
-  
-  const [activeRow1Tab, setActiveRow1Tab] = useState('Error Pos'); 
-  const [activeRow2Tab, setActiveRow2Tab] = useState('Programs File');
   const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
 
   const [selectedGraphAxis, setSelectedGraphAxis] = useState('All-axis');
@@ -182,10 +212,15 @@ const RightPart = () => {
   const doVal = rs.do_val || 0;
 
   useEffect(() => { if (rs.tp_run_mode) setDisplayTpMode(rs.tp_run_mode); }, [rs.tp_run_mode]);
+  useEffect(() => { if (rs.global_speed_percentage !== undefined) setGlobalSpeed(rs.global_speed_percentage); }, [rs.global_speed_percentage]);
 
   const handlePointerDown = (axis) => sendCommand(motionType === 'JOG' ? "BTN_PRESS" : "BTN_CLICK", axis);
   const handlePointerUp = (axis) => { if (motionType === 'JOG') sendCommand("BTN_RELEASE", axis); };
-  const handleGlobalSpeedChange = (e) => { setGlobalSpeed(e.target.value); sendCommand("SET_GLOBAL_SPEED", e.target.value); };
+  const handleGlobalSpeedChange = (e) => { 
+      const newVal = parseInt(e.target.value);
+      setGlobalSpeed(newVal); 
+      sendCommand("SET_GLOBAL_SPEED", newVal); 
+  };
   const applyMmSpeed = () => sendCommand("SET_MM_SPEED", mmSpeedText);
   const applyDegSpeed = () => sendCommand("SET_DEG_SPEED", degSpeedText);
   const handleTpModeSelect = (uiLabel, backendCmd) => { setDisplayTpMode(uiLabel); sendCommand('SET_TP_RUN_MODE', backendCmd); setOpenDropdown(null); };
@@ -473,28 +508,50 @@ const RightPart = () => {
   );
 
   const renderSpeedConfig = () => (
-    <div className="speed-config-container">
-      <div className="speed-config-title">SPEED SETTINGS</div>
-      <div className="speed-config-body">
-        <div className="fluid-speed-row"><span className="fluid-speed-label">MM</span>
-            {renderDropdown('SPEED_MM', MM_OPTIONS, mmIncVal, (v) => { setMmIncVal(v); sendCommand("SET_MM_INC", v); }, "fluid-speed-input", "down")}
+    <div className="modern-speed-config-view">
+        <div className="config-header-label">SETTINGS</div>
+        <div className="config-layout">
+            <div className="layout-controls">
+                <div className="m-input-row">
+                    <span className="m-label">MM Inc:</span>
+                    {renderDropdown('SPEED_MM_INC', MM_OPTIONS, mmIncVal, (v) => { setMmIncVal(v); sendCommand("SET_MM_INC", v); }, "config-input", "down", {width: '100%'})}
+                </div>
+                <div className="m-input-row">
+                    <span className="m-label">MM/S:</span>
+                    <input type="number" className="config-input" value={mmSpeedText} onChange={(e) => setMmSpeedText(e.target.value)} onBlur={applyMmSpeed} />
+                </div>
+                <div className="m-input-row">
+                    <span className="m-label">DEG Inc:</span>
+                    {renderDropdown('SPEED_DEG_INC', DEG_OPTIONS, degIncVal, (v) => { setDegIncVal(v); sendCommand("SET_DEG_INC", v); }, "config-input", "down", {width: '100%'})}
+                </div>
+                <div className="m-input-row">
+                    <span className="m-label">DEG/S:</span>
+                    <input type="number" className="config-input" value={degSpeedText} onChange={(e) => setDegSpeedText(e.target.value)} onBlur={applyDegSpeed} />
+                </div>
+                <div className="m-input-row">
+                    <span className="m-label">FRAME:</span>
+                    {renderDropdown('SPEED_FRAME', FRAME_OPTIONS, frameVal, (v) => { setFrameVal(v); sendCommand("SET_FRAME", v); }, "config-input", "up", {width: '100%'})}
+                </div>
+            </div>
+            
+            <div className="config-divider"></div>
+
+            <div className="layout-gauge">
+                <PremiumSpeedGauge speedVal={globalSpeed} />
+                <div className="slider-box-custom">
+                    <input 
+                        type="range" 
+                        min="1" 
+                        max="100" 
+                        value={globalSpeed} 
+                        style={{ '--val': `${globalSpeed}%` }}
+                        onChange={(e) => setGlobalSpeed(parseInt(e.target.value))} 
+                        onMouseUp={handleGlobalSpeedChange} 
+                        onTouchEnd={handleGlobalSpeedChange}
+                    />
+                </div>
+            </div>
         </div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">MM/S</span><input type="number" className="fluid-speed-input" value={mmSpeedText} onChange={(e) => setMmSpeedText(e.target.value)} onBlur={applyMmSpeed} /></div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">DEG</span>
-            {renderDropdown('SPEED_DEG', DEG_OPTIONS, degIncVal, (v) => { setDegIncVal(v); sendCommand("SET_DEG_INC", v); }, "fluid-speed-input", "down")}
-        </div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">DEG/S</span><input type="number" className="fluid-speed-input" value={degSpeedText} onChange={(e) => setDegSpeedText(e.target.value)} onBlur={applyDegSpeed} /></div>
-        <div className="fluid-speed-row"><span className="fluid-speed-label">FRAME</span>
-            {renderDropdown('SPEED_FRAME', FRAME_OPTIONS, frameVal, (v) => { setFrameVal(v); sendCommand("SET_FRAME", v); }, "fluid-speed-input", "down")}
-        </div>
-        <div className="fluid-speed-row">
-          <span className="fluid-speed-label">SPEED</span>
-          <div className="speed-range-group">
-              <input type="range" min="1" max="100" value={globalSpeed} onChange={(e) => setGlobalSpeed(e.target.value)} onMouseUp={handleGlobalSpeedChange} onTouchEnd={handleGlobalSpeedChange} />
-              <input type="number" className="fluid-speed-input" value={globalSpeed} onChange={handleGlobalSpeedChange} />
-          </div>
-        </div>
-      </div>
     </div>
   );
 
@@ -561,7 +618,7 @@ const RightPart = () => {
                         <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('Rx-')} onPointerUp={()=>handlePointerUp('Rx-')} onPointerLeave={()=>handlePointerUp('Rx-')}>Rx-</button>
                         <div className="dpad-center">ROT</div>
                         <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('Rx+')} onPointerUp={()=>handlePointerUp('Rx+')} onPointerLeave={()=>handlePointerUp('Rx+')}>Rx+</button>
-                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerUp={()=>handlePointerUp('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
+                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerDown={()=>handlePointerDown('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
                     </div>
                     <div className="dpad-z-row">
                         <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
@@ -576,6 +633,60 @@ const RightPart = () => {
 
   return (
     <>
+      {/* SETTINGS OVERLAY */}
+      {isSettingsOpen && (
+          <div className="settings-master-overlay">
+              <div className="settings-header">
+                  <div className="settings-title"><span style={{fontSize: '1.8rem'}}>⚙</span> SYSTEM SETTINGS</div>
+                  <button className="settings-close-btn" onClick={() => setIsSettingsOpen(false)}>✖ CLOSE PANEL</button>
+              </div>
+              <div className="settings-body">
+                  <div className="settings-sidebar">
+                      <button className={`set-tab-btn ${mainSettingsTab === 'DIAGNOSTIC' ? 'active' : ''}`} onClick={() => setMainSettingsTab('DIAGNOSTIC')}>
+                          📊 DIAGNOSTIC SETTINGS
+                      </button>
+                      <button className={`set-tab-btn ${mainSettingsTab === 'CONFIG' ? 'active' : ''}`} onClick={() => setMainSettingsTab('CONFIG')}>
+                          🛠 CONFIG SETTINGS
+                      </button>
+                  </div>
+                  <div className="settings-content-area">
+                      {mainSettingsTab === 'DIAGNOSTIC' && (
+                          <>
+                              <div className="dark-tabs bg-dark-deep">
+                                  {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
+                                      <div key={tab} className={`dark-tab ${activeDiagTab === tab ? 'active' : ''}`} onClick={() => setActiveDiagTab(tab)}>{tab}</div>
+                                  ))}
+                              </div>
+                              <div className="settings-scroll-content">
+                                  {activeDiagTab === 'Error Pos' && renderErrorPos()}
+                                  {activeDiagTab === 'Ether Cat' && renderEtherCat()}
+                                  {activeDiagTab === 'IO Modules' && renderIOModules()}
+                                  {activeDiagTab === 'Graph' && renderGraphView()}
+                              </div>
+                          </>
+                      )}
+                      {mainSettingsTab === 'CONFIG' && (
+                          <>
+                              <div className="dark-tabs bg-dark-deep">
+                                  {['Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings'].map(tab => (
+                                      <div key={tab} className={`dark-tab ${activeConfigTab === tab ? 'active' : ''}`} onClick={() => setActiveConfigTab(tab)}>{tab}</div>
+                                  ))}
+                              </div>
+                              <div className="settings-scroll-content">
+                                  {activeConfigTab === 'Encoder Offset' && renderEncoderOffset()}
+                                  {activeConfigTab === 'Settings View' && renderSettingsView()}
+                                  {activeConfigTab === 'Data Variable' && renderDataVariable()}
+                                  {activeConfigTab === 'Axis Limit' && renderAxisLimit()}
+                                  {activeConfigTab === 'Mech Settings' && renderMechSettings()}
+                              </div>
+                          </>
+                      )}
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* MODALS */}
       {showModTpModal && (
         <div className="modal-overlay">
             <div className="modal-box">
@@ -612,184 +723,109 @@ const RightPart = () => {
             
             <div className="rp-upper-half">
                 
-                {/* ROW 1 */}
+                {/* ROW 1: Header + Full Width Content Panel */}
                 <div className={`rp-row-1 ${expandedRowPanel === 'ROW1' ? 'row-maximized' : expandedRowPanel === 'ROW2' ? 'row-minimized' : ''}`}>
                     <div className="rp-header-col">
-                        <RightHeader onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} currentMode={currentView} isOpen={isSidebarOpen} />
+                        <RightHeader 
+                            onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
+                            currentMode={currentView} 
+                            isOpen={isSidebarOpen} 
+                            onSettingsClick={() => setIsSettingsOpen(true)} 
+                        />
                     </div>
                     
-                    <div className="rp-content-col" style={{ display: expandedRowPanel === 'ROW2' ? 'none' : 'flex' }}>
+                    <div className="rp-content-col" style={{ display: expandedRowPanel === 'ROW2' ? 'none' : 'flex', position: 'relative' }}>
                         
-                        {/* Only show left panel if not expanded */}
-                        {!isRow1RightExpanded && (
-                            <div className={`rp-panel-left ${currentView === 'SPEED CONFIG' ? 'bg-dark' : 'bg-light-dark'}`}>
-                                {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
-                            </div>
-                        )}
-                        
-                        <div className="rp-panel-right" style={{ position: 'relative' }}>
-                            
-                            {/* ---> NEW ENHANCE BUTTON IN CENTER <--- */}
-                            <div 
-                                className={`row1-enhance-btn ${isRow1RightExpanded ? 'expanded' : ''}`} 
-                                onClick={() => setIsRow1RightExpanded(!isRow1RightExpanded)}
-                                title="Toggle Expand Right Panel"
-                            >
-                                {isRow1RightExpanded ? '>' : '<'}
-                            </div>
+                        {/* ABSOLUTE PINNED MAX/MIN BUTTON FOR ROW 1 */}
+                        <div 
+                            className="panel-action-btn" 
+                            style={{ position: 'absolute', top: 0, right: 0, zIndex: 100, height: '35px', borderBottom: '1px solid #111' }}
+                            onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW1' ? 'NONE' : 'ROW1')}
+                        >
+                            {expandedRowPanel === 'ROW1' ? '▼ MIN' : '⛶ MAX'}
+                        </div>
 
-                            <div className="dark-tabs">
-                                {['Error Pos', 'Ether Cat', 'IO Modules', 'Graph'].map(tab => (
-                                    <div key={tab} className={`dark-tab ${activeRow1Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow1Tab(tab)}>
-                                        {tab}
+                        <div className={`rp-panel-full ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`}>
+                            {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : 
+                             currentView === 'GRAPH VIEW' ? renderGraphView() : 
+                             renderJogPanel()}
+                        </div>
+
+                    </div>
+                </div>
+
+                {/* ROW 2: Programs & Target Point Tables Side-by-Side */}
+                <div className={`rp-row-2 ${expandedRowPanel === 'ROW2' ? 'row-maximized' : expandedRowPanel === 'ROW1' ? 'row-minimized' : ''}`}>
+                    
+                    {/* RESTORED: Main Row 2 Tabs with the primary MAX button in the header */}
+                    <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex' }}>
+                            <div className={`dark-tab ${activeFileTab === 'TP' ? 'active' : ''}`} onClick={() => setActiveFileTab('TP')}>TARGET POINTS</div>
+                            <div className={`dark-tab ${activeFileTab === 'PR' ? 'active' : ''}`} onClick={() => setActiveFileTab('PR')}>PROGRAM FILE</div>
+                        </div>
+                        <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
+                            {expandedRowPanel === 'ROW2' ? '▼ MIN' : '⛶ MAX'}
+                        </div>
+                    </div>
+
+                    <div className="row2-content" style={{ display: expandedRowPanel === 'ROW1' ? 'none' : 'flex' }}>
+                        <div className="table-container">
+                            
+                            {/* LEFT TABLE: TARGET POINT */}
+                            {activeFileTab === 'TP' && (
+                                <div className="table-wrapper">
+                                    <div className="table-scroller">
+                                        <MemoizedTpTableBody tpList={tpList} expandedTable={'TP'} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
                                     </div>
-                                ))}
-                                <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW1' ? 'NONE' : 'ROW1')}>
-                                    {expandedRowPanel === 'ROW1' ? '▼ MIN' : '⛶ MAX'}
                                 </div>
-                            </div>
-                            
-                            <div className={`row2-content ${expandedRowPanel !== 'ROW1' ? 'blurred-content' : ''}`}>
-                                {activeRow1Tab === 'Error Pos' && renderErrorPos()}
-                                {activeRow1Tab === 'Ether Cat' && renderEtherCat()}
-                                {activeRow1Tab === 'IO Modules' && renderIOModules()}
-                                {activeRow1Tab === 'Graph' && renderGraphView()}
-                            </div>
+                            )}
 
-                            {expandedRowPanel !== 'ROW1' && (
-                                <div className="view-full-overlay">
-                                    <button className="view-full-btn" onClick={() => setExpandedRowPanel('ROW1')}>
-                                        ⛶ VIEW FULL
-                                    </button>
+                            {/* RIGHT TABLE: PROGRAM FILE */}
+                            {activeFileTab === 'PR' && (
+                                <div className="table-wrapper">
+                                    <div className="table-scroller">
+                                        <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                    </div>
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
-
-                {/* ROW 2 */}
-                <div className={`rp-row-2 ${expandedRowPanel === 'ROW2' ? 'row-maximized' : expandedRowPanel === 'ROW1' ? 'row-minimized' : ''}`}>
-                    <div className="dark-tabs bg-dark-deep">
-                        {['Programs File', 'Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings'].map(tab => (
-                            <div key={tab} className={`dark-tab ${activeRow2Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow2Tab(tab)}>
-                                {tab}
-                            </div>
-                        ))}
-                        <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
-                            {expandedRowPanel === 'ROW2' ? '▼ MIN' : '⛶ MAX'}
-                        </div>
-                    </div>
-                    
-                    <div className="row2-content" style={{ display: expandedRowPanel === 'ROW1' ? 'none' : 'flex' }}>
-                        {activeRow2Tab === 'Programs File' && (
-                            <div className="table-container" style={{ gap: expandedTable === 'NONE' ? '4px' : '0' }}>
-                                
-                                {(expandedTable === 'NONE' || expandedTable === 'TP') && (
-                                    <div className="table-wrapper">
-                                        <div className="table-scroller">
-                                            <MemoizedTpTableBody tpList={tpList} expandedTable={expandedTable} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
-                                        </div>
-                                        {tpList.length > 0 && (
-                                            <div className="table-min-max-btn" onClick={() => setExpandedTable(expandedTable === 'TP' ? 'NONE' : 'TP')}> 
-                                                {expandedTable === 'TP' ? '▼ MIN' : '⛶ MAX'} 
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {(expandedTable === 'NONE' || expandedTable === 'PR') && (
-                                    <div className="table-wrapper" style={{ borderLeft: expandedTable === 'NONE' ? '2px solid #202430' : 'none' }}>
-                                        <div className="table-scroller">
-                                            <MemoizedPrTableBody prList={prList} expandedTable={expandedTable} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
-                                        </div>
-                                        {prList.length > 0 && (
-                                            <div className="table-min-max-btn" onClick={() => setExpandedTable(expandedTable === 'PR' ? 'NONE' : 'PR')}> 
-                                                {expandedTable === 'PR' ? '▼ MIN' : '⛶ MAX'} 
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {activeRow2Tab === 'Encoder Offset' && renderEncoderOffset()}
-                        {activeRow2Tab === 'Settings View' && renderSettingsView()}
-                        {activeRow2Tab === 'Data Variable' && renderDataVariable()}
-                        {activeRow2Tab === 'Axis Limit' && renderAxisLimit()}
-                        {activeRow2Tab === 'Mech Settings' && renderMechSettings()}
-                    </div>
-                </div>
             
             </div>
 
-            <div className="rp-row-3">
-                <div className="grid-7-col">
-                    <div className="rel-flex">
-                        <button className="tp-btn btn-blue" onClick={() => toggleDropdown('TP_MODE')}>⚙ {displayTpMode}</button>
-                        {openDropdown === 'TP_MODE' && (
-                            <div className="dropdown-menu">
-                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('TP Mode', 'Tp')}>⚙ TP Mode</button>
-                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVJ', 'MOVJ')}>⚙ MOVJ</button>
-                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVL', 'MOVL')}>⚙ MOVL</button>
-                            </div>
-                        )}
-                    </div>
-                    
-                    <div className="rel-flex">
-                        <button className="tp-btn btn-purple" onClick={() => toggleDropdown('TP')}>⚙ TP</button>
-                        {openDropdown === 'TP' && (
-                            <div className="dropdown-menu">
-                                <button className="dd-btn dd-purple" onClick={() => { sendCommand('INSERT_TP'); setOpenDropdown(null); }}>⚙ Insert TP</button>
-                                <button className="dd-btn dd-purple" onClick={openModifyTpModal}>📄 Modify TP</button>
-                                <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_TP_INDEX', selectedTpIndex); setOpenDropdown(null); }}>⎋ Delete TP</button>
-                            </div>
-                        )}
-                    </div>
-                    
-                    <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_TP')}>▶ Run TP</button>
-                    <button className="tp-btn btn-dark" onClick={() => {}}>📄 Op Pg</button>
-                    <input className="tp-standalone-input" value={rs.program_count_output || '0'} readOnly />
-                    
-                    <div className="rel-flex">
-                        <button className="tp-btn btn-purple" onClick={() => toggleDropdown('INST')}>📄 Inst</button>
-                        {openDropdown === 'INST' && (
-                            <div className="dropdown-menu inst-qty-input-dropdown">
-                                <div className="gap-flex">
-                                    <input type="text" placeholder="S..." value={instInput} onChange={e => setInstInput(e.target.value)} className="inst-qty-input" />
-                                    <button className="dd-btn dd-purple f1" onClick={() => { sendCommand(instInput ? 'INSERT_PR_INSTRUCTION_AT' : 'INSERT_PR_INSTRUCTION', instInput); setOpenDropdown(null); }}>📄 Insert</button>
-                                </div>
-                                <button className="dd-btn dd-purple" onClick={() => { setOpenDropdown(null); }}>📄 Modify Inst</button>
-                                <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_PR_INSTRUCTION'); setOpenDropdown(null); }}>⎋ Delete Inst</button>
-                            </div>
-                        )}
-                    </div>
-                    
-                    <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>▶ Run Inst</button>
-                </div>
-                
-                <div className="grid-7-col">
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_INPUT", ipPgInput)}>📄 Ip Pg</button>
-                    <input className="tp-standalone-input" value={ipPgInput} onChange={(e) => setIpPgInput(e.target.value)} />
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_TP_NAME", tpNameVal)}>🏷 Tp name</button>
-                    <input className="tp-standalone-input" value={tpNameVal} onChange={(e) => setTpNameVal(e.target.value)} />
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_COMMENT", comVal)}>🌍 Com</button>
-                    <input className="tp-standalone-input" value={comVal} onChange={(e) => setComVal(e.target.value)} />
-                    <button className="tp-btn btn-teal" onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>🧮 Calc Traj</button>
-                </div>
-            </div>
-
+            {/* ROW 4: Inst/Debug Tabs + The New TP/PR Edit Buttons */}
             <div className="rp-row-4">
-                <div className="dark-tabs bg-dark-deep">
-                    {['Inst', 'Debug', 'Jog Deg'].map(tab => (
-                        <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>
-                            {tab}
-                        </div>
-                    ))}
+                <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
+                    <div style={{ display: 'flex' }}>
+                        {['Inst', 'Debug', 'Jog Deg'].map(tab => (
+                            <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>
+                                {tab}
+                            </div>
+                        ))}
+                    </div>
+                    
+                    {/* --- EDIT BUTTONS --- */}
+                    <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
+                        <button 
+                            className={`pro-th-btn edit-btn ${bottomPanelMode === 'TP_CTRL' ? 'active' : ''}`} 
+                            onClick={() => { setBottomPanelMode('TP_CTRL'); setActiveFileTab('TP'); }}
+                        >
+                            ✏️ TP EDIT
+                        </button>
+                        <button 
+                            className={`pro-th-btn edit-btn ${bottomPanelMode === 'PR_CTRL' ? 'active' : ''}`} 
+                            onClick={() => { setBottomPanelMode('PR_CTRL'); setActiveFileTab('PR'); }}
+                        >
+                            ✏️ PR EDIT
+                        </button>
+                    </div>
                 </div>
                 
-                <div className="row2-content">
+                <div className="row2-content row4-auto-height">
                     {activeRow4Tab === 'Inst' && (
-                        <div className="table-wrapper" style={{ overflow: 'hidden' }}>
-                            <div className="table-scroller">
+                        <div className="table-wrapper row4-table-wrapper">
+                            <div className="table-scroller row4-scroller">
                                 <table className="data-table">
                                     <thead>
                                         <tr>
@@ -825,51 +861,116 @@ const RightPart = () => {
                     )}
 
                     {activeRow4Tab === 'Jog Deg' && (
-                        <div className="light-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666', fontStyle: 'italic' }}>
+                        <div className="light-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontStyle: 'italic', padding: '10px' }}>
                             Jog Degrees not set
                         </div>
                     )}
                 </div>
             </div>
 
+            {/* COMBINED DYNAMIC ROW 5 (Switches based on TP/PR EDIT clicks) */}
             <div className="rp-row-5">
-                <div className="grid-11-col">
-                    {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "tp-standalone-input", "up")}
-                    {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "tp-standalone-input", "up")}
-                    {renderDropdown('R5_DI2', DI2_OPTIONS, selDi2, (v) => { setSelDi2(v); sendCommand("SET_DIGI_2", v); }, "tp-standalone-input", "up")}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px', justifyContent: 'center' }}>
                     
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
-                    
-                    {renderDropdown('R5_HL', DIG_STATE_OPTIONS, selHL, (v) => { setSelHL(v); sendCommand("SET_HIGH_LOW", v); }, "tp-standalone-input", "up")}
-                    
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_DELAY', delayVal)}>⏱ delay</button>
-                    <input className="tp-standalone-input" value={delayVal} onChange={e => setDelayVal(e.target.value)} />
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_GOTO_PROGRAM', gotoVal)}>→ go to</button>
-                    <input className="tp-standalone-input" value={gotoVal} onChange={e => setGotoVal(e.target.value)} />
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_LOOP', loopVal)}>↺ loop</button>
-                    <input className="tp-standalone-input" value={loopVal} onChange={e => setLoopVal(e.target.value)} />
-                </div>
-                <div className="grid-11-col">
-                    <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_PROGRAM_SPEED', progSpeedVal)}>⏱ mm/s</button>
-                    <input className="tp-standalone-input" value={progSpeedVal} onChange={e => setProgSpeedVal(e.target.value)} />
-                    <button className="tp-btn btn-dark" onClick={() => {}}>🎯 RAD</button>
-                    <input className="tp-standalone-input" value={radiusVal} onChange={e => setRadiusVal(e.target.value)} />
-                    
-                    {renderDropdown('R5_VAR1', VAR1_OPTIONS, selVar1, (v) => { setSelVar1(v); sendCommand("SET_VAR1", v); }, "tp-standalone-input", "up")}
-                    
-                    <input className="tp-standalone-input" value={varInputVal} onChange={e => setVarInputVal(e.target.value)} onBlur={(e) => sendCommand('SET_VAR_VAL', e.target.value)} />
-                    
-                    {renderDropdown('R5_VAR2', VAR2_OPTIONS, selVar2, (v) => { setSelVar2(v); sendCommand("SET_VAR2", v); }, "tp-standalone-input", "up")}
-                    
-                    <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN ip</button>
-                    <input className="tp-standalone-input" value={anIpVal} onChange={e => setAnIpVal(e.target.value)} />
-                    <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN op</button>
-                    <input className="tp-standalone-input" value={anOpVal} onChange={e => setAnOpVal(e.target.value)} />
+                    {bottomPanelMode === 'PR_CTRL' ? (
+                        <>
+                            {/* --- PR EDIT MODE (Config Controls) --- */}
+                            <div className="grid-11-col">
+                                {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "tp-standalone-input", "up")}
+                                {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "tp-standalone-input", "up")}
+                                {renderDropdown('R5_DI2', DI2_OPTIONS, selDi2, (v) => { setSelDi2(v); sendCommand("SET_DIGI_2", v); }, "tp-standalone-input", "up")}
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
+                                {renderDropdown('R5_HL', DIG_STATE_OPTIONS, selHL, (v) => { setSelHL(v); sendCommand("SET_HIGH_LOW", v); }, "tp-standalone-input", "up")}
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_DELAY', delayVal)}>⏱ delay</button>
+                                <input className="tp-standalone-input" value={delayVal} onChange={e => setDelayVal(e.target.value)} />
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_GOTO_PROGRAM', gotoVal)}>→ go to</button>
+                                <input className="tp-standalone-input" value={gotoVal} onChange={e => setGotoVal(e.target.value)} />
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_LOOP', loopVal)}>↺ loop</button>
+                                <input className="tp-standalone-input" value={loopVal} onChange={e => setLoopVal(e.target.value)} />
+                            </div>
+                            <div className="grid-11-col">
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_PROGRAM_SPEED', progSpeedVal)}>⏱ mm/s</button>
+                                <input className="tp-standalone-input" value={progSpeedVal} onChange={e => setProgSpeedVal(e.target.value)} />
+                                <button className="tp-btn btn-dark" onClick={() => {}}>🎯 RAD</button>
+                                <input className="tp-standalone-input" value={radiusVal} onChange={e => setRadiusVal(e.target.value)} />
+                                {renderDropdown('R5_VAR1', VAR1_OPTIONS, selVar1, (v) => { setSelVar1(v); sendCommand("SET_VAR1", v); }, "tp-standalone-input", "up")}
+                                <input className="tp-standalone-input" value={varInputVal} onChange={e => setVarInputVal(e.target.value)} onBlur={(e) => sendCommand('SET_VAR_VAL', e.target.value)} />
+                                {renderDropdown('R5_VAR2', VAR2_OPTIONS, selVar2, (v) => { setSelVar2(v); sendCommand("SET_VAR2", v); }, "tp-standalone-input", "up")}
+                                <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN ip</button>
+                                <input className="tp-standalone-input" value={anIpVal} onChange={e => setAnIpVal(e.target.value)} />
+                                <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN op</button>
+                                <input className="tp-standalone-input" value={anOpVal} onChange={e => setAnOpVal(e.target.value)} />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {/* --- TP EDIT MODE (Target Point Controls) --- */}
+                            <div className="grid-7-col">
+                                <div className="rel-flex">
+                                    <button className="tp-btn btn-blue" onClick={() => toggleDropdown('TP_MODE')}>⚙ {displayTpMode}</button>
+                                    {openDropdown === 'TP_MODE' && (
+                                        <div className="dropdown-menu">
+                                            <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('TP Mode', 'Tp')}>⚙ TP Mode</button>
+                                            <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVJ', 'MOVJ')}>⚙ MOVJ</button>
+                                            <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVL', 'MOVL')}>⚙ MOVL</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="rel-flex">
+                                    <button className="tp-btn btn-purple" onClick={() => toggleDropdown('TP')}>⚙ TP</button>
+                                    {openDropdown === 'TP' && (
+                                        <div className="dropdown-menu">
+                                            <button className="dd-btn dd-purple" onClick={() => { sendCommand('INSERT_TP'); setOpenDropdown(null); }}>⚙ Insert TP</button>
+                                            <button className="dd-btn dd-purple" onClick={openModifyTpModal}>📄 Modify TP</button>
+                                            <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_TP_INDEX', selectedTpIndex); setOpenDropdown(null); }}>⎋ Delete TP</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_TP')}>▶ Run TP</button>
+                                <button className="tp-btn btn-dark" onClick={() => {}}>📄 Op Pg</button>
+                                <input className="tp-standalone-input" value={rs.program_count_output || '0'} readOnly />
+                                <div className="rel-flex">
+                                    <button className="tp-btn btn-purple" onClick={() => toggleDropdown('INST')}>📄 Inst</button>
+                                    {openDropdown === 'INST' && (
+                                        <div className="dropdown-menu inst-qty-input-dropdown">
+                                            <div className="gap-flex">
+                                                <input type="text" placeholder="S..." value={instInput} onChange={e => setInstInput(e.target.value)} className="inst-qty-input" />
+                                                <button className="dd-btn dd-purple f1" onClick={() => { sendCommand(instInput ? 'INSERT_PR_INSTRUCTION_AT' : 'INSERT_PR_INSTRUCTION', instInput); setOpenDropdown(null); }}>📄 Insert</button>
+                                            </div>
+                                            <button className="dd-btn dd-purple" onClick={() => { setOpenDropdown(null); }}>📄 Modify Inst</button>
+                                            <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_PR_INSTRUCTION'); setOpenDropdown(null); }}>⎋ Delete Inst</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>▶ Run Inst</button>
+                            </div>
+                            <div className="grid-7-col">
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_INPUT", ipPgInput)}>📄 Ip Pg</button>
+                                <input className="tp-standalone-input" value={ipPgInput} onChange={(e) => setIpPgInput(e.target.value)} />
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_TP_NAME", tpNameVal)}>🏷 Tp name</button>
+                                <input className="tp-standalone-input" value={tpNameVal} onChange={(e) => setTpNameVal(e.target.value)} />
+                                <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_COMMENT", comVal)}>🌍 Com</button>
+                                <input className="tp-standalone-input" value={comVal} onChange={(e) => setComVal(e.target.value)} />
+                                <button className="tp-btn btn-teal" onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>🧮 Calc Traj</button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
         
-        <RightMenuSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onSelectView={setCurrentView} activeView={currentView} />
+        {/* Right Menu Sidebar */}
+        <RightMenuSidebar 
+            isOpen={isSidebarOpen} 
+            onClose={() => setIsSidebarOpen(false)} 
+            onSelectView={(view) => {
+                setCurrentView(view);
+                if (view === 'GRAPH VIEW') {
+                    setExpandedRowPanel('ROW1');
+                }
+            }} 
+            activeView={currentView} 
+        />
       </div>
     </>
   );
