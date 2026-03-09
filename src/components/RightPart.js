@@ -111,7 +111,6 @@ const RightPart = () => {
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
-  const [activeFileTab, setActiveFileTab] = useState('TP'); 
   const [bottomPanelMode, setBottomPanelMode] = useState('TP_CTRL'); 
   const [openDropdown, setOpenDropdown] = useState(null);
   
@@ -665,8 +664,9 @@ const RightPart = () => {
                       )}
                       {mainSettingsTab === 'CONFIG' && (
                           <>
+                              {/* FIX: ADDED 'Target Points' TO CONFIG TABS */}
                               <div className="dark-tabs bg-dark-deep">
-                                  {['Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings'].map(tab => (
+                                  {['Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings', 'Target Points'].map(tab => (
                                       <div key={tab} className={`dark-tab ${activeConfigTab === tab ? 'active' : ''}`} onClick={() => setActiveConfigTab(tab)}>{tab}</div>
                                   ))}
                               </div>
@@ -676,6 +676,15 @@ const RightPart = () => {
                                   {activeConfigTab === 'Data Variable' && renderDataVariable()}
                                   {activeConfigTab === 'Axis Limit' && renderAxisLimit()}
                                   {activeConfigTab === 'Mech Settings' && renderMechSettings()}
+                                  
+                                  {/* FIX: TP TABLE NOW RENDERS INSIDE CONFIG SETTINGS */}
+                                  {activeConfigTab === 'Target Points' && (
+                                      <div className="table-wrapper" style={{ border: 'none', height: '100%' }}>
+                                          <div className="table-scroller">
+                                              <MemoizedTpTableBody tpList={tpList} expandedTable={'TP'} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
+                                          </div>
+                                      </div>
+                                  )}
                               </div>
                           </>
                       )}
@@ -734,11 +743,11 @@ const RightPart = () => {
                     
                     <div className="rp-content-col" style={{ display: expandedRowPanel === 'ROW2' ? 'none' : 'flex', position: 'relative' }}>
                         
-                        {/* --- DEFAULT VIEW: BLUR OVERLAY WITH CENTER MAX BUTTON --- */}
+                        {/* --- DEFAULT VIEW: DARK BLUR OVERLAY WITH CENTER MAX BUTTON --- */}
                         {expandedRowPanel === 'NONE' && (
                             <div className="center-max-overlay">
                                 <button className="center-max-btn" onClick={() => setExpandedRowPanel('ROW1')}>
-                                    ⛶ MAXIMIZE TO USE
+                                    ⛶ VIEW FULL
                                 </button>
                             </div>
                         )}
@@ -746,7 +755,7 @@ const RightPart = () => {
                         {/* --- MAXIMIZED VIEW: BOTTOM RIGHT MIN BUTTON --- */}
                         {expandedRowPanel === 'ROW1' && (
                             <button className="br-min-btn" onClick={() => setExpandedRowPanel('NONE')}>
-                                ▼ MINIMIZE
+                                ▼ MIN
                             </button>
                         )}
 
@@ -760,14 +769,13 @@ const RightPart = () => {
                     </div>
                 </div>
 
-                {/* ROW 2: Programs & Target Point Tables Side-by-Side */}
+                {/* ROW 2: Programs File Table Only */}
                 <div className={`rp-row-2 ${expandedRowPanel === 'ROW2' ? 'row-maximized' : expandedRowPanel === 'ROW1' ? 'row-minimized' : ''}`}>
                     
-                    {/* Main Row 2 Tabs with the primary MAX button in the header */}
+                    {/* FIX: Static Header for Program File */}
                     <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex' }}>
-                            <div className={`dark-tab ${activeFileTab === 'TP' ? 'active' : ''}`} onClick={() => setActiveFileTab('TP')}>TARGET POINTS</div>
-                            <div className={`dark-tab ${activeFileTab === 'PR' ? 'active' : ''}`} onClick={() => setActiveFileTab('PR')}>PROGRAM FILE</div>
+                            <div className="dark-tab active">PROGRAM FILE</div>
                         </div>
                         <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
                             {expandedRowPanel === 'ROW2' ? '▼ MIN' : '⛶ MAX'}
@@ -776,24 +784,12 @@ const RightPart = () => {
 
                     <div className="row2-content" style={{ display: expandedRowPanel === 'ROW1' ? 'none' : 'flex' }}>
                         <div className="table-container">
-                            
-                            {/* LEFT TABLE: TARGET POINT */}
-                            {activeFileTab === 'TP' && (
-                                <div className="table-wrapper">
-                                    <div className="table-scroller">
-                                        <MemoizedTpTableBody tpList={tpList} expandedTable={'TP'} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
-                                    </div>
+                            {/* FIX: ONLY PROGRAM FILE REMAINS HERE */}
+                            <div className="table-wrapper">
+                                <div className="table-scroller">
+                                    <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
                                 </div>
-                            )}
-
-                            {/* RIGHT TABLE: PROGRAM FILE */}
-                            {activeFileTab === 'PR' && (
-                                <div className="table-wrapper">
-                                    <div className="table-scroller">
-                                        <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
-                                    </div>
-                                </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -801,7 +797,8 @@ const RightPart = () => {
             </div>
 
             {/* ROW 4: Inst/Debug Tabs + The New TP/PR Edit Buttons */}
-            <div className="rp-row-4">
+            {/* FIX: Row 4 hides automatically when Row 2 is MAXIMIZED */}
+            <div className={`rp-row-4 ${expandedRowPanel === 'ROW2' ? 'row-minimized' : ''}`}>
                 <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
                     <div style={{ display: 'flex' }}>
                         {['Inst', 'Debug', 'Jog Deg'].map(tab => (
@@ -815,13 +812,13 @@ const RightPart = () => {
                     <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
                         <button 
                             className={`pro-th-btn edit-btn ${bottomPanelMode === 'TP_CTRL' ? 'active' : ''}`} 
-                            onClick={() => { setBottomPanelMode('TP_CTRL'); setActiveFileTab('TP'); }}
+                            onClick={() => { setBottomPanelMode('TP_CTRL'); }}
                         >
                             ✏️ TP EDIT
                         </button>
                         <button 
                             className={`pro-th-btn edit-btn ${bottomPanelMode === 'PR_CTRL' ? 'active' : ''}`} 
-                            onClick={() => { setBottomPanelMode('PR_CTRL'); setActiveFileTab('PR'); }}
+                            onClick={() => { setBottomPanelMode('PR_CTRL'); }}
                         >
                             ✏️ PR EDIT
                         </button>
@@ -874,8 +871,9 @@ const RightPart = () => {
                 </div>
             </div>
 
-            {/* COMBINED DYNAMIC ROW 5 (Switches based on TP/PR EDIT clicks) */}
-            <div className="rp-row-5">
+            {/* COMBINED DYNAMIC ROW 5 */}
+            {/* FIX: Row 5 hides automatically when Row 2 is MAXIMIZED */}
+            <div className={`rp-row-5 ${expandedRowPanel === 'ROW2' ? 'row-minimized' : ''}`}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px', justifyContent: 'center' }}>
                     
                     {bottomPanelMode === 'PR_CTRL' ? (

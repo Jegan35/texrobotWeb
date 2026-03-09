@@ -238,7 +238,10 @@ const RobotScene = ({ showControls, onToggleControls }) => {
   const bluePts = robotState?.blueTrajectory || [];
   const redPts = robotState?.redTrajectory || [];
 
-  const isSystemOk = robotState?.system_ok !== false && !robotState?.error_state;
+ // --- CONNECT SYSTEM OK STATE (FIXED) ---
+  // This now checks all standard backend error flags to guarantee it catches the error!
+  const isError = robotState?.error || robotState?.error_state || robotState?.is_error || robotState?.system_ok === false;
+  const isSystemOk = !isError;
 
   const controlsRef = useRef(null);
 
