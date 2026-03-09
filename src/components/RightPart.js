@@ -111,11 +111,9 @@ const RightPart = () => {
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
+  const [activeFileTab, setActiveFileTab] = useState('TP'); 
+  const [bottomPanelMode, setBottomPanelMode] = useState('TP_CTRL'); 
   const [openDropdown, setOpenDropdown] = useState(null);
-  
-  // --- NEW: ROW 2 TABBED FILE STATE ---
-  const [activeFileTab, setActiveFileTab] = useState('TP'); // Defaults to Target Point
-  const [bottomPanelMode, setBottomPanelMode] = useState('TP_CTRL'); // Defaults to TP Controls
   
   // SETTINGS OVERLAY STATE
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -618,7 +616,7 @@ const RightPart = () => {
                         <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('Rx-')} onPointerUp={()=>handlePointerUp('Rx-')} onPointerLeave={()=>handlePointerUp('Rx-')}>Rx-</button>
                         <div className="dpad-center">ROT</div>
                         <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('Rx+')} onPointerUp={()=>handlePointerUp('Rx+')} onPointerLeave={()=>handlePointerUp('Rx+')}>Rx+</button>
-                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerDown={()=>handlePointerDown('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
+                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerUp={()=>handlePointerUp('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
                     </div>
                     <div className="dpad-z-row">
                         <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
@@ -736,16 +734,24 @@ const RightPart = () => {
                     
                     <div className="rp-content-col" style={{ display: expandedRowPanel === 'ROW2' ? 'none' : 'flex', position: 'relative' }}>
                         
-                        {/* ABSOLUTE PINNED MAX/MIN BUTTON FOR ROW 1 */}
-                        <div 
-                            className="panel-action-btn" 
-                            style={{ position: 'absolute', top: 0, right: 0, zIndex: 100, height: '35px', borderBottom: '1px solid #111' }}
-                            onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW1' ? 'NONE' : 'ROW1')}
-                        >
-                            {expandedRowPanel === 'ROW1' ? '▼ MIN' : '⛶ MAX'}
-                        </div>
+                        {/* --- DEFAULT VIEW: BLUR OVERLAY WITH CENTER MAX BUTTON --- */}
+                        {expandedRowPanel === 'NONE' && (
+                            <div className="center-max-overlay">
+                                <button className="center-max-btn" onClick={() => setExpandedRowPanel('ROW1')}>
+                                    ⛶ MAXIMIZE TO USE
+                                </button>
+                            </div>
+                        )}
 
-                        <div className={`rp-panel-full ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`}>
+                        {/* --- MAXIMIZED VIEW: BOTTOM RIGHT MIN BUTTON --- */}
+                        {expandedRowPanel === 'ROW1' && (
+                            <button className="br-min-btn" onClick={() => setExpandedRowPanel('NONE')}>
+                                ▼ MINIMIZE
+                            </button>
+                        )}
+
+                        <div className={`rp-panel-full ${expandedRowPanel === 'NONE' ? 'blurred-content' : ''} ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`}>
+                            {/* Dynamically renders Jog Control, Speed Config, or GRAPH VIEW */}
                             {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : 
                              currentView === 'GRAPH VIEW' ? renderGraphView() : 
                              renderJogPanel()}
@@ -757,7 +763,7 @@ const RightPart = () => {
                 {/* ROW 2: Programs & Target Point Tables Side-by-Side */}
                 <div className={`rp-row-2 ${expandedRowPanel === 'ROW2' ? 'row-maximized' : expandedRowPanel === 'ROW1' ? 'row-minimized' : ''}`}>
                     
-                    {/* RESTORED: Main Row 2 Tabs with the primary MAX button in the header */}
+                    {/* Main Row 2 Tabs with the primary MAX button in the header */}
                     <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex' }}>
                             <div className={`dark-tab ${activeFileTab === 'TP' ? 'active' : ''}`} onClick={() => setActiveFileTab('TP')}>TARGET POINTS</div>

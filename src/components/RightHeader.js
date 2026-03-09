@@ -1,5 +1,5 @@
-import React from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
+import './RightPart.css'; // This connects the header to your existing CSS file!
 
 const RightHeader = ({ onMenuToggle, currentMode, isOpen, onSettingsClick }) => {
     const { robotState } = useWebSocket();
@@ -7,90 +7,50 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen, onSettingsClick }) => 
     // Automatically read the physically moving state from context
     const isMoving = robotState?.is_physically_moving || false;
 
+    // --- DYNAMIC INDICATOR COLORS ---
+    // The dot will change color depending on what mode you select!
+    const safeMode = currentMode || '';
+    let dotColor = '#00bcd4'; // Default Cyan for JOG
+    if (safeMode.includes('AUTO')) dotColor = '#9c27b0'; // Purple for AUTO
+    else if (safeMode.includes('MOVE')) dotColor = '#4CAF50'; // Green for MOVE
+    else if (safeMode.includes('MANUAL')) dotColor = '#FF9800'; // Orange for MANUAL
+    else if (safeMode.includes('GRAPH')) dotColor = '#E91E63'; // Pink for GRAPH
+
     return (
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%', padding: '0 15px', color: 'white', boxSizing: 'border-box' }}>
+        <div className="rh-master-container">
             
             {/* 1. LEFT: MENU BUTTON */}
-            <div 
-                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }} 
-                onClick={onMenuToggle}
-            >
-                <span style={{ fontSize: '1.8rem', marginRight: '10px' }}>{isOpen ? '✕' : '≡'}</span>
+            <div className="rh-menu-btn" onClick={onMenuToggle}>
+                {/* Rotates 90 degrees gracefully via CSS when open */}
+                <span className={`rh-hamburger ${isOpen ? 'rotated' : ''}`}>☰</span>
                 <span style={{ fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1px' }}>MENU</span>
             </div>
 
-            {/* 2. CENTER-LEFT: MODE INDICATOR (JOG : CARTESIAN) */}
-            <div style={{ 
-                marginLeft: '30px', 
-                border: '1px solid #333', 
-                borderRadius: '4px', 
-                padding: '6px 12px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                backgroundColor: '#151822' 
-            }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00bcd4', boxShadow: '0 0 5px #00bcd4' }}></div>
+            {/* 2. CENTER-LEFT: MODE INDICATOR & BLINKING DOT */}
+            <div className="rh-mode-box">
+                {/* Dynamic colored dot with blinking CSS class */}
+                <div 
+                    className="rh-blinking-dot" 
+                    style={{ backgroundColor: dotColor, boxShadow: `0 0 8px ${dotColor}` }}
+                ></div>
                 <span style={{ fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', fontSize: '0.85rem' }}>
                     {currentMode}
                 </span>
             </div>
 
-            {/* 3. CENTER: THE NEW "2-IN-1" DYNAMIC STANDBY / IN-MOTION BUTTON */}
-            <div style={{ marginLeft: '15px' }}>
+            {/* 3. CENTER-RIGHT: DYNAMIC STANDBY / IN-MOTION BUTTON */}
+            <div className="rh-status-container">
                 {isMoving ? (
-                    <div style={{ 
-                        border: '2px solid #FF9800', 
-                        color: '#FF9800', 
-                        padding: '5px 15px', 
-                        borderRadius: '4px', 
-                        fontWeight: '900', 
-                        letterSpacing: '1px', 
-                        backgroundColor: 'rgba(255, 152, 0, 0.1)', 
-                        textShadow: '0 0 5px rgba(255,152,0,0.4)', 
-                        boxShadow: 'inset 0 0 5px rgba(255,152,0,0.2)',
-                        fontSize: '0.85rem'
-                    }}>
-                        IN MOTION
-                    </div>
+                    <div className="rh-status-motion">IN MOTION</div>
                 ) : (
-                    <div style={{ 
-                        border: '2px solid #4CAF50', 
-                        color: '#4CAF50', 
-                        padding: '5px 15px', 
-                        borderRadius: '4px', 
-                        fontWeight: '900', 
-                        letterSpacing: '1px', 
-                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                        fontSize: '0.85rem'
-                    }}>
-                        STANDBY
-                    </div>
+                    <div className="rh-status-standby">STANDBY</div>
                 )}
             </div>
             
             {/* 4. RIGHT: SETTINGS BUTTON */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                <button 
-                    onClick={onSettingsClick}
-                    style={{
-                        background: 'linear-gradient(180deg, #373d49 0%, #262b33 100%)',
-                        border: '1px solid #111',
-                        color: '#00bcd4',
-                        padding: '6px 20px',
-                        borderRadius: '4px',
-                        fontWeight: '900',
-                        fontSize: '0.85rem',
-                        cursor: 'pointer',
-                        boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.1), 0 3px 5px rgba(0,0,0,0.4)',
-                        letterSpacing: '1px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                    }}>
-                    <span style={{ fontSize: '1.2rem' }}>⚙</span> SETTINGS
-                </button>
-            </div>
+            <button className="rh-settings-btn" onClick={onSettingsClick}>
+                <span style={{ fontSize: '1.2rem' }}>⚙</span> SETTINGS
+            </button>
             
         </div>
     );

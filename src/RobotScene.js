@@ -5,26 +5,16 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import HamburgerMenu from "./components/HamburgerMenu"; 
 import { useWebSocket } from "./context/WebSocketContext";
 
-// Original Colors Restored
 const COLORS = { Y_GREEN: "#1b5e20", X_RED: "#b71c1c", Z_BLUE: "#0d47a1" };
 
-// ==========================================
-// OPTIMIZATION 1: THE ULTIMATE ZERO-LAG THICK LINE
-// O(K) Complexity + 150ms Throttling + Tail Effect (Fixed Marking)
-// ==========================================
-// ==========================================
-// OPTIMIZATION 1: THE ULTIMATE ZERO-LAG CHUNKING ALGORITHM
-// லைன் முழுமையாக இருக்கும், மறையாது! ஆனால் 0% Lag!
-// ==========================================
-
-// 1. Static Line: இது பழைய லைன்களை "Freeze" செய்துவிடும். CPU-வை துளியும் பாதிக்காது!
+// 1. Static Line (CPU Zero Cost)
 const StaticLine = React.memo(({ points, color, lineWidth }) => {
   return (
     <Line points={points} color={color} lineWidth={lineWidth} transparent opacity={0.9} />
   );
 });
 
-// 2. Main Logic: லைன்களை 250 புள்ளிகளாக துண்டாக்கும் மூளை (Chunker)
+// 2. Chunker Line Algorithm
 const FastThickLine = React.memo(({ points, color, lineWidth }) => {
   const [renderData, setRenderData] = useState({ chunks: [], active: [] });
   const chunksRef = useRef([]);
@@ -34,14 +24,11 @@ const FastThickLine = React.memo(({ points, color, lineWidth }) => {
   latestPoints.current = points;
 
   useEffect(() => {
-    // 150ms Throttling + Chunking
     const interval = setInterval(() => {
       const pts = latestPoints.current;
       if (!pts) return;
 
       const len = pts.length;
-
-      // FAST CLEAR (பழைய டேட்டாவை அழித்தால் உடனே க்ளியர் ஆகும்)
       if (len < 2) {
         if (lastLen.current > 0) {
           chunksRef.current = [];
@@ -52,27 +39,22 @@ const FastThickLine = React.memo(({ points, color, lineWidth }) => {
       }
 
       if (len !== lastLen.current) {
-        // ட்ராஜெக்டரி ரீசெட் ஆனால் க்ளியர் செய்ய
         if (len < lastLen.current) chunksRef.current = [];
 
-        const CHUNK_SIZE = 250; // 250 புள்ளிகளாக துண்டாக்குகிறது
+        const CHUNK_SIZE = 250; 
         const numChunks = Math.floor(len / CHUNK_SIZE);
 
-        // புது Chunk உருவாகி இருந்தால், அதை Static ஆக மாற்று
         if (numChunks > chunksRef.current.length) {
           for (let i = chunksRef.current.length; i < numChunks; i++) {
-            // முந்தைய துண்டோடு ஒட்டிக்கொள்ள (Overlap) 1 புள்ளி முன்னால் இருந்து வெட்டுகிறோம்
             const start = Math.max(0, i * CHUNK_SIZE - 1);
             const end = (i + 1) * CHUNK_SIZE;
             chunksRef.current.push(pts.slice(start, end));
           }
         }
 
-        // மீதமுள்ள புதிய புள்ளிகள் (எப்போதும் 250-க்கு குறைவாகவே இருக்கும், அதனால் Lag ஆகாது)
         const activeStart = Math.max(0, chunksRef.current.length * CHUNK_SIZE - 1);
         const activePts = pts.slice(activeStart, len);
 
-        // React-ஐ ஏமாற்றி Static ஆக்க Shallow Copy பயன்படுத்துகிறோம்
         setRenderData({ chunks: [...chunksRef.current], active: activePts });
         lastLen.current = len;
       }
@@ -85,12 +67,9 @@ const FastThickLine = React.memo(({ points, color, lineWidth }) => {
 
   return (
     <group>
-      {/* ஃப்ரீஸ் செய்யப்பட்ட பழைய மார்க்கிங் லைன்கள் (CPU: 0%) */}
       {renderData.chunks.map((chunk, idx) => (
          <StaticLine key={idx} points={chunk} color={color} lineWidth={lineWidth || 2.5} />
       ))}
-      
-      {/* தற்போதைய லைன் முனை (CPU: Very Low) */}
       {renderData.active.length > 1 && (
          <StaticLine points={renderData.active} color={color} lineWidth={lineWidth || 2.5} />
       )}
@@ -98,9 +77,6 @@ const FastThickLine = React.memo(({ points, color, lineWidth }) => {
   );
 });
 
-// ==========================================
-// OPTIMIZATION 2: React.memo() to cache static models
-// ==========================================
 const Custom3DArrows = React.memo(() => {
   const shaftLength = 0.35;
   const shaftRadius = 0.0035;
@@ -146,9 +122,7 @@ const RealRobot = () => {
   return (
     <group position={[0, 0, 0]} scale={[1000, 1000, 1000]}>
       <mesh geometry={link0}><meshStandardMaterial color="#222222" {...matProps} /></mesh>
-      
       <Custom3DArrows />
-
       <group position={[0, 0, 0]} rotation={[0, 0, rad(j.j1)]}>
         <mesh geometry={link1} position={[0, 0, 0]}><meshStandardMaterial color="#0277bd" {...matProps} /></mesh>
         <group position={[0.150, 0, 0.462]} rotation={[0, rad(j.j2), 0]}>
@@ -171,7 +145,6 @@ const RealRobot = () => {
   );
 };
 
-// Cached so React doesn't redraw thousands of lines 60 times a second
 const CustomGridWalls = React.memo(() => {
   const size = 2500;
   const step = 100;
@@ -233,7 +206,6 @@ const CustomGridWalls = React.memo(() => {
   );
 });
 
-// Cached so React doesn't recreate Heavy Text Meshes on every tick
 const WorldCoordinates = React.memo(() => {
   const labels = [];
   const step = 100; 
@@ -254,7 +226,11 @@ const WorldCoordinates = React.memo(() => {
   return <group>{labels}</group>;
 });
 
-const RobotScene = () => {
+
+// ==========================================
+// MAIN COMPONENT EXPORT
+// ==========================================
+const RobotScene = ({ showControls, onToggleControls }) => {
   const { robotState } = useWebSocket();
   const c = robotState?.cartesian || { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 };
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
@@ -262,52 +238,157 @@ const RobotScene = () => {
   const bluePts = robotState?.blueTrajectory || [];
   const redPts = robotState?.redTrajectory || [];
 
+  const isSystemOk = robotState?.system_ok !== false && !robotState?.error_state;
+
+  const controlsRef = useRef(null);
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleResetView = () => {
+    if (controlsRef.current) {
+      controlsRef.current.object.position.set(0, -6500, 3000);
+      controlsRef.current.target.set(0, 0, 800);
+      controlsRef.current.update();
+    }
+  };
+
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       
-      <HamburgerMenu />
+      <HamburgerMenu onToggle={(isOpen) => setIsMenuOpen(isOpen)} />
 
-      {/* ================= JOINTS PANEL (PERFECT FIT) ================= */}
-      <div style={{ position: 'absolute', top: 0, right: 0, width: 'clamp(60px, 10vw, 85px)', bottom: 0, backgroundColor: 'rgba(26, 30, 41, 0.95)', borderLeft: '2px solid #111', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', userSelect: 'none' }}>
+      {/* --- TOP LEFT UI WRAPPER --- */}
+      <div style={{ 
+          position: 'absolute', top: '65px', left: '15px', zIndex: 5, 
+          display: isMenuOpen ? 'none' : 'flex', 
+          flexDirection: 'column', gap: '8px', pointerEvents: 'none' 
+      }}>
+          
+          <button
+              onClick={onToggleControls}
+              style={{
+                  background: showControls ? 'linear-gradient(180deg, #00bcd4 0%, #008ba3 100%)' : 'rgba(20, 24, 33, 0.85)',
+                  color: showControls ? '#111' : '#00bcd4',
+                  border: '1px solid rgba(0, 188, 212, 0.4)',
+                  borderLeft: showControls ? '1px solid #00bcd4' : '3px solid #00bcd4',
+                  borderRadius: '4px', cursor: 'pointer', height: '35px', 
+                  width: '130px', 
+                  padding: '0', fontWeight: '900', fontSize: '0.75rem',
+                  letterSpacing: '1px', backdropFilter: 'blur(5px)', transition: 'all 0.1s ease-in-out',
+                  boxShadow: showControls ? '0 2px 10px rgba(0,188,212,0.4)' : 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)',
+                  pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+              }}
+          >
+              <span style={{ fontSize: '1rem' }}>{showControls ? '▼' : '⚙'}</span> 
+              CONTROLS
+          </button>
+
+          <button
+              onClick={handleResetView}
+              onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; e.currentTarget.style.boxShadow = 'none'; }}
+              onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)'; }}
+              style={{
+                  background: 'rgba(20, 24, 33, 0.85)',
+                  color: '#ff5252', 
+                  border: '1px solid rgba(255, 82, 82, 0.4)', 
+                  borderLeft: '3px solid #ff5252', 
+                  borderRadius: '4px', cursor: 'pointer', height: '35px', 
+                  width: '130px', 
+                  padding: '0', fontWeight: '900', fontSize: '0.75rem',
+                  letterSpacing: '1px', transition: 'all 0.1s ease-in-out',
+                  backdropFilter: 'blur(5px)',
+                  boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)',
+                  pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+              }}
+          >
+              <span style={{ fontSize: '1.1rem', marginBottom: '2px' }}>⌂</span> 
+              RESET
+          </button>
+
+      </div>
+
+      {/* --- JOINTS PANEL --- */}
+      <div style={{ 
+          position: 'absolute', top: 0, right: 0, width: '85px', bottom: 0, 
+          backgroundColor: 'rgba(10, 12, 18, 0.85)', 
+          backdropFilter: 'blur(8px)', 
+          borderLeft: '1px solid rgba(0, 188, 212, 0.2)',
+          zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', userSelect: 'none', pointerEvents: 'none' 
+      }}>
+        <div style={{ color: '#00bcd4', fontSize: '0.75rem', fontWeight: '900', letterSpacing: '1px', marginTop: '15px', textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>JOINTS</div>
         
-        <div style={{ color: '#00bcd4', fontSize: 'clamp(0.6rem, 1vw, 0.8rem)', fontWeight: '900', letterSpacing: '1px', marginTop: '15px' }}>JOINTS</div>
-        
-        {/* flex: 1 மற்றும் space-evenly மூலம் சீராக பிரிக்கிறோம். 
-            marginBottom கொடுத்திருப்பதால், Cartesian பேனல் உயரத்திற்கு மேல் சரியாக J6 வந்து நிற்கும்! */}
-        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, justifyContent: 'space-evenly', marginBottom: 'clamp(40px, 8vh, 55px)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, justifyContent: 'space-evenly', marginBottom: '85px' }}>
           {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map((label, idx) => {
             const val = j[`j${idx+1}`];
             return (
               <div key={label} style={{ textAlign: 'center', width: '100%' }}>
-                <div style={{ color: '#aaa', fontSize: 'clamp(0.5rem, 0.75vw, 0.7rem)', fontWeight: 'bold', marginBottom: '2px' }}>{label}</div>
-                <div style={{ color: '#4CAF50', fontSize: 'clamp(0.7rem, 1vw, 0.95rem)', fontWeight: 'bold', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                <div style={{ color: '#ccc', fontSize: '0.7rem', fontWeight: '900', marginBottom: '2px', textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>{label}</div>
+                <div style={{ color: '#00E676', fontSize: '1.1rem', fontWeight: '900', textShadow: '0 2px 5px rgba(0,0,0,0.9)' }}>
                   {val !== undefined ? val.toFixed(2) : "0.00"}°
                 </div>
               </div>
             );
           })}
         </div>
+
+        {/* SYSTEM INDICATOR BULB */}
+        <div style={{ 
+            position: 'absolute', bottom: 0, width: '100%', height: '85px', 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            borderTop: '1px solid rgba(0, 188, 212, 0.2)' 
+        }}>
+            <div style={{
+                width: '34px', height: '34px', borderRadius: '50%',
+                background: 'linear-gradient(145deg, #333, #111)',
+                padding: '4px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.3)',
+                position: 'relative'
+            }}>
+                <div style={{
+                    width: '100%', height: '100%', borderRadius: '50%',
+                    background: isSystemOk ? 'radial-gradient(circle at 30% 30%, #4aff95, #00E676, #00b35c)' : 'radial-gradient(circle at 30% 30%, #ff7b72, #FF3B30, #cc2e26)',
+                    boxShadow: isSystemOk ? '0 0 15px rgba(0, 230, 118, 0.8), inset 0 0 8px rgba(255,255,255,0.6)' : '0 0 15px rgba(255, 59, 48, 0.8), inset 0 0 8px rgba(255,255,255,0.6)',
+                    transition: 'all 0.3s ease'
+                }} />
+            </div>
+            <div style={{ 
+                color: isSystemOk ? '#00E676' : '#FF3B30', 
+                fontSize: '0.6rem', fontWeight: '900', marginTop: '8px', 
+                letterSpacing: '1px', textShadow: '0 2px 4px rgba(0,0,0,0.8)' 
+            }}>
+                {isSystemOk ? 'SYS OK' : 'SYS ERR'}
+            </div>
+        </div>
+
       </div>
 
-      {/* ================= CARTESIAN PANEL ================= */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 'clamp(60px, 10vw, 85px)', height: 'clamp(40px, 8vh, 55px)', backgroundColor: 'rgba(26, 30, 41, 0.95)', borderTop: '2px solid #111', zIndex: 10, display: 'flex', alignItems: 'center', padding: '0 clamp(10px, 2vw, 20px)', userSelect: 'none' }}>
-        
-        <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(0.6rem, 1vw, 0.8rem)', letterSpacing: '1px', marginRight: 'clamp(10px, 3vw, 30px)' }}>CARTESIAN</div>
+      {/* --- CARTESIAN PANEL --- */}
+      <div style={{ 
+          position: 'absolute', bottom: 0, left: 0, right: '85px', height: '85px', 
+          backgroundColor: 'rgba(10, 12, 18, 0.85)', 
+          backdropFilter: 'blur(8px)', 
+          borderTop: '1px solid rgba(0, 188, 212, 0.2)',
+          zIndex: 10, display: 'flex', alignItems: 'center', padding: '0 20px', userSelect: 'none', pointerEvents: 'none' 
+      }}>
+        <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '0.85rem', letterSpacing: '1px', marginRight: '30px', textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>CARTESIAN</div>
         
         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', alignItems: 'center' }}>
           {[ {l: 'X(mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y(mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z(mm)', v: c.z, clr: '#00bcd4'},
              {l: 'A(°)', v: c.rx, clr: '#fff'}, {l: 'B(°)', v: c.ry, clr: '#fff'}, {l: 'C(°)', v: c.rz, clr: '#fff'} 
           ].map(item => (
             <div key={item.l} style={{ textAlign: 'center' }}>
-              <div style={{ color: '#aaa', fontSize: 'clamp(0.5rem, 0.75vw, 0.7rem)', marginBottom: '2px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{item.l}</div>
-              <div style={{ color: item.clr, fontSize: 'clamp(0.7rem, 1vw, 0.95rem)', fontWeight: '900', textShadow: '0 1px 2px rgba(0,0,0,0.8)', whiteSpace: 'nowrap' }}>
+              <div style={{ color: '#ccc', fontSize: '0.75rem', marginBottom: '2px', fontWeight: '900', whiteSpace: 'nowrap', textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>{item.l}</div>
+              <div style={{ color: item.clr, fontSize: '1.15rem', fontWeight: '900', textShadow: '0 2px 5px rgba(0,0,0,0.9)', whiteSpace: 'nowrap' }}>
                 {item.v !== undefined ? item.v.toFixed(2) : "0.00"}
               </div>
             </div>
           ))}
         </div>
       </div>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 'clamp(60px, 12vw, 110px)', bottom: 'clamp(50px, 10vh, 85px)' }}>
+
+      {/* --- 3D CANVAS --- */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
         <Canvas camera={{ position: [0, -6500, 3000], up: [0, 0, 1], fov: 45, near: 1, far: 30000 }}>
           
           <color attach="background" args={["#f0f4f8"]} /> 
@@ -316,7 +397,7 @@ const RobotScene = () => {
           <directionalLight position={[2000, -4000, 4000]} intensity={2.5} castShadow />
           <pointLight position={[-2000, -2000, 3000]} intensity={1.8} />
 
-          <OrbitControls makeDefault target={[0, 0, 800]} maxDistance={12000} minDistance={200} />
+          <OrbitControls ref={controlsRef} makeDefault target={[0, 0, 800]} maxDistance={12000} minDistance={200} />
           
           <group>
             <CustomGridWalls />
@@ -326,13 +407,13 @@ const RobotScene = () => {
           <Suspense fallback={null}>
             <group rotation={[0, 0, -Math.PI / 2]}>
               <RealRobot />
-              {/* Using the Ultra-Optimized, Lag-Free ThickLine Component! */}
               {bluePts.length > 1 && <FastThickLine points={bluePts} color="#039BE5" lineWidth={2.5} />}
               {redPts.length > 1 && <FastThickLine points={redPts} color="#E53935" lineWidth={4} />}
             </group>
           </Suspense>
 
-          <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+          {/* FIX: GIZMO PUSHED FULLY OUTSIDE THE 85px PANELS */}
+          <GizmoHelper alignment="bottom-right" margin={[150, 150]}>
             <GizmoViewport axisColors={[COLORS.X_RED, COLORS.Y_GREEN, COLORS.Z_BLUE]} labelColor="white" />
           </GizmoHelper>
         </Canvas>

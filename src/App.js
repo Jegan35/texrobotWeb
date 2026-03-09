@@ -12,6 +12,9 @@ function AppContent() {
   const [showReloadWarning, setShowReloadWarning] = useState(false);
   const [reloadFocus, setReloadFocus] = useState('cancel');
   const [failedFocus, setFailedFocus] = useState('retry');
+  
+  // --- NEW: Controls Panel Toggle State (Default false = Full Grid) ---
+  const [showBottomControls, setShowBottomControls] = useState(false);
 
   useEffect(() => { if (connectionFailed) setFailedFocus('retry'); }, [connectionFailed]);
   useEffect(() => { if (showReloadWarning) setReloadFocus('cancel'); }, [showReloadWarning]);
@@ -55,9 +58,7 @@ function AppContent() {
 
   return (
     <>
-      {/* ==========================================
-          WARNING MODALS
-          ========================================== */}
+      {/* WARNING MODALS */}
       {showReloadWarning && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ backgroundColor: '#1e222b', border: '2px solid #F44336', borderRadius: '8px', padding: '30px', width: '400px', textAlign: 'center', boxShadow: '0px 10px 30px rgba(0,0,0,0.8)' }}>
@@ -94,9 +95,7 @@ function AppContent() {
         </div>
       )}
 
-      {/* ==========================================
-          MAIN CONTAINER
-          ========================================== */}
+      {/* MAIN CONTAINER */}
       <div style={{ display: 'flex', height: '100vh', width: '100vw', backgroundColor: '#1a1e29', color: 'white', overflow: 'hidden' }}>
         
         {/* LEFT PANEL */}
@@ -107,14 +106,17 @@ function AppContent() {
             <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '0.5px' }}>ROBOT CONTROLLER V1.0</div>
           </div>
 
-          {/* DYNAMIC SCENE WRAPPER: Let RobotScene render its own Cartesian & Joints perfectly! */}
+          {/* DYNAMIC SCENE WRAPPER: Fills all available space seamlessly */}
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-            <RobotScene />
+            <RobotScene showControls={showBottomControls} onToggleControls={() => setShowBottomControls(!showBottomControls)} />
           </div>
 
-          <div style={{ backgroundColor: '#202430', padding: '10px', flexShrink: 0, borderTop: '2px solid #111' }}>
-            <ControlButtons />
-          </div>
+          {/* DYNAMIC CONTROL BUTTONS PANEL */}
+          {showBottomControls && (
+            <div style={{ backgroundColor: '#202430', padding: '10px', flexShrink: 0, borderTop: '2px solid #111' }}>
+              <ControlButtons />
+            </div>
+          )}
           
         </div>
 
