@@ -3,8 +3,8 @@ import { WebSocketProvider, useWebSocket } from './context/WebSocketContext';
 
 // Components
 import RobotScene from './RobotScene';
-import ControlButtons from './components/ControlButtons';
 import RightPart from './components/RightPart';
+// (Removed ControlButtons import entirely!)
 
 function AppContent() {
   const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket } = useWebSocket(); 
@@ -13,8 +13,7 @@ function AppContent() {
   const [reloadFocus, setReloadFocus] = useState('cancel');
   const [failedFocus, setFailedFocus] = useState('retry');
   
-  // --- NEW: Controls Panel Toggle State (Default false = Full Grid) ---
-  const [showBottomControls, setShowBottomControls] = useState(false);
+  // (Removed showBottomControls state completely)
 
   useEffect(() => { if (connectionFailed) setFailedFocus('retry'); }, [connectionFailed]);
   useEffect(() => { if (showReloadWarning) setReloadFocus('cancel'); }, [showReloadWarning]);
@@ -108,15 +107,11 @@ function AppContent() {
 
           {/* DYNAMIC SCENE WRAPPER: Fills all available space seamlessly */}
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-            <RobotScene showControls={showBottomControls} onToggleControls={() => setShowBottomControls(!showBottomControls)} />
+            {/* Render just the RobotScene with no extra props! */}
+            <RobotScene /> 
           </div>
-
-          {/* DYNAMIC CONTROL BUTTONS PANEL */}
-          {showBottomControls && (
-            <div style={{ backgroundColor: '#202430', padding: '10px', flexShrink: 0, borderTop: '2px solid #111' }}>
-              <ControlButtons />
-            </div>
-          )}
+          
+          {/* THE CONTROL BUTTONS BLOCK HAS BEEN COMPLETELY DELETED FROM HERE! */}
           
         </div>
 

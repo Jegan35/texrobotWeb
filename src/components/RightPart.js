@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
 import RightHeader from './RightHeader';
 import RightMenuSidebar from './RightMenuSidebar';
+import ControlButtons from './ControlButtons'; 
 import './RightPart.css'; 
 
 const INST_OPTIONS = ["Inst", "MOVJ", "MOVJ_dg", "MOVL", "MOVC", "MVLEX_Deg", "MVLEX_mm", "Pallet_Matrix", "Num_of_row", "Num_of_colm", "pos_add_x", "pos_add_y", "pos_add_z", "delay_ms", "go_to", "loop", "Start If", "End If", "Start-Con", "End-Con", "Wait", "DI-1", "DI-2", "DI-3", "DI-4", "DI-5", "DI-6", "DI-7", "DI-8", "DI-9", "DI-10", "DI-11", "DI-12", "DI-13", "DI-14", "DI-15", "DI-16", "DO-1", "DO-2", "DO-3", "DO-4", "DO-5", "DO-6", "DO-7", "DO-8", "DO-9", "DO-10", "DO-11", "DO-12", "DO-13", "DO-14", "DO-15", "DO-16", "AI-1", "AI-2", "AI-3", "AI-4", "AO-1", "AO-2", "AO-3", "AO-4", "DI-1 Chk", "DI-2 Chk", "DI-3 Chk", "DI-4 Chk", "DI-5 Chk", "DI-6 Chk", "DI-7 Chk", "DI-8 Chk", "DI-9 Chk", "DI-10 Chk", "DI-11 Chk", "DI-12 Chk", "DI-13 Chk", "DI-14 Chk", "DI-15 Chk", "DI-16 Chk", "DI-1 Un Chk", "DI-2 Un Chk", "DI-3 Un Chk", "DI-4 Un Chk", "DI-5 Un Chk", "DI-6 Un Chk", "DI-7 Un Chk", "DI-8 Un Chk", "DI-9 Un Chk", "DI-10 Un Chk", "DI-11 Un Chk", "DI-12 Un Chk", "DI-13 Un Chk", "DI-14 Un Chk", "DI-15 Un Chk", "DI-16 Un Chk", "= Assign", "== Equal", "!= Not Eql", "<", ">", "<=", ">=", "+", "-", "&", "stop", "Servo off"];
@@ -111,14 +112,20 @@ const RightPart = () => {
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
-  const [bottomPanelMode, setBottomPanelMode] = useState('TP_CTRL'); 
+  const [bottomPanelMode, setBottomPanelMode] = useState('MAIN_CTRL'); 
+  
+  const [activeFileTab, setActiveFileTab] = useState('PR'); 
   const [openDropdown, setOpenDropdown] = useState(null);
   
+  // FIX: isTopPanelOpen now toggles between the tools and the Program File view
+  const [isTopPanelOpen, setIsTopPanelOpen] = useState(false);
+
   // SETTINGS OVERLAY STATE
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [mainSettingsTab, setMainSettingsTab] = useState('DIAGNOSTIC'); 
   const [activeDiagTab, setActiveDiagTab] = useState('Error Pos'); 
   const [activeConfigTab, setActiveConfigTab] = useState('Encoder Offset');
+  const [activeDebugJogTab, setActiveDebugJogTab] = useState('Debug'); 
   
   // Custom Dropdowns
   const [selInst, setSelInst] = useState(INST_OPTIONS[0]);
@@ -645,6 +652,9 @@ const RightPart = () => {
                       <button className={`set-tab-btn ${mainSettingsTab === 'CONFIG' ? 'active' : ''}`} onClick={() => setMainSettingsTab('CONFIG')}>
                           🛠 CONFIG SETTINGS
                       </button>
+                      <button className={`set-tab-btn ${mainSettingsTab === 'DEBUG_JOG' ? 'active' : ''}`} onClick={() => setMainSettingsTab('DEBUG_JOG')}>
+                          🎛️ DEBUG & JOG
+                      </button>
                   </div>
                   <div className="settings-content-area">
                       {mainSettingsTab === 'DIAGNOSTIC' && (
@@ -664,7 +674,6 @@ const RightPart = () => {
                       )}
                       {mainSettingsTab === 'CONFIG' && (
                           <>
-                              {/* FIX: ADDED 'Target Points' TO CONFIG TABS */}
                               <div className="dark-tabs bg-dark-deep">
                                   {['Encoder Offset', 'Settings View', 'Data Variable', 'Axis Limit', 'Mech Settings', 'Target Points'].map(tab => (
                                       <div key={tab} className={`dark-tab ${activeConfigTab === tab ? 'active' : ''}`} onClick={() => setActiveConfigTab(tab)}>{tab}</div>
@@ -677,12 +686,40 @@ const RightPart = () => {
                                   {activeConfigTab === 'Axis Limit' && renderAxisLimit()}
                                   {activeConfigTab === 'Mech Settings' && renderMechSettings()}
                                   
-                                  {/* FIX: TP TABLE NOW RENDERS INSIDE CONFIG SETTINGS */}
                                   {activeConfigTab === 'Target Points' && (
                                       <div className="table-wrapper" style={{ border: 'none', height: '100%' }}>
                                           <div className="table-scroller">
                                               <MemoizedTpTableBody tpList={tpList} expandedTable={'TP'} selectedTpIndex={selectedTpIndex} onRowClick={handleTpRowClick} />
                                           </div>
+                                      </div>
+                                  )}
+                              </div>
+                          </>
+                      )}
+                      {mainSettingsTab === 'DEBUG_JOG' && (
+                          <>
+                              <div className="dark-tabs bg-dark-deep">
+                                  {['Debug', 'Jog Deg'].map(tab => (
+                                      <div key={tab} className={`dark-tab ${activeDebugJogTab === tab ? 'active' : ''}`} onClick={() => setActiveDebugJogTab(tab)}>{tab}</div>
+                                  ))}
+                              </div>
+                              <div className="settings-scroll-content">
+                                  {activeDebugJogTab === 'Debug' && (
+                                      <div className="light-panel" style={{ display: 'flex', gap: '8px', padding: '10px' }}>
+                                           <button className="debug-btn debug-red" style={{width: '90px'}} onClick={() => sendCommand('TOGGLE_START')}>Start_Stop</button>
+                                           <button className="debug-btn" style={{width: '70px'}} onClick={() => {}}>Step</button>
+                                           <button className="debug-btn" style={{width: '70px'}} onClick={() => sendCommand('EXIT')}>Exit</button>
+                                           <div style={{width: '10px'}}></div>
+                                           <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump In</button>
+                                           <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump Out</button>
+                                           <button className="debug-btn" style={{fontWeight: '900', border: '2px solid black'}} onClick={() => sendCommand('SET_GOTO_PROGRAM', debugGoto)}>go to</button>
+                                           <input className="light-input" style={{width: '60px', textAlign: 'center'}} value={debugGoto} onChange={e => setDebugGoto(e.target.value)} />
+                                           <button className="debug-btn" style={{width: '60px'}} onClick={() => {}}>prv</button>
+                                      </div>
+                                  )}
+                                  {activeDebugJogTab === 'Jog Deg' && (
+                                      <div className="light-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontStyle: 'italic', padding: '10px' }}>
+                                          Jog Degrees not set
                                       </div>
                                   )}
                               </div>
@@ -730,86 +767,86 @@ const RightPart = () => {
             
             <div className="rp-upper-half">
                 
-                {/* ROW 1: Header + Full Width Content Panel */}
-                <div className={`rp-row-1 ${expandedRowPanel === 'ROW1' ? 'row-maximized' : expandedRowPanel === 'ROW2' ? 'row-minimized' : ''}`}>
-                    <div className="rp-header-col">
-                        <RightHeader 
-                            onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
-                            currentMode={currentView} 
-                            isOpen={isSidebarOpen} 
-                            onSettingsClick={() => setIsSettingsOpen(true)} 
-                        />
-                    </div>
-                    
-                    <div className="rp-content-col" style={{ display: expandedRowPanel === 'ROW2' ? 'none' : 'flex', position: 'relative' }}>
-                        
-                        {/* --- DEFAULT VIEW: DARK BLUR OVERLAY WITH CENTER MAX BUTTON --- */}
-                        {expandedRowPanel === 'NONE' && (
-                            <div className="center-max-overlay">
-                                <button className="center-max-btn" onClick={() => setExpandedRowPanel('ROW1')}>
-                                    ⛶ VIEW FULL
-                                </button>
-                            </div>
-                        )}
-
-                        {/* --- MAXIMIZED VIEW: BOTTOM RIGHT MIN BUTTON --- */}
-                        {expandedRowPanel === 'ROW1' && (
-                            <button className="br-min-btn" onClick={() => setExpandedRowPanel('NONE')}>
-                                ▼ MIN
-                            </button>
-                        )}
-
-                        <div className={`rp-panel-full ${expandedRowPanel === 'NONE' ? 'blurred-content' : ''} ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`}>
-                            {/* Dynamically renders Jog Control, Speed Config, or GRAPH VIEW */}
-                            {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : 
-                             currentView === 'GRAPH VIEW' ? renderGraphView() : 
-                             renderJogPanel()}
-                        </div>
-
-                    </div>
+                {/* Header */}
+                <div className="rp-header-col">
+                    <RightHeader 
+                        onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
+                        currentMode={currentView} 
+                        isOpen={isSidebarOpen} 
+                        onSettingsClick={() => setIsSettingsOpen(true)} 
+                    />
                 </div>
+                
+                {/* --- WHEN OPEN: JOG / SPEED TAKES FULL SPACE --- */}
+                {isTopPanelOpen ? (
+                    <div className="rp-row-1" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', minHeight: 0 }}>
+                        <div className="rp-content-col" style={{ display: 'flex', flex: 1, position: 'relative', width: '100%' }}>
+                            
+                            {/* GUARANTEED VISIBLE BACK BUTTON */}
+                            <button 
+                                onClick={() => setIsTopPanelOpen(false)}
+                                style={{
+                                    position: 'absolute', bottom: 0, right: 0, zIndex: 9999,
+                                    background: '#151822', color: '#00bcd4', border: 'none',
+                                    borderTop: '2px solid #00bcd4', borderLeft: '2px solid #00bcd4',
+                                    padding: '8px 25px', fontWeight: '900', fontSize: '0.85rem',
+                                    cursor: 'pointer', borderRadius: '8px 0 0 0',
+                                    boxShadow: '-4px -4px 15px rgba(0,0,0,0.5)', letterSpacing: '1px'
+                                }}
+                            >
+                                ◀ BACK
+                            </button>
 
-                {/* ROW 2: Programs File Table Only */}
-                <div className={`rp-row-2 ${expandedRowPanel === 'ROW2' ? 'row-maximized' : expandedRowPanel === 'ROW1' ? 'row-minimized' : ''}`}>
-                    
-                    {/* FIX: Static Header for Program File */}
-                    <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex' }}>
-                            <div className="dark-tab active">PROGRAM FILE</div>
-                        </div>
-                        <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'ROW2' ? 'NONE' : 'ROW2')}>
-                            {expandedRowPanel === 'ROW2' ? '▼ MIN' : '⛶ MAX'}
+                            {/* The tools render cleanly without any blurry overlays */}
+                            <div className={`rp-panel-full ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`}>
+                                {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : 
+                                 currentView === 'GRAPH VIEW' ? renderGraphView() : 
+                                 renderJogPanel()}
+                            </div>
+
                         </div>
                     </div>
+                ) : (
+                    /* --- WHEN CLOSED: PROGRAM FILE TAKES FULL SPACE --- */
+                    <div className="rp-row-2" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                        <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex' }}>
+                                <div className="dark-tab active">PROGRAM FILE</div>
+                            </div>
+                        </div>
 
-                    <div className="row2-content" style={{ display: expandedRowPanel === 'ROW1' ? 'none' : 'flex' }}>
-                        <div className="table-container">
-                            {/* FIX: ONLY PROGRAM FILE REMAINS HERE */}
-                            <div className="table-wrapper">
-                                <div className="table-scroller">
-                                    <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                        <div className="row2-content" style={{ display: 'flex', flex: 1 }}>
+                            <div className="table-container">
+                                <div className="table-wrapper">
+                                    <div className="table-scroller">
+                                        <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
             
             </div>
-
-            {/* ROW 4: Inst/Debug Tabs + The New TP/PR Edit Buttons */}
-            {/* FIX: Row 4 hides automatically when Row 2 is MAXIMIZED */}
-            <div className={`rp-row-4 ${expandedRowPanel === 'ROW2' ? 'row-minimized' : ''}`}>
+            {/* --- ROW 3 & 4 (INST & CONTROLS) --- */}
+            <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
                 <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
                     <div style={{ display: 'flex' }}>
-                        {['Inst', 'Debug', 'Jog Deg'].map(tab => (
+                        {['Inst'].map(tab => (
                             <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>
                                 {tab}
                             </div>
                         ))}
                     </div>
                     
-                    {/* --- EDIT BUTTONS --- */}
                     <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
+                        {/* MAIN CTRL TOGGLE */}
+                        <button 
+                            className={`pro-th-btn edit-btn ${bottomPanelMode === 'MAIN_CTRL' ? 'active' : ''}`} 
+                            onClick={() => { setBottomPanelMode('MAIN_CTRL'); }}
+                        >
+                            🎮 MAIN CTRL
+                        </button>
                         <button 
                             className={`pro-th-btn edit-btn ${bottomPanelMode === 'TP_CTRL' ? 'active' : ''}`} 
                             onClick={() => { setBottomPanelMode('TP_CTRL'); }}
@@ -848,37 +885,19 @@ const RightPart = () => {
                             </div>
                         </div>
                     )}
-
-                    {activeRow4Tab === 'Debug' && (
-                        <div className="light-panel" style={{ display: 'flex', gap: '8px', padding: '10px' }}>
-                             <button className="debug-btn debug-red" style={{width: '90px'}} onClick={() => sendCommand('TOGGLE_START')}>Start_Stop</button>
-                             <button className="debug-btn" style={{width: '70px'}} onClick={() => {}}>Step</button>
-                             <button className="debug-btn" style={{width: '70px'}} onClick={() => sendCommand('EXIT')}>Exit</button>
-                             <div style={{width: '10px'}}></div>
-                             <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump In</button>
-                             <button className="debug-btn" style={{width: '80px'}} onClick={() => {}}>Jump Out</button>
-                             <button className="debug-btn" style={{fontWeight: '900', border: '2px solid black'}} onClick={() => sendCommand('SET_GOTO_PROGRAM', debugGoto)}>go to</button>
-                             <input className="light-input" style={{width: '60px', textAlign: 'center'}} value={debugGoto} onChange={e => setDebugGoto(e.target.value)} />
-                             <button className="debug-btn" style={{width: '60px'}} onClick={() => {}}>prv</button>
-                        </div>
-                    )}
-
-                    {activeRow4Tab === 'Jog Deg' && (
-                        <div className="light-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontStyle: 'italic', padding: '10px' }}>
-                            Jog Degrees not set
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* COMBINED DYNAMIC ROW 5 */}
-            {/* FIX: Row 5 hides automatically when Row 2 is MAXIMIZED */}
-            <div className={`rp-row-5 ${expandedRowPanel === 'ROW2' ? 'row-minimized' : ''}`}>
+            <div className={`rp-row-5 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px', justifyContent: 'center' }}>
                     
-                    {bottomPanelMode === 'PR_CTRL' ? (
+                    {/* --- FIX: IMPORTS YOUR COMPONENT PERFECTLY --- */}
+                    {bottomPanelMode === 'MAIN_CTRL' && (
+                        <ControlButtons />
+                    )}
+
+                    {bottomPanelMode === 'PR_CTRL' && (
                         <>
-                            {/* --- PR EDIT MODE (Config Controls) --- */}
                             <div className="grid-11-col">
                                 {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "tp-standalone-input", "up")}
                                 {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "tp-standalone-input", "up")}
@@ -906,9 +925,10 @@ const RightPart = () => {
                                 <input className="tp-standalone-input" value={anOpVal} onChange={e => setAnOpVal(e.target.value)} />
                             </div>
                         </>
-                    ) : (
+                    )}
+
+                    {bottomPanelMode === 'TP_CTRL' && (
                         <>
-                            {/* --- TP EDIT MODE (Target Point Controls) --- */}
                             <div className="grid-7-col">
                                 <div className="rel-flex">
                                     <button className="tp-btn btn-blue" onClick={() => toggleDropdown('TP_MODE')}>⚙ {displayTpMode}</button>
@@ -963,15 +983,13 @@ const RightPart = () => {
             </div>
         </div>
         
-        {/* Right Menu Sidebar */}
         <RightMenuSidebar 
             isOpen={isSidebarOpen} 
             onClose={() => setIsSidebarOpen(false)} 
             onSelectView={(view) => {
                 setCurrentView(view);
-                if (view === 'GRAPH VIEW') {
-                    setExpandedRowPanel('ROW1');
-                }
+                setIsTopPanelOpen(true);
+                setExpandedRowPanel('NONE'); 
             }} 
             activeView={currentView} 
         />

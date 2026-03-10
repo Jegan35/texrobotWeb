@@ -230,7 +230,7 @@ const WorldCoordinates = React.memo(() => {
 // ==========================================
 // MAIN COMPONENT EXPORT
 // ==========================================
-const RobotScene = ({ showControls, onToggleControls }) => {
+const RobotScene = () => { // Removed props related to controls
   const { robotState } = useWebSocket();
   const c = robotState?.cartesian || { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 };
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
@@ -238,78 +238,29 @@ const RobotScene = ({ showControls, onToggleControls }) => {
   const bluePts = robotState?.blueTrajectory || [];
   const redPts = robotState?.redTrajectory || [];
 
- // --- CONNECT SYSTEM OK STATE (FIXED) ---
-  // This now checks all standard backend error flags to guarantee it catches the error!
-  const isError = robotState?.error || robotState?.error_state || robotState?.is_error || robotState?.system_ok === false;
-  const isSystemOk = !isError;
+  // --- CONNECT SYSTEM OK STATE (BULLETPROOF FIX) ---
+  const rs = robotState || {};
+  
+  // This forcefully catches booleans, strings ("false"/"true"), numbers (0/1), and multiple variable names
+  const hasError = 
+      rs.system_ok === false || String(rs.system_ok).toLowerCase() === 'false' || rs.system_ok === 0 ||
+      rs.sys_ok === false || String(rs.sys_ok).toLowerCase() === 'false' || rs.sys_ok === 0 ||
+      rs.error === true || String(rs.error).toLowerCase() === 'true' || rs.error === 1 ||
+      rs.error_state === true || String(rs.error_state).toLowerCase() === 'true' ||
+      rs.is_error === true || String(rs.is_error).toLowerCase() === 'true' ||
+      (rs.error_code !== undefined && rs.error_code !== 0 && rs.error_code !== "0");
+
+  const isSystemOk = !hasError;
 
   const controlsRef = useRef(null);
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleResetView = () => {
-    if (controlsRef.current) {
-      controlsRef.current.object.position.set(0, -6500, 3000);
-      controlsRef.current.target.set(0, 0, 800);
-      controlsRef.current.update();
-    }
-  };
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       
       <HamburgerMenu onToggle={(isOpen) => setIsMenuOpen(isOpen)} />
 
-      {/* --- TOP LEFT UI WRAPPER --- */}
-      <div style={{ 
-          position: 'absolute', top: '65px', left: '15px', zIndex: 5, 
-          display: isMenuOpen ? 'none' : 'flex', 
-          flexDirection: 'column', gap: '8px', pointerEvents: 'none' 
-      }}>
-          
-          <button
-              onClick={onToggleControls}
-              style={{
-                  background: showControls ? 'linear-gradient(180deg, #00bcd4 0%, #008ba3 100%)' : 'rgba(20, 24, 33, 0.85)',
-                  color: showControls ? '#111' : '#00bcd4',
-                  border: '1px solid rgba(0, 188, 212, 0.4)',
-                  borderLeft: showControls ? '1px solid #00bcd4' : '3px solid #00bcd4',
-                  borderRadius: '4px', cursor: 'pointer', height: '35px', 
-                  width: '130px', 
-                  padding: '0', fontWeight: '900', fontSize: '0.75rem',
-                  letterSpacing: '1px', backdropFilter: 'blur(5px)', transition: 'all 0.1s ease-in-out',
-                  boxShadow: showControls ? '0 2px 10px rgba(0,188,212,0.4)' : 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)',
-                  pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-              }}
-          >
-              <span style={{ fontSize: '1rem' }}>{showControls ? '▼' : '⚙'}</span> 
-              CONTROLS
-          </button>
-
-          <button
-              onClick={handleResetView}
-              onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.95)'; e.currentTarget.style.boxShadow = 'none'; }}
-              onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)'; }}
-              style={{
-                  background: 'rgba(20, 24, 33, 0.85)',
-                  color: '#ff5252', 
-                  border: '1px solid rgba(255, 82, 82, 0.4)', 
-                  borderLeft: '3px solid #ff5252', 
-                  borderRadius: '4px', cursor: 'pointer', height: '35px', 
-                  width: '130px', 
-                  padding: '0', fontWeight: '900', fontSize: '0.75rem',
-                  letterSpacing: '1px', transition: 'all 0.1s ease-in-out',
-                  backdropFilter: 'blur(5px)',
-                  boxShadow: 'inset 1px 1px 0 rgba(255,255,255,0.05), 0 2px 5px rgba(0,0,0,0.3)',
-                  pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-              }}
-          >
-              <span style={{ fontSize: '1.1rem', marginBottom: '2px' }}>⌂</span> 
-              RESET
-          </button>
-
-      </div>
+      {/* FIX: Removed the CONTROLS and RESET buttons completely from this overlay */}
 
       {/* --- JOINTS PANEL --- */}
       <div style={{ 
@@ -415,7 +366,6 @@ const RobotScene = ({ showControls, onToggleControls }) => {
             </group>
           </Suspense>
 
-          {/* FIX: GIZMO PUSHED FULLY OUTSIDE THE 85px PANELS */}
           <GizmoHelper alignment="bottom-right" margin={[150, 150]}>
             <GizmoViewport axisColors={[COLORS.X_RED, COLORS.Y_GREEN, COLORS.Z_BLUE]} labelColor="white" />
           </GizmoHelper>

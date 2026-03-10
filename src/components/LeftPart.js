@@ -26,7 +26,6 @@ const LeftPart = () => {
       if (isConnected || isConnecting) {
           disconnectWebSocket();
       } else {
-          // PASS EXACT IP TO AVOID CLOSURE BUGS
           connectWebSocket(ipAddress);
       }
   };
@@ -85,7 +84,7 @@ const LeftPart = () => {
           </button>
       </div>
 
-      {/* CARTESIAN PANEL */}
+      {/* CARTESIAN COORDINATE DISPLAY PANEL */}
       <div className="left-panel">
           <div className="panel-title">CARTESIAN (mm / °)</div>
           <div className="cartesian-grid">

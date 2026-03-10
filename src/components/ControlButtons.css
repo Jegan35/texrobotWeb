@@ -64,9 +64,9 @@
 /* BUTTON COLOR THEMES */
 .btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); }
 .btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); }
-.btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); color: #000; text-shadow: none; }
+.btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); color:white; text-shadow: none; }
 .btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); }
-.btn-yellow { background: linear-gradient(180deg, #FFEE58 0%, #F57F17 100%); color: #111; text-shadow: none; }
+.btn-yellow { background: linear-gradient(180deg, #ccc04f 0%, #F57F17 100%); color: white; text-shadow: none; }
 .btn-orange { background: linear-gradient(180deg, #FFA726 0%, #E65100 100%); }
 .btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); }
 .btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); }
