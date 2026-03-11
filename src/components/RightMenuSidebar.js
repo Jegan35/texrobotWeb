@@ -24,7 +24,6 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
   const isSpeedActive = activeView === 'SPEED CONFIG';
   const isJogActive = activeView && activeView.includes('JOG');
   const isMoveActive = activeView && activeView.includes('MOVE');
-  const isGraphActive = activeView === 'GRAPH VIEW'; // <-- Add this check
 
   return (
         <div className="rms-container">
@@ -39,9 +38,6 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
                     <button className={`rms-btn btn-auto ${activeMode === 'AUTO' ? 'rms-active' : ''}`} onClick={() => handleModeClick('AUTO')}><span>↻</span> AUTO</button>
                     <button className={`rms-btn btn-manual ${activeMode === 'MANUAL' ? 'rms-active' : ''}`} onClick={() => handleModeClick('MANUAL')}><span>⚙</span> MANUAL</button>
                     <button className={`rms-btn btn-remote ${activeMode === 'REMOTE' ? 'rms-active' : ''}`} onClick={() => handleModeClick('REMOTE')}><span>🌍</span> REMOTE</button>
-                    
-                    {/* ---> ADD THE GRAPH BUTTON HERE <--- */}
-                    <button className={`rms-btn btn-graph ${isGraphActive ? 'rms-active' : ''}`} onClick={() => handleViewClick('GRAPH VIEW')}><span>📈</span> GRAPH</button>
                 </>
             )}
 

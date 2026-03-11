@@ -107,7 +107,7 @@ const RightPart = () => {
     return () => { document.removeEventListener("contextmenu", disableContextMenu); };
   }, []);
   
-  const { sendCommand, robotState, isGraphReading, setGraphReading } = useWebSocket();
+  const { sendCommand, robotState, isGraphReading, setGraphReading, userRole } = useWebSocket();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
@@ -116,18 +116,16 @@ const RightPart = () => {
   
   const [activeFileTab, setActiveFileTab] = useState('PR'); 
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [row2Tab, setRow2Tab] = useState('PROGRAM_FILE'); // 'PROGRAM_FILE' or 'IO_MODULES'
   
-  // FIX: isTopPanelOpen now toggles between the tools and the Program File view
   const [isTopPanelOpen, setIsTopPanelOpen] = useState(false);
 
-  // SETTINGS OVERLAY STATE
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [mainSettingsTab, setMainSettingsTab] = useState('DIAGNOSTIC'); 
   const [activeDiagTab, setActiveDiagTab] = useState('Error Pos'); 
   const [activeConfigTab, setActiveConfigTab] = useState('Encoder Offset');
   const [activeDebugJogTab, setActiveDebugJogTab] = useState('Debug'); 
   
-  // Custom Dropdowns
   const [selInst, setSelInst] = useState(INST_OPTIONS[0]);
   const [selDi1, setSelDi1] = useState(DI_OPTIONS[0]);
   const [selDi2, setSelDi2] = useState(DI2_OPTIONS[0]);
@@ -605,7 +603,6 @@ const RightPart = () => {
                 <div className="dpad-col">
                     <div className="dpad-col-title">TRANSLATION</div>
                     
-                    {/* NEW 4-COLUMN GRID LAYOUT */}
                     <div className="dpad-cross">
                         <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Y+')} onPointerUp={()=>handlePointerUp('Y+')} onPointerLeave={()=>handlePointerUp('Y+')}>Y+</button>
                         <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('X-')} onPointerUp={()=>handlePointerUp('X-')} onPointerLeave={()=>handlePointerUp('X-')}>X-</button>
@@ -613,7 +610,6 @@ const RightPart = () => {
                         <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('X+')} onPointerUp={()=>handlePointerUp('X+')} onPointerLeave={()=>handlePointerUp('X+')}>X+</button>
                         <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Y-')} onPointerUp={()=>handlePointerUp('Y-')} onPointerLeave={()=>handlePointerUp('Y-')}>Y-</button>
                         
-                        {/* Z Buttons moved INSIDE the cross grid! */}
                         <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown('Z+')} onPointerUp={()=>handlePointerUp('Z+')} onPointerLeave={()=>handlePointerUp('Z+')}>Z+</button>
                         <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown('Z-')} onPointerUp={()=>handlePointerUp('Z-')} onPointerLeave={()=>handlePointerUp('Z-')}>Z-</button>
                     </div>
@@ -626,7 +622,6 @@ const RightPart = () => {
                 <div className="dpad-col">
                     <div className="dpad-col-title">ROTATION</div>
                     
-                    {/* NEW 4-COLUMN GRID LAYOUT */}
                     <div className="dpad-cross">
                         <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Ry+')} onPointerUp={()=>handlePointerUp('Ry+')} onPointerLeave={()=>handlePointerUp('Ry+')}>Ry+</button>
                         <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('Rx-')} onPointerUp={()=>handlePointerUp('Rx-')} onPointerLeave={()=>handlePointerUp('Rx-')}>Rx-</button>
@@ -634,7 +629,6 @@ const RightPart = () => {
                         <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('Rx+')} onPointerUp={()=>handlePointerUp('Rx+')} onPointerLeave={()=>handlePointerUp('Rx+')}>Rx+</button>
                         <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerUp={()=>handlePointerUp('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
                         
-                        {/* Rz Buttons moved INSIDE the cross grid! */}
                         <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown('Rz+')} onPointerUp={()=>handlePointerUp('Rz+')} onPointerLeave={()=>handlePointerUp('Rz+')}>Rz+</button>
                         <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
                     </div>
@@ -644,6 +638,7 @@ const RightPart = () => {
         );
     }
   };
+  
   return (
     <>
       {/* SETTINGS OVERLAY */}
@@ -780,10 +775,10 @@ const RightPart = () => {
                 <div className="rp-header-col">
                     <RightHeader 
                         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
-                        currentMode={currentView} 
+                        currentMode={!isTopPanelOpen ? 'PROGRAM FILE' : currentView} 
                         isOpen={isSidebarOpen} 
                         onSettingsClick={() => setIsSettingsOpen(true)} 
-                    />
+                     />
                 </div>
                 
                 {/* --- WHEN OPEN: JOG / SPEED TAKES FULL SPACE --- */}
@@ -809,18 +804,35 @@ const RightPart = () => {
                             {/* The tools render cleanly without any blurry overlays */}
                             <div className={`rp-panel-full ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`}>
                                 {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : 
-                                 currentView === 'GRAPH VIEW' ? renderGraphView() : 
                                  renderJogPanel()}
                             </div>
 
                         </div>
                     </div>
                 ) : (
-                    /* --- WHEN CLOSED: PROGRAM FILE TAKES FULL SPACE --- */
                     <div className={`rp-row-2 ${expandedRowPanel === 'PROGRAM' ? 'row-maximized' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                        {/* ========================================== */}
+                        {/* ROW 2: PROGRAM FILE & IO MODULES TABS      */}
+                        {/* ========================================== */}
                         <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
                             <div style={{ display: 'flex' }}>
-                                <div className="dark-tab active">PROGRAM FILE</div>
+                                {/* PROGRAM FILE TAB */}
+                                <div 
+                                    className={`dark-tab ${row2Tab === 'PROGRAM_FILE' ? 'active' : ''}`} 
+                                    onClick={() => setRow2Tab('PROGRAM_FILE')}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    PROGRAM FILE
+                                </div>
+                                
+                                {/* IO MODULES TAB */}
+                                <div 
+                                    className={`dark-tab ${row2Tab === 'IO_MODULES' ? 'active' : ''}`} 
+                                    onClick={() => setRow2Tab('IO_MODULES')}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    I/O MODULES
+                                </div>
                             </div>
                             
                             {/* MAX / MIN TOGGLE BUTTON */}
@@ -829,83 +841,93 @@ const RightPart = () => {
                             </div>
                         </div>
 
-                        <div className="row2-content" style={{ display: 'flex', flex: 1 }}>
-                            <div className="table-container">
-                                <div className="table-wrapper">
-                                    <div className="table-scroller">
-                                        <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                        <div className="row2-content" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                            
+                            {/* IF PROGRAM FILE IS SELECTED */}
+                            {row2Tab === 'PROGRAM_FILE' && (
+                                <div className="table-container" style={{ width: '100%', height: '100%' }}>
+                                    <div className="table-wrapper">
+                                        <div className="table-scroller">
+                                            <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {/* IF IO MODULES IS SELECTED */}
+                            {row2Tab === 'IO_MODULES' && (
+                                <div style={{ width: '100%', height: '100%', padding: '15px', overflowY: 'auto' }}>
+                                    <h3 style={{ color: '#00bcd4', textAlign: 'center', marginTop: '20px' }}>I/O MODULES CONTROL</h3>
+                                    <p style={{ color: '#888', textAlign: 'center' }}>[ Your Digital & Analog I/O UI goes here ]</p>
+                                </div>
+                            )}
+
                         </div>
                     </div>
-                )}
-            
-            </div>
-            {/* --- ROW 3 & 4 (INST & CONTROLS) --- */}
-            <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
-                <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
-                    <div style={{ display: 'flex' }}>
-                        {['Inst'].map(tab => (
-                            <div key={tab} className={`dark-tab ${activeRow4Tab === tab ? 'active' : ''}`} onClick={() => setActiveRow4Tab(tab)}>
-                                {tab}
+                )} 
+
+                {/* --- ROW 3 & 4 (INST & CONTROLS) --- */}
+                <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
+                    <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
+                        <div style={{ display: 'flex' }}>
+                            <div className="dark-tab active">INST</div>
+                        </div>
+                        
+                        {/* SECURE BLOCK: ONLY SHOWS IF LOGGED IN AS PROGRAMMER */}
+                        {userRole === 'Programmer' && (
+                            <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
+                                <button 
+                                    className={`pro-th-btn edit-btn ${bottomPanelMode === 'MAIN_CTRL' ? 'active' : ''}`} 
+                                    onClick={() => { setBottomPanelMode('MAIN_CTRL'); }}
+                                >
+                                    🎮 MAIN CTRL
+                                </button>
+                                <button 
+                                    className={`pro-th-btn edit-btn ${bottomPanelMode === 'TP_CTRL' ? 'active' : ''}`} 
+                                    onClick={() => { setBottomPanelMode('TP_CTRL'); }}
+                                >
+                                    ✏️ TP EDIT
+                                </button>
+                                <button 
+                                    className={`pro-th-btn edit-btn ${bottomPanelMode === 'PR_CTRL' ? 'active' : ''}`} 
+                                    onClick={() => { setBottomPanelMode('PR_CTRL'); }}
+                                >
+                                    ✏️ PR EDIT
+                                </button>
                             </div>
-                        ))}
+                        )}
                     </div>
-                    
-                    <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
-                        {/* MAIN CTRL TOGGLE */}
-                        <button 
-                            className={`pro-th-btn edit-btn ${bottomPanelMode === 'MAIN_CTRL' ? 'active' : ''}`} 
-                            onClick={() => { setBottomPanelMode('MAIN_CTRL'); }}
-                        >
-                            🎮 MAIN CTRL
-                        </button>
-                        <button 
-                            className={`pro-th-btn edit-btn ${bottomPanelMode === 'TP_CTRL' ? 'active' : ''}`} 
-                            onClick={() => { setBottomPanelMode('TP_CTRL'); }}
-                        >
-                            ✏️ TP EDIT
-                        </button>
-                        <button 
-                            className={`pro-th-btn edit-btn ${bottomPanelMode === 'PR_CTRL' ? 'active' : ''}`} 
-                            onClick={() => { setBottomPanelMode('PR_CTRL'); }}
-                        >
-                            ✏️ PR EDIT
-                        </button>
-                    </div>
-                </div>
                 
-                <div className="row2-content row4-auto-height">
-                    {activeRow4Tab === 'Inst' && (
-                        <div className="table-wrapper row4-table-wrapper">
-                            <div className="table-scroller row4-scroller">
-                                <table className="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
-                                            <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
-                                            <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
-                                            <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
-                                            <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                    <div className="row2-content row4-auto-height">
+                        {activeRow4Tab === 'Inst' && (
+                            <div className="table-wrapper row4-table-wrapper">
+                                <div className="table-scroller row4-scroller">
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
+                                                <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
+                                                <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
+                                                <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
+                                                <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 
             <div className={`rp-row-5 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px', justifyContent: 'center' }}>
                     
-                    {/* --- FIX: IMPORTS YOUR COMPONENT PERFECTLY --- */}
                     {bottomPanelMode === 'MAIN_CTRL' && (
                         <ControlButtons />
                     )}
