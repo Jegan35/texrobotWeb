@@ -854,11 +854,10 @@ const RightPart = () => {
                                 </div>
                             )}
 
-                            {/* IF IO MODULES IS SELECTED */}
+                           {/* IF IO MODULES IS SELECTED - NOW CONNECTED TO BACKEND */}
                             {row2Tab === 'IO_MODULES' && (
-                                <div style={{ width: '100%', height: '100%', padding: '15px', overflowY: 'auto' }}>
-                                    <h3 style={{ color: '#00bcd4', textAlign: 'center', marginTop: '20px' }}>I/O MODULES CONTROL</h3>
-                                    <p style={{ color: '#888', textAlign: 'center' }}>[ Your Digital & Analog I/O UI goes here ]</p>
+                                <div style={{ width: '100%', height: '100%', padding: '10px', overflowY: 'auto' }}>
+                                    {renderIOModules()}
                                 </div>
                             )}
 

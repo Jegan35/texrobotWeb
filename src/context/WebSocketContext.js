@@ -57,7 +57,22 @@ export const WebSocketProvider = ({ children }) => {
   });
 
   // --- LOGIN HANDLER (Now accepts the 'role' parameter from the LoginPortal UI) ---
+// --- LOGIN HANDLER WITH OFFLINE DUMMY BYPASS ---
   const loginToRobot = (ip, user, pass, role) => {
+      
+      // ========================================================
+      // 🛠️ DUMMY ACCESS / OFFLINE MODE BYPASS
+      // If User ID and Password are "dummy", bypass the server!
+      // ========================================================
+      if (user === 'dummy' && pass === 'dummy') {
+          console.warn(`[OFFLINE MODE] Dummy Login Activated as ${role}`);
+          setAuthStatus('idle'); // Clears the loading screen
+          setUserRole(role);     // Sets Operator or Programmer
+          setIsConnected(true);  // Unlocks the Main UI
+          return;                // STOP HERE. Do not attempt to connect to WS.
+      }
+
+      // --- NORMAL PRODUCTION LOGIN ---
       setAuthStatus('authenticating');
       setAuthMessage('Connecting to server...');
       
