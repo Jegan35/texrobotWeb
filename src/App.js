@@ -4,16 +4,14 @@ import { WebSocketProvider, useWebSocket } from './context/WebSocketContext';
 // Components
 import RobotScene from './RobotScene';
 import RightPart from './components/RightPart';
-// (Removed ControlButtons import entirely!)
+import LoginPortal from './components/LoginPortal'; // IMPORT THE NEW LOGIN PORTAL
 
 function AppContent() {
-  const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket } = useWebSocket(); 
+  const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket, userRole } = useWebSocket(); 
   
   const [showReloadWarning, setShowReloadWarning] = useState(false);
   const [reloadFocus, setReloadFocus] = useState('cancel');
   const [failedFocus, setFailedFocus] = useState('retry');
-  
-  // (Removed showBottomControls state completely)
 
   useEffect(() => { if (connectionFailed) setFailedFocus('retry'); }, [connectionFailed]);
   useEffect(() => { if (showReloadWarning) setReloadFocus('cancel'); }, [showReloadWarning]);
@@ -101,17 +99,19 @@ function AppContent() {
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', borderRight: '2px solid #333' }}>
           
           <div style={{ height: '40px', flexShrink: 0, backgroundColor: '#151822', borderBottom: '2px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
-            <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TEXSONICS</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '15px' }}>
+                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TEXSONICS</div>
+                {/* Dynamically show the role the C++ Backend assigned us! */}
+                <div style={{ color: '#00E676', fontWeight: 'bold', fontSize: '0.7rem', letterSpacing: '1px', border: '1px solid #00E676', padding: '2px 6px', borderRadius: '3px' }}>
+                    {userRole ? userRole.toUpperCase() : 'CONNECTED'}
+                </div>
+            </div>
             <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '0.5px' }}>ROBOT CONTROLLER V1.0</div>
           </div>
 
-          {/* DYNAMIC SCENE WRAPPER: Fills all available space seamlessly */}
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-            {/* Render just the RobotScene with no extra props! */}
             <RobotScene /> 
           </div>
-          
-          {/* THE CONTROL BUTTONS BLOCK HAS BEEN COMPLETELY DELETED FROM HERE! */}
           
         </div>
 
@@ -125,10 +125,24 @@ function AppContent() {
   );
 }
 
+// MAIN ROUTER: Chooses between Login Screen or App
+function MainRouter() {
+  const { isConnected } = useWebSocket();
+
+  // If we are NOT fully connected and approved, show the Login Portal
+  if (!isConnected) {
+      return <LoginPortal />;
+  }
+
+  // Once Admin clicks Accept, we load the Main App!
+  return <AppContent />;
+}
+
+// APP WRAPPER
 function App() {
   return (
     <WebSocketProvider>
-      <AppContent />
+      <MainRouter />
     </WebSocketProvider>
   );
 }

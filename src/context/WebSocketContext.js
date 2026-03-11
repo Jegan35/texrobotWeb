@@ -6,17 +6,30 @@ export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [ipAddress, setIpAddress] = useState("192.168.1.51"); 
-  //const [ipAddress, setIpAddress] = useState("lucretia-spriggiest-scrawnily.ngrok-free.dev");
   const [accessFull, setAccessFull] = useState(false);
   const [connectionFailed, setConnectionFailed] = useState(false);
   const [rejectMessage, setRejectMessage] = useState("");
+
+  // --- AUTHENTICATION STATES ---
+  const [authStatus, setAuthStatus] = useState('idle'); // 'idle', 'authenticating', 'waiting_admin', 'rejected'
+  const [authMessage, setAuthMessage] = useState('');
+  const [userRole, setUserRole] = useState(null); 
+  
+  // We use a ref for credentials so the ws.onopen closure always has the latest values for auto-reconnects
+  const [loginCreds, setLoginCredsState] = useState(null);
+  const loginCredsRef = useRef(null);
+  
+  // FIX: Make sure the role is saved in the state and ref!
+  const setLoginCreds = (creds) => {
+      setLoginCredsState(creds);
+      loginCredsRef.current = creds;
+  };
 
   const wsRef = useRef(null);
   const ipRef = useRef(ipAddress);
   const isAccessFullRef = useRef(false);
   const isIntentionalDisconnect = useRef(false);
 
-  // --> NEW: Frontend Lock logic for Graph
   const [isGraphReading, setIsGraphReadingState] = useState(true);
   const isGraphReadingRef = useRef(true);
 
@@ -43,8 +56,20 @@ export const WebSocketProvider = ({ children }) => {
     graph_data: []
   });
 
+  // --- LOGIN HANDLER (Now accepts the 'role' parameter from the LoginPortal UI) ---
+  const loginToRobot = (ip, user, pass, role) => {
+      setAuthStatus('authenticating');
+      setAuthMessage('Connecting to server...');
+      
+      // Save all 3 pieces of data so they can be sent when the socket connects
+      setLoginCreds({ user, pass, role }); 
+      
+      setIpAddress(ip);
+      ipRef.current = ip; // Sync immediately for the connection
+      connectWebSocket();
+  };
+
   const connectWebSocket = () => {
-    // ---> APPLIED FIX: .trim() removes accidental spaces that cause the WebSocket to fail
     const targetIp = ipRef.current.trim();
 
     if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
@@ -61,26 +86,31 @@ export const WebSocketProvider = ({ children }) => {
     isIntentionalDisconnect.current = false;
 
     try {
-      // --- SMART CONNECTION LOGIC ---
       let wsUrl = "";
-
-      // ---> APPLIED FIX: Using 'targetIp' instead of 'ipAddress' below
-      // Check for BOTH .app and .dev ngrok extensions
       if (targetIp.includes("ngrok-free.app") || targetIp.includes("ngrok-free.dev")) {
-        // Ngrok handles the 8080 port internally. 
-        // You MUST use 'wss://' (secure) and NO port in the URL string.
         wsUrl = `wss://${targetIp}`;
       } else {
-        // Local Wi-Fi logic
         wsUrl = `ws://${targetIp}:8080`;
       }
 
       wsRef.current = new WebSocket(wsUrl);
-      // ------------------------------
 
       wsRef.current.onopen = () => {
         console.log(`CONNECTED TO: ${wsUrl}`);
-        console.log(`Connected to ${targetIp} physically. Waiting for C++ Admin Handshake...`);
+        setIsConnecting(false);
+
+        // --- SEND AUTHENTICATION IMMEDIATELY UPON SOCKET OPEN ---
+        if (loginCredsRef.current) {
+            console.log(`Sending REMOTE_AUTH: User=${loginCredsRef.current.user}, Role=${loginCredsRef.current.role}`);
+            
+            // This JSON payload exactly matches what your new C++ logic is looking for!
+            wsRef.current.send(JSON.stringify({
+                command: "REMOTE_AUTH",
+                username: loginCredsRef.current.user,
+                password: loginCredsRef.current.pass,
+                role: loginCredsRef.current.role // Passes "Operator" or "Programmer" to C++
+            }));
+        }
       };
 
       wsRef.current.onerror = (err) => {
@@ -98,28 +128,61 @@ export const WebSocketProvider = ({ children }) => {
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
-        if (data.type === "connection_accepted") {
+        // --- AUTHENTICATION RESPONSES FROM C++ ---
+        
+        // 1. C++ rejected us (Invalid password, or strict Role Mismatch!)
+        // --- AUTHENTICATION RESPONSES FROM C++ ---
+        
+        // 1. C++ rejected us
+        if (data.type === "auth_rejected") {
+            // NEW: Detect if it's a safety lock or a standard rejection
+            if (data.message.includes("Safety Lock")) {
+                setAuthStatus('safety_lock');
+            } else {
+                setAuthStatus('rejected');
+            }
+            setAuthMessage(data.message); 
+            isIntentionalDisconnect.current = true;
+            wsRef.current.close();
+        }
+        // 2. C++ verified credentials and role match, waiting for Admin on the physical screen
+        else if (data.type === "auth_success") {
+            setAuthStatus('waiting_admin');
+            setAuthMessage(data.message);
+        }
+        // 3. Admin physically clicked 'Accept'
+        else if (data.type === "connection_accepted") {
           console.log("C++ Admin Accepted Connection!");
+          setAuthStatus('idle'); // Clear the login screen
           setIsConnected(true);
           setIsConnecting(false);
           setAccessFull(false);
           setConnectionFailed(false);
+          setUserRole(data.role); // Save the verified role
         }
+        // 4. Admin physically clicked 'Reject'
         else if (data.type === "connection_rejected" || data.type === "access_full") {
           console.warn("C++ Admin Rejected Connection.");
           setIsConnected(false); setIsConnecting(false); setAccessFull(true);
           setRejectMessage(data.message || "Connection denied by the server administrator.");
+          setAuthStatus('rejected');
+          setAuthMessage(data.message || "Connection denied.");
           isAccessFullRef.current = true;
           wsRef.current.close();
         }
+        // 5. Admin kicked us out mid-session
         else if (data.type === "force_disconnect") {
           setIsConnected(false); setIsConnecting(false); setAccessFull(true);
           setRejectMessage(data.message || "You have been disconnected by the server admin.");
+          setUserRole(null);
+          setAuthStatus('rejected');
+          setAuthMessage(data.message || "Disconnected by admin.");
           isIntentionalDisconnect.current = true;
           wsRef.current.close();
         }
+        
+        // --- EXISTING ROBOT STATUS LOGIC ---
         else if (data.type === "graph_update") {
-          // --> FIXED: Only process graph data if Frontend Lock is TRUE
           if (isGraphReadingRef.current) {
             setRobotState(prevState => {
               const newGraphData = [...(prevState.graph_data || []), data.data];
@@ -207,6 +270,8 @@ export const WebSocketProvider = ({ children }) => {
     isIntentionalDisconnect.current = true;
     setIsConnecting(false);
     setIsConnected(false);
+    setAuthStatus('idle'); // Clear auth on disconnect
+    setUserRole(null);
     if (wsRef.current) wsRef.current.close();
   };
 
@@ -222,7 +287,8 @@ export const WebSocketProvider = ({ children }) => {
     <WebSocketContext.Provider value={{
       isConnected, isConnecting, ipAddress, setIpAddress, connectWebSocket, disconnectWebSocket, sendCommand, robotState,
       accessFull, setAccessFull, connectionFailed, setConnectionFailed, rejectMessage,
-      isGraphReading, setGraphReading // Exported for RightPart.js
+      isGraphReading, setGraphReading, 
+      loginToRobot, authStatus, authMessage, userRole // EXPORTED LOGIN VARIABLES
     }}>
       {children}
     </WebSocketContext.Provider>

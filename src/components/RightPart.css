@@ -106,43 +106,113 @@
 .premium-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #ffffff; cursor: pointer; border: 2px solid #00bcd4; box-shadow: 0 0 10px rgba(0,0,0,0.5), inset 0 -2px 5px rgba(0,0,0,0.2); transition: transform 0.1s; }
 .premium-slider::-webkit-slider-thumb:active { transform: scale(1.1); }
 
+
+
+
+
 /* ==============================================================
    4. JOG PANEL (CARTESIAN & JOINTS)
    ============================================================== */
-/* ==============================================================
-   4. JOG PANEL (CARTESIAN & JOINTS)
-   ============================================================== */
-.jog-panel-container { display: flex; flex-direction: column; width: 100%; height: 100%; padding: clamp(10px, 2vh, 15px) 20px clamp(40px, 6vh, 65px) 20px; box-sizing: border-box; justify-content: center; }
-.jog-panel-title { text-align: center; font-size: clamp(12px, 1.6vw, 16px); font-weight: 900; color: #00bcd4; padding-bottom: clamp(6px, 1vh, 10px); letter-spacing: 1px; flex-shrink: 0; border-bottom: 1px solid #333; margin-bottom: clamp(6px, 1vh, 10px); text-transform: uppercase; }
-.joints-two-col-layout, .dpad-two-col-layout { display: flex; justify-content: space-between; width: 100%; flex: 1; padding-top: 5px; gap: 10px; }
-.joints-col, .dpad-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48%; gap: clamp(10px, 2vh, 18px); }
-.joints-col-title, .dpad-col-title { color: #888; font-weight: 900; font-size: clamp(0.75rem, 1.1vw, 0.95rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
-.joints-divider { width: 2px; background: linear-gradient(to bottom, transparent, #333, transparent); height: 95%; margin: auto 0; }
+.jog-panel-container { 
+    display: flex; flex-direction: column; width: 100%; height: 100%; 
+    padding: clamp(20px, 3vh, 30px) 20px clamp(65px, 8vh, 75px) 20px; 
+    box-sizing: border-box; 
+    /* CRITICAL FIX: This stops the top from getting chopped off when the screen shrinks! */
+    justify-content: flex-start; 
+    overflow-y: auto; 
+}
 
-/* --- MASSIVELY SCALED JOINTS CONTROLS --- */
-.joint-industrial-block { display: flex; align-items: center; justify-content: center; gap: clamp(15px, 2.5vw, 35px); padding: clamp(6px, 1vh, 10px) clamp(15px, 2vw, 30px); width: max-content; margin: 0 auto; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; }
-.jib-label { color: #fff; font-weight: 900; font-size: clamp(1.2rem, 1.6vw, 1.6rem); width: 45px; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+/* ==========================================
+   PERFECT JOINTS LAYOUT
+   ========================================== */
+.joints-two-col-layout { 
+    display: flex; justify-content: center; width: 100%; 
+    margin: auto 0; /* Centers vertically IF there is extra space */
+    padding-top: 15px; 
+    /* FIX: Decreased space between columns */
+    gap: clamp(10px, 2vw, 30px); 
+}
+.joints-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: auto; gap: clamp(10px, 2vh, 20px); }
+.joints-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
 
-.jib-btn { width: clamp(65px, 8vw, 85px); height: clamp(45px, 6.5vh, 60px); background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 6px; font-weight: 900; font-size: clamp(1.1rem, 1.4vw, 1.4rem); cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.5); transition: 0.1s; display: flex; align-items: center; justify-content: center; }
+.joint-industrial-block { display: flex; align-items: center; justify-content: center; gap: clamp(20px, 3vw, 40px); padding: clamp(8px, 1.5vh, 12px) clamp(15px, 2vw, 30px); width: max-content; margin: 0 auto; background: rgba(0, 0, 0, 0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; }
+.jib-label { color: #fff; font-weight: 900; font-size: clamp(1.3rem, 1.6vw, 1.8rem); width: 45px; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+.jib-btn { width: clamp(65px, 8vw, 90px); height: clamp(45px, 6.5vh, 65px); background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 6px; font-weight: 900; font-size: clamp(1.2rem, 1.5vw, 1.6rem); cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.5); transition: 0.1s; display: flex; align-items: center; justify-content: center; }
 .jib-btn:active { transform: translateY(2px); box-shadow: inset 2px 2px 4px rgba(0,0,0,0.8); }
 
-/* --- MASSIVELY SCALED D-PAD CONTROLS --- */
-.dpad-cross { display: grid; grid-template-columns: clamp(55px, 7vw, 75px) clamp(55px, 7vw, 75px) clamp(55px, 7vw, 75px); grid-template-rows: clamp(55px, 7vw, 75px) clamp(55px, 7vw, 75px) clamp(55px, 7vw, 75px); gap: clamp(6px, 1vh, 10px); margin-bottom: clamp(15px, 2.5vh, 30px); }
-.dpad-btn { background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 8px; font-weight: 900; font-size: clamp(1rem, 1.3vw, 1.3rem); cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: 0.1s; }
+/* ==========================================
+   MIDDLE DIVIDER & BADGE
+   ========================================== */
+.joints-divider { 
+    width: 2px; 
+    background: linear-gradient(to bottom, transparent, #444, transparent); 
+    height: auto; 
+    margin: 10px 0; 
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+.divider-badge {
+    position: absolute;
+    top: -15px; /* Safely clears the title */
+    background: #151822; 
+    color: #00bcd4;
+    font-weight: 900;
+    font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    white-space: nowrap;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    z-index: 2;
+}
+
+/* ==============================================================
+   PERFECT DPAD LAYOUT
+   ============================================================== */
+.dpad-two-col-layout { 
+    display: flex; justify-content: center; width: 100%; 
+    margin: auto 0; padding-top: 15px; 
+    padding-right: clamp(5px, 1vw, 15px); 
+    gap: clamp(10px, 2vw, 30px); 
+}
+.dpad-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: auto; gap: clamp(10px, 2vh, 20px); }
+.dpad-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* FIX: 5-Column Grid! 
+   Cols 1,2,3 are the D-Pad. Col 4 is an INVISIBLE SPACER. Col 5 is for Z/Rz. 
+   This guarantees ALL buttons are exactly the same size! */
+.dpad-cross { 
+    display: grid; 
+    grid-template-columns: clamp(45px, 5.5vw, 65px) clamp(45px, 5.5vw, 65px) clamp(45px, 5.5vw, 65px) clamp(10px, 2vw, 20px) clamp(45px, 5.5vw, 65px); 
+    grid-template-rows: repeat(3, clamp(45px, 5.5vw, 65px)); 
+    gap: clamp(5px, 1vh, 10px); 
+    margin-bottom: 0; 
+}
+
+/* Added width: 100% and height: 100% to force them to perfectly fill the grid cell */
+.dpad-btn { width: 100%; height: 100%; background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 8px; font-weight: 900; font-size: clamp(1rem, 1.2vw, 1.25rem); cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: 0.1s; }
 .dpad-btn:active { transform: scale(0.95); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
 
 .text-pos { color: #4caf50 !important; text-shadow: 0 0 2px rgba(76, 175, 80, 0.4); }
 .text-neg { color: #ff5252 !important; text-shadow: 0 0 2px rgba(255, 82, 82, 0.4); }
+
+/* Main Cross positions */
 .dpad-up { grid-column: 2; grid-row: 1; }
 .dpad-down { grid-column: 2; grid-row: 3; }
 .dpad-left { grid-column: 1; grid-row: 2; }
 .dpad-right { grid-column: 3; grid-row: 2; }
-.dpad-center { grid-column: 2; grid-row: 2; background: #151822; border: 2px solid #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #03a9f4; font-size: clamp(0.65rem, 0.8vw, 0.8rem); font-weight: bold; margin: 4px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
+.dpad-center { grid-column: 2; grid-row: 2; background: #151822; border: 2px solid #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #03a9f4; font-size: clamp(0.6rem, 0.8vw, 0.8rem); font-weight: bold; margin: 4px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
 
-.dpad-z-row { display: flex; gap: clamp(20px, 3vw, 35px); justify-content: center; width: 100%; margin-top: 5px; }
-.dpad-z-row .dpad-btn { width: clamp(70px, 8.5vw, 90px); height: clamp(45px, 6vh, 55px); font-size: clamp(1rem, 1.3vw, 1.25rem); }
-/* ==============================================================
-   5. DATA PANELS & SETTINGS TABLES
+/* FIX: Z/Rz buttons moved to Column 5. Margins completely removed so they stay full size! */
+.dpad-z-up { grid-column: 5; grid-row: 1; }
+.dpad-z-down { grid-column: 5; grid-row: 3; }
+
+
+/* 5. DATA PANELS & SETTINGS TABLES
    ============================================================== */
 .row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; width: 100%; min-height: 0; transition: filter 0.3s; }
 .light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; width: 100%; box-sizing: border-box; }
@@ -181,12 +251,6 @@
 .mech-table td { padding: 3px 5px; border: 1px solid #ccc; }
 .mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 4px; font-weight: 900; font-size: 0.75rem; border-radius: 0; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
 
-/* ==============================================================
-   6. TABLE, SCROLL, AND ACTION BARS
-   ============================================================== */
-/* ==============================================================
-   6. TABLE, SCROLL, AND ACTION BARS
-   ============================================================== */
 /* ==============================================================
    6. TABLE, SCROLL, AND ACTION BARS
    ============================================================== */

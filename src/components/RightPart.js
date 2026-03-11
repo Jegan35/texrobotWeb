@@ -563,7 +563,6 @@ const RightPart = () => {
     if (isJoints) {
         return (
           <div className="jog-panel-container">
-            <div className="jog-panel-title">JOINTS CONTROL</div>
             <div className="joints-two-col-layout">
               <div className="joints-col">
                  <div className="joints-col-title">BASE / ARM</div>
@@ -578,7 +577,11 @@ const RightPart = () => {
                      )
                  })}
               </div>
-              <div className="joints-divider"></div>
+              
+              <div className="joints-divider">
+                  <div className="divider-badge">JOINTS</div>
+              </div>
+
               <div className="joints-col">
                  <div className="joints-col-title">WRIST</div>
                  {['J4', 'J5', 'J6'].map(id => {
@@ -598,35 +601,42 @@ const RightPart = () => {
     } else {
         return (
           <div className="jog-panel-container">
-            <div className="jog-panel-title">CARTESIAN D-PAD</div>
             <div className="dpad-two-col-layout">
                 <div className="dpad-col">
                     <div className="dpad-col-title">TRANSLATION</div>
+                    
+                    {/* NEW 4-COLUMN GRID LAYOUT */}
                     <div className="dpad-cross">
                         <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Y+')} onPointerUp={()=>handlePointerUp('Y+')} onPointerLeave={()=>handlePointerUp('Y+')}>Y+</button>
                         <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('X-')} onPointerUp={()=>handlePointerUp('X-')} onPointerLeave={()=>handlePointerUp('X-')}>X-</button>
                         <div className="dpad-center">XYZ</div>
                         <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('X+')} onPointerUp={()=>handlePointerUp('X+')} onPointerLeave={()=>handlePointerUp('X+')}>X+</button>
                         <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Y-')} onPointerUp={()=>handlePointerUp('Y-')} onPointerLeave={()=>handlePointerUp('Y-')}>Y-</button>
-                    </div>
-                    <div className="dpad-z-row">
-                        <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Z-')} onPointerUp={()=>handlePointerUp('Z-')} onPointerLeave={()=>handlePointerUp('Z-')}>Z-</button>
-                        <button className="dpad-btn text-pos" onPointerDown={()=>handlePointerDown('Z+')} onPointerUp={()=>handlePointerUp('Z+')} onPointerLeave={()=>handlePointerUp('Z+')}>Z+</button>
+                        
+                        {/* Z Buttons moved INSIDE the cross grid! */}
+                        <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown('Z+')} onPointerUp={()=>handlePointerUp('Z+')} onPointerLeave={()=>handlePointerUp('Z+')}>Z+</button>
+                        <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown('Z-')} onPointerUp={()=>handlePointerUp('Z-')} onPointerLeave={()=>handlePointerUp('Z-')}>Z-</button>
                     </div>
                 </div>
-                <div className="joints-divider"></div>
+
+                <div className="joints-divider">
+                    <div className="divider-badge">D-PAD</div>
+                </div>
+
                 <div className="dpad-col">
                     <div className="dpad-col-title">ROTATION</div>
+                    
+                    {/* NEW 4-COLUMN GRID LAYOUT */}
                     <div className="dpad-cross">
                         <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Ry+')} onPointerUp={()=>handlePointerUp('Ry+')} onPointerLeave={()=>handlePointerUp('Ry+')}>Ry+</button>
                         <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('Rx-')} onPointerUp={()=>handlePointerUp('Rx-')} onPointerLeave={()=>handlePointerUp('Rx-')}>Rx-</button>
                         <div className="dpad-center">ROT</div>
                         <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('Rx+')} onPointerUp={()=>handlePointerUp('Rx+')} onPointerLeave={()=>handlePointerUp('Rx+')}>Rx+</button>
                         <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerUp={()=>handlePointerUp('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
-                    </div>
-                    <div className="dpad-z-row">
-                        <button className="dpad-btn text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
-                        <button className="dpad-btn text-pos" onPointerDown={()=>handlePointerDown('Rz+')} onPointerUp={()=>handlePointerUp('Rz+')} onPointerLeave={()=>handlePointerUp('Rz+')}>Rz+</button>
+                        
+                        {/* Rz Buttons moved INSIDE the cross grid! */}
+                        <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown('Rz+')} onPointerUp={()=>handlePointerUp('Rz+')} onPointerLeave={()=>handlePointerUp('Rz+')}>Rz+</button>
+                        <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
                     </div>
                 </div>
             </div>
@@ -634,7 +644,6 @@ const RightPart = () => {
         );
     }
   };
-
   return (
     <>
       {/* SETTINGS OVERLAY */}
@@ -808,10 +817,15 @@ const RightPart = () => {
                     </div>
                 ) : (
                     /* --- WHEN CLOSED: PROGRAM FILE TAKES FULL SPACE --- */
-                    <div className="rp-row-2" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    <div className={`rp-row-2 ${expandedRowPanel === 'PROGRAM' ? 'row-maximized' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
                             <div style={{ display: 'flex' }}>
                                 <div className="dark-tab active">PROGRAM FILE</div>
+                            </div>
+                            
+                            {/* MAX / MIN TOGGLE BUTTON */}
+                            <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'PROGRAM' ? 'NONE' : 'PROGRAM')}>
+                                {expandedRowPanel === 'PROGRAM' ? '▼ MIN' : '⛶ MAX'}
                             </div>
                         </div>
 
