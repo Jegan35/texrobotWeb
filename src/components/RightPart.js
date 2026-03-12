@@ -860,9 +860,6 @@ const RightPart = () => {
                                     {renderIOModules()}
                                 </div>
                             )}
-
-
-
                         </div>
                     </div>
                 )} 
