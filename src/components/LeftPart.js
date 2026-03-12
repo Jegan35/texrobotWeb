@@ -134,4 +134,6 @@ const LeftPart = () => {
   );
 };
 
+
+
 export default LeftPart;
