@@ -133,7 +133,4 @@ const LeftPart = () => {
     </div>
   );
 };
-
-
-
 export default LeftPart;
