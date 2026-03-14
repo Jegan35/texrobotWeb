@@ -107,7 +107,7 @@ const RightPart = () => {
     return () => { document.removeEventListener("contextmenu", disableContextMenu); };
   }, []);
   
-  const { sendCommand, robotState, isGraphReading, setGraphReading, userRole } = useWebSocket();
+ const { sendCommand, robotState, isGraphReading, setGraphReading, userRole, disconnectWebSocket } = useWebSocket();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
@@ -766,7 +766,7 @@ const RightPart = () => {
         </div>
       )}
 
-      <div className="rp-master-container">
+     <div className="rp-master-container">
         <div className="rp-main-content">
             
             <div className="rp-upper-half">
@@ -777,7 +777,7 @@ const RightPart = () => {
                         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
                         currentMode={!isTopPanelOpen ? 'PROGRAM FILE' : currentView} 
                         isOpen={isSidebarOpen} 
-                        onSettingsClick={() => setIsSettingsOpen(true)} 
+                        onDisconnectClick={disconnectWebSocket} 
                      />
                 </div>
                 
@@ -831,7 +831,7 @@ const RightPart = () => {
                                     onClick={() => setRow2Tab('IO_MODULES')}
                                     style={{ cursor: 'pointer' }}
                                 >
-                                    I/O MODULES
+                                    I/O PANEL
                                 </div>
                             </div>
                             
@@ -843,36 +843,78 @@ const RightPart = () => {
 
                         <div className="row2-content" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
                             
-                            {/* IF PROGRAM FILE IS SELECTED */}
+                           {/* IF PROGRAM FILE IS SELECTED */}
                             {row2Tab === 'PROGRAM_FILE' && (
                                 <div className="table-container" style={{ width: '100%', height: '100%' }}>
+                                    
+                                    {/* The White Box Area */}
                                     <div className="table-wrapper">
+                                        
                                         <div className="table-scroller">
                                             <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
                                         </div>
-                                    </div>
+
+                                        {/* --- OPERATOR MODE: PURE FLOATING BUTTONS --- */}
+                                        {/* FIX: Now securely trapped INSIDE the white table-wrapper! */}
+                                        {userRole !== 'Programmer' && (
+                                            <div className="operator-floating-controls">
+                                                
+                                                {/* 1. INST DROPDOWN BUTTON */}
+                                                <div className="rel-flex">
+                                                    <button className="tp-btn btn-purple" onClick={() => toggleDropdown('OP_INST')}>
+                                                        📄 INST
+                                                    </button>
+                                                    
+                                                    {openDropdown === 'OP_INST' && (
+                                                        <div className="dropdown-menu inst-qty-input-dropdown operator-dropdown">
+                                                            <div className="gap-flex">
+                                                                <input type="text" placeholder="S..." value={instInput || ''} onChange={e => setInstInput(e.target.value)} className="inst-qty-input" />
+                                                                <button className="dd-btn dd-purple f1" onClick={() => { sendCommand(instInput ? 'INSERT_PR_INSTRUCTION_AT' : 'INSERT_PR_INSTRUCTION', instInput); setOpenDropdown(null); }}>📄 Insert</button>
+                                                            </div>
+                                                            <button className="dd-btn dd-purple" onClick={() => { setOpenDropdown(null); }}>📄 Modify Inst</button>
+                                                            <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_PR_INSTRUCTION'); setOpenDropdown(null); }}>⎋ Delete Inst</button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* 2. RUN INST BUTTON */}
+                                                <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>
+                                                    ▶ RUN INST
+                                                </button>
+                                                
+                                                {/* 3. CALC TRAJ BUTTON */}
+                                                <button className="tp-btn btn-teal" onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>
+                                                    🧮 CALC TRAJ
+                                                </button>
+                                                
+                                            </div>
+                                        )}
+                                        
+                                    </div> {/* <--- END OF TABLE WRAPPER */}
+
                                 </div>
                             )}
 
-                           {/* IF IO MODULES IS SELECTED - NOW CONNECTED TO BACKEND */}
+                            {/* IF IO MODULES IS SELECTED */}
                             {row2Tab === 'IO_MODULES' && (
-                                <div style={{ width: '100%', height: '100%', padding: '10px', overflowY: 'auto' }}>
+                                <div style={{ width: '100%', height: '100%', padding: '15px', overflowY: 'auto' }}>
                                     {renderIOModules()}
                                 </div>
                             )}
+
                         </div>
                     </div>
                 )} 
 
                 {/* --- ROW 3 & 4 (INST & CONTROLS) --- */}
-                <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
-                    <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
-                        <div style={{ display: 'flex' }}>
-                            <div className="dark-tab active">INST</div>
-                        </div>
-                        
-                        {/* SECURE BLOCK: ONLY SHOWS IF LOGGED IN AS PROGRAMMER */}
-                        {userRole === 'Programmer' && (
+                {/* SECURE BLOCK: ENTIRE INSTRUCTION ROW ONLY SHOWS FOR PROGRAMMER */}
+                {userRole === 'Programmer' && (
+                    <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
+                        <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
+                            <div style={{ display: 'flex' }}>
+                                <div className="dark-tab active">INSTRUCTION</div>
+                            </div>
+                            
                             <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
                                 <button 
                                     className={`pro-th-btn edit-btn ${bottomPanelMode === 'MAIN_CTRL' ? 'active' : ''}`} 
@@ -893,41 +935,42 @@ const RightPart = () => {
                                     ✏️ PR EDIT
                                 </button>
                             </div>
-                        )}
-                    </div>
-                
-                    <div className="row2-content row4-auto-height">
-                        {activeRow4Tab === 'Inst' && (
-                            <div className="table-wrapper row4-table-wrapper">
-                                <div className="table-scroller row4-scroller">
-                                    <table className="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>S.No</th><th>Inst</th><th>Name</th><th>Value 1</th><th>Deg 1</th>
-                                                <th>Name</th><th>Value 2</th><th>Deg 2</th><th>Speed</th>
-                                                <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
-                                                <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
-                                                <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                        </div>
+                    
+                        <div className="row2-content row4-auto-height">
+                            {activeRow4Tab === 'Inst' && (
+                                <div className="table-wrapper row4-table-wrapper">
+                                    <div className="table-scroller row4-scroller">
+                                        <table className="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No</th><th>Instruction</th><th>Name</th><th>Value 1</th><th>Degree 1</th>
+                                                    <th>Name</th><th>Value 2</th><th>Degree 2</th><th>Speed</th>
+                                                    <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
+                                                    <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
+                                                    <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
-            </div>
+                )}
+            </div> {/* <--- CRITICAL FIX: THIS CLOSES rp-upper-half */}
 
+            {/* --- ROW 5: BOTTOM PANEL COMMANDS --- */}
             <div className={`rp-row-5 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px', justifyContent: 'center' }}>
                     
                     {bottomPanelMode === 'MAIN_CTRL' && (
-                        <ControlButtons />
+                        <ControlButtons userRole={userRole} />
                     )}
 
                     {bottomPanelMode === 'PR_CTRL' && (
@@ -1031,6 +1074,5 @@ const RightPart = () => {
     </>
   );
 };
-
 
 export default RightPart;

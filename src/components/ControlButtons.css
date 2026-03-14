@@ -28,7 +28,7 @@
     width: 100%;
     height: clamp(35px, 6vh, 45px); 
     box-sizing: border-box;
-    border-radius: 0px; 
+    border-radius:4px; 
     font-weight: 900;
     /* Font size shrunk slightly to fit SERVO:OFF perfectly */
     font-size: clamp(9px, 1.1vw, 13px);
@@ -96,7 +96,7 @@
     align-items: center; 
     justify-content: center; 
     padding: 0 2px; /* Minimized padding so text doesn't hide */
-    border-radius: 0px; 
+    border-radius: 2px; 
     font-size: clamp(8px, 0.95vw, 12px); /* Shrunk font slightly for "Open TP: None" to fit */
     font-family: 'Consolas', monospace; 
     overflow: hidden; 

@@ -145,3 +145,34 @@
 .dark-box { background-color: #111; border: 1px solid #333; color: #ccc; }
 .empty-box { background-color: transparent; border: 1px dashed #555; color: #666; }
 .text-green { color: #4CAF50; font-weight: bold; justify-content: flex-end; font-size: clamp(0.8rem, 1.2vw, 1rem); }
+/* ==============================================================
+   LIVE INDICATOR BLINKING LED
+   ============================================================== */
+/* ==============================================================
+   LIVE INDICATOR BLINKING LED (FIXED)
+   ============================================================== */
+@keyframes blinkBulb {
+    0% { 
+        opacity: 1; 
+        box-shadow: 0 0 6px #00E676, 0 0 12px #00E676; 
+    }
+    50% { 
+        opacity: 0.4; 
+        box-shadow: none; 
+    }
+    100% { 
+        opacity: 1; 
+        box-shadow: 0 0 6px #00E676, 0 0 12px #00E676; 
+    }
+}
+
+.live-blink-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #00E676; /* Pure green */
+    border-radius: 50%; /* Makes it a perfect circle */
+    margin-right: 8px;
+    animation: blinkBulb 1.5s ease-in-out infinite;
+    /* Prevents the shape from shrinking */
+    flex-shrink: 0; 
+}

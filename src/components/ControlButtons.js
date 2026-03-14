@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
-import './ControlButtons.css'; // <--- The CSS is now cleanly imported!
+import './ControlButtons.css'; 
 
 const ControlButtons = () => {
-  const { sendCommand, robotState } = useWebSocket();
+  // 1. WE ADDED userRole HERE TO CHECK WHO IS LOGGED IN!
+  const { sendCommand, robotState, userRole } = useWebSocket();
 
   const rs = robotState || {};
   const servoOn = rs.servo_on === true;
@@ -110,22 +111,47 @@ const ControlButtons = () => {
 
       return (
           <div style={{ position: 'absolute', bottom: '110%', left: 0, width: '300px', background: '#151822', border: '2px solid #333', zIndex: 9999, borderRadius: '8px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.9)' }}>
+              
+              {/* --- POPUP 1: SELECT TYPE --- */}
               {fileModalStep === 'TYPE' && (
                   <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ color: '#aaa', fontWeight: '900', textAlign: 'center', fontSize: '0.85rem', marginBottom: '5px', letterSpacing: '1px' }}>SELECT TYPE</div>
-                      <button className="btn" style={{ background: '#00897B', minHeight: '40px' }} onClick={() => selectType('TP')}>TARGET POINT FILES</button>
+                      
+                      {/* ONLY SHOW TARGET POINT FILES TO PROGRAMMER */}
+                      {userRole === 'Programmer' && (
+                          <button className="btn" style={{ background: '#00897B', minHeight: '40px' }} onClick={() => selectType('TP')}>TARGET POINT FILES</button>
+                      )}
+
+                      {/* PROGRAM FILES ALWAYS VISIBLE */}
                       <button className="btn" style={{ background: '#039BE5', minHeight: '40px' }} onClick={() => selectType('PR')}>PROGRAM FILES</button>
-                      <button className="btn" style={{ background: '#7E57C2', minHeight: '40px' }}>TRAJECTORY FILES</button>
+                      
+                      {/* ONLY SHOW TRAJECTORY FILES TO PROGRAMMER */}
+                      {userRole === 'Programmer' && (
+                          <button className="btn" style={{ background: '#7E57C2', minHeight: '40px' }}>TRAJECTORY FILES</button>
+                      )}
+
                       <button className="btn" style={{ background: '#2b303b', marginTop: '10px', minHeight: '40px' }} onClick={() => setFileModalStep('CLOSED')}>CLOSE</button>
                   </div>
               )}
 
+              {/* --- POPUP 2: OPERATIONS --- */}
               {fileModalStep === 'OPS' && (
                   <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div style={{ color: '#aaa', fontWeight: '900', textAlign: 'center', fontSize: '0.85rem', marginBottom: '5px', letterSpacing: '1px', textTransform: 'uppercase' }}>{fileType} OPERATIONS</div>
-                      <button className="btn" style={{ background: '#43A047', minHeight: '40px' }} onClick={() => { setFileModalStep('NEW'); setFileNameInput(''); }}>NEW {fileType} FILE</button>
+                      
+                      {/* ONLY SHOW "NEW FILE" TO PROGRAMMER */}
+                      {userRole === 'Programmer' && (
+                          <button className="btn" style={{ background: '#43A047', minHeight: '40px' }} onClick={() => { setFileModalStep('NEW'); setFileNameInput(''); }}>NEW {fileType} FILE</button>
+                      )}
+
+                      {/* OPEN FILE ALWAYS VISIBLE */}
                       <button className="btn" style={{ background: '#039BE5', minHeight: '40px' }} onClick={() => { setFileModalStep('OPEN'); setSearchQuery(''); }}>OPEN {fileType} FILE</button>
-                      <button className="btn" style={{ background: '#E53935', minHeight: '40px' }} onClick={() => { setFileModalStep('DELETE'); setSelectedChecks({}); }}>DELETE {fileType} FILE</button>
+                      
+                      {/* ONLY SHOW "DELETE FILE" TO PROGRAMMER */}
+                      {userRole === 'Programmer' && (
+                          <button className="btn" style={{ background: '#E53935', minHeight: '40px' }} onClick={() => { setFileModalStep('DELETE'); setSelectedChecks({}); }}>DELETE {fileType} FILE</button>
+                      )}
+
                       <button className="btn" style={{ background: '#2b303b', marginTop: '10px', minHeight: '40px' }} onClick={() => setFileModalStep('TYPE')}>BACK</button>
                   </div>
               )}
@@ -216,7 +242,7 @@ const ControlButtons = () => {
         <div style={{ position: "relative", display: "flex", width: "100%" }}>
           <button className="btn btn-outline-green" style={{ width: "100%" }} onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}>{mode}</button>
           {isModeMenuOpen && (
-            <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '100%', background: '#111', border: '2px solid #4CAF50', zIndex: 1000, borderRadius: '6px', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.8)' }}>
+            <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '100%', background: '#111', border: '2px solid #4CAF50', zIndex: 99999, borderRadius: '6px', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.8)' }}>
               <button className="popup-menu-btn" style={{ borderBottom: '1px solid #333' }} onClick={() => handleModeSelect('SIM')}>SIM</button>
               <button className="popup-menu-btn" onClick={() => handleModeSelect('REAL')}>REAL</button>
             </div>

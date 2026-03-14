@@ -238,19 +238,23 @@ const RobotScene = () => { // Removed props related to controls
   const bluePts = robotState?.blueTrajectory || [];
   const redPts = robotState?.redTrajectory || [];
 
-  // --- CONNECT SYSTEM OK STATE (BULLETPROOF FIX) ---
+ // --- CONNECT SYSTEM OK STATE (BULLETPROOF FIX) ---
   const rs = robotState || {};
   
-  // This forcefully catches booleans, strings ("false"/"true"), numbers (0/1), and multiple variable names
-  const hasError = 
+  // 1. Grab the exact string message the Right Panel uses
+  const currentError = rs.error_message || "No error";
+  const errLower = currentError.toLowerCase().trim();
+  const hasErrorMessage = !["no error", "no active errors", "error cleared"].includes(errLower) && errLower !== "";
+
+  // 2. Keep the old boolean checks just as a backup
+  const hasErrorFlag = 
+      rs.has_error === true || String(rs.has_error).toLowerCase() === 'true' || rs.has_error === 1 ||
       rs.system_ok === false || String(rs.system_ok).toLowerCase() === 'false' || rs.system_ok === 0 ||
-      rs.sys_ok === false || String(rs.sys_ok).toLowerCase() === 'false' || rs.sys_ok === 0 ||
       rs.error === true || String(rs.error).toLowerCase() === 'true' || rs.error === 1 ||
-      rs.error_state === true || String(rs.error_state).toLowerCase() === 'true' ||
-      rs.is_error === true || String(rs.is_error).toLowerCase() === 'true' ||
       (rs.error_code !== undefined && rs.error_code !== 0 && rs.error_code !== "0");
 
-  const isSystemOk = !hasError;
+  // 3. If EITHER the string has an error OR the flag has an error -> TURN RED!
+  const isSystemOk = !(hasErrorMessage || hasErrorFlag);
 
   const controlsRef = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
