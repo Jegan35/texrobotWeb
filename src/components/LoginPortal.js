@@ -3,7 +3,8 @@ import { useWebSocket } from '../context/WebSocketContext';
 import './LoginPortal.css';
 
 const LoginPortal = () => {
-    const { loginToRobot, authStatus, authMessage } = useWebSocket();
+    // FIX: Added 'connectionFailed' here just in case the websocket uses that flag when offline
+    const { loginToRobot, authStatus, authMessage, connectionFailed } = useWebSocket();
     
     const [ip, setIp] = useState('192.168.1.36'); 
     const [userId, setUserId] = useState('');
@@ -29,7 +30,14 @@ const LoginPortal = () => {
                 {/* DYNAMIC ERROR / SUCCESS MESSAGES FROM C++ */}
                 {authStatus === 'rejected' && <div className="login-error">{authMessage}</div>}
                 
-                {/* NEW: PROFESSIONAL SAFETY LOCK WARNING */}
+                {/* --- CLEAN SYSTEM OFFLINE ERROR --- */}
+                {(authStatus === 'error' || connectionFailed) && (
+                    <div className="login-error">
+                        {authMessage || "⚠️ SYSTEM OFFLINE: Unable to reach robot."}
+                    </div>
+                )}
+
+                {/* PROFESSIONAL SAFETY LOCK WARNING */}
                 {authStatus === 'safety_lock' && (
                     <div className="login-warning">
                         <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '4px' }}>⚠️ SAFETY HAZARD</span>
@@ -37,6 +45,7 @@ const LoginPortal = () => {
                     </div>
                 )}
 
+                {/* WAITING FOR ADMIN SPINNER */}
                 {authStatus === 'waiting_admin' && (
                     <div className="login-waiting">
                         <div className="spinner"></div>
@@ -79,7 +88,7 @@ const LoginPortal = () => {
                         />
                     </div>
 
-                    {/* NEW: ROLE SELECTION BUTTONS */}
+                    {/* ROLE SELECTION BUTTONS */}
                     <div className="input-group">
                         <label>REQUESTED ACCESS LEVEL</label>
                         <div className="role-btn-group">

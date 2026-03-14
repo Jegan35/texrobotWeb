@@ -230,7 +230,7 @@ const WorldCoordinates = React.memo(() => {
 // ==========================================
 // MAIN COMPONENT EXPORT
 // ==========================================
-const RobotScene = () => { // Removed props related to controls
+const RobotScene = () => { 
   const { robotState } = useWebSocket();
   const c = robotState?.cartesian || { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 };
   const j = robotState?.joints || { j1: 0, j2: 0, j3: 0, j4: 0, j5: 0, j6: 0 };
@@ -238,7 +238,7 @@ const RobotScene = () => { // Removed props related to controls
   const bluePts = robotState?.blueTrajectory || [];
   const redPts = robotState?.redTrajectory || [];
 
- // --- CONNECT SYSTEM OK STATE (BULLETPROOF FIX) ---
+  // --- CONNECT SYSTEM OK STATE (BULLETPROOF FIX) ---
   const rs = robotState || {};
   
   // 1. Grab the exact string message the Right Panel uses
@@ -255,16 +255,27 @@ const RobotScene = () => { // Removed props related to controls
 
   // 3. If EITHER the string has an error OR the flag has an error -> TURN RED!
   const isSystemOk = !(hasErrorMessage || hasErrorFlag);
-
   const controlsRef = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // --- CAMERA RECENTER LOGIC ---
+  const handleRecenter = () => {
+    if (controlsRef.current) {
+      // 1. Reset Camera Position to your default Canvas camera settings
+      controlsRef.current.object.position.set(0, -6500, 3000);
+      
+      // 2. Reset OrbitControls Target back to the robot's center
+      controlsRef.current.target.set(0, 0, 800);
+      
+      // 3. Update the controls to apply the changes
+      controlsRef.current.update();
+    }
+  };
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       
       <HamburgerMenu onToggle={(isOpen) => setIsMenuOpen(isOpen)} />
-
-      {/* FIX: Removed the CONTROLS and RESET buttons completely from this overlay */}
 
       {/* --- JOINTS PANEL --- */}
       <div style={{ 
@@ -321,7 +332,39 @@ const RobotScene = () => { // Removed props related to controls
 
       </div>
 
-      {/* --- CARTESIAN PANEL --- */}
+      {/* --- CAMERA RECENTER BUTTON --- */}
+      <button 
+        onClick={handleRecenter}
+        style={{
+            position: 'absolute',
+            bottom: '105px', 
+            left: '20px',
+            zIndex: 20,
+            background: 'rgba(10, 12, 18, 0.85)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid #00bcd4',
+            borderRadius: '6px',
+            color: '#00bcd4',
+            padding: '8px 15px',
+            fontWeight: '900',
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.6), inset 0 0 8px rgba(0, 188, 212, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            transition: 'all 0.1s ease'
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = '#00bcd4'; e.currentTarget.style.color = '#111'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(10, 12, 18, 0.85)'; e.currentTarget.style.color = '#00bcd4'; }}
+        onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+        onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        <span style={{ fontSize: '1.2rem' }}>🎯</span> RECENTER
+      </button>
+
       <div style={{ 
           position: 'absolute', bottom: 0, left: 0, right: '85px', height: '85px', 
           backgroundColor: 'rgba(10, 12, 18, 0.85)', 
@@ -365,8 +408,8 @@ const RobotScene = () => { // Removed props related to controls
           <Suspense fallback={null}>
             <group rotation={[0, 0, -Math.PI / 2]}>
               <RealRobot />
-              {bluePts.length > 1 && <FastThickLine points={bluePts} color="#039BE5" lineWidth={2.5} />}
-              {redPts.length > 1 && <FastThickLine points={redPts} color="#E53935" lineWidth={4} />}
+              {bluePts.length > 1 && <FastThickLine points={bluePts} color="#039BE5" lineWidth={1} />}
+              {redPts.length > 1 && <FastThickLine points={redPts} color="#E53935" lineWidth={3} />}
             </group>
           </Suspense>
 

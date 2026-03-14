@@ -300,6 +300,19 @@
 
 .tr-blue { background-color: #bbdefb !important; }
 .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
+/* ==============================================================
+   ACTIVE RUNNING INSTRUCTION HIGHLIGHT
+   ============================================================== */
+.tr-executing {
+    background-color: #00E676 !important; /* Bright Industrial Green */
+    color: #111 !important;
+    font-weight: 900 !important;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+}
+.tr-executing td {
+    border-top: 2px solid #1B5E20 !important;
+    border-bottom: 2px solid #1B5E20 !important;
+}
 .empty-table-text { color: #555; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding: 20px !important; }
 
 .row4-auto-height { flex: 0 0 auto !important; height: auto !important; flex-shrink: 0 !important; }
@@ -374,7 +387,21 @@
 /* ==============================================================
    9. MODALS & ALERTS
    ============================================================== */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.modal-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background-color: rgba(0, 0, 0, 0.7); 
+    
+    /* CRITICAL FIX: 9999999 forces it to cover the 100000 bottom panel */
+    z-index: 9999999 !important; 
+    
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
 .modal-box { background-color: #202430; border-top: 4px solid #8e24aa; padding: 20px; width: 320px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 .modal-title { color: white; font-weight: 900; text-align: center; font-size: 1.1rem; letter-spacing: 1px; }
 .modal-divider { height: 1px; background-color: #333; width: 100%; margin-bottom: 5px; }
@@ -476,70 +503,65 @@ body, html { -webkit-touch-callout: none !important; }
 /* ==============================================================
    13. RIGHT HEADER (MENU, INDICATORS, SETTINGS)
    ============================================================== */
-.rh-master-container { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 100%; padding: 0 15px; background-color: #151822; }
-.rh-menu-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #ffffff; transition: color 0.2s ease-in-out; }
-.rh-menu-btn:hover { color: #00bcd4; }
+.rh-master-container { 
+    display: flex; 
+    /* FIX 1: This forces all 4 elements to have perfectly even space between them */
+    justify-content: space-between; 
+    align-items: center; 
+    width: 100%; 
+    height: 100%; 
+    
+    /* FIX 2: Increased right padding to 30px so the scrollbar NEVER hides the Disconnect button! */
+    padding: 0 30px 0 20px; 
+    
+    background-color: #151822; 
+    box-sizing: border-box;
+}
+
+/* Force all 4 main elements to hold their shape and never squash */
+.rh-menu-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #ffffff; transition: color 0.2s ease-in-out; flex-shrink: 0; }
 .rh-hamburger { font-size: 1.5rem; line-height: 1; transition: transform 0.3s ease-in-out; }
 .rh-hamburger.rotated { transform: rotate(90deg); color: #00bcd4; }
-.rh-mode-box { display: flex; align-items: center; gap: 10px; background-color: #0a0c11; border: 1px solid #2a2d35; padding: 6px 16px; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); min-width: 160px; justify-content: center; transition: all 0.3s ease; }
-.rh-blinking-dot { width: 10px; height: 10px; border-radius: 50%; animation: rhPulse 1.5s infinite alternate; }
-@keyframes rhPulse { 0% { opacity: 0.4; filter: brightness(0.8); } 100% { opacity: 1; filter: brightness(1.2); } }
-.rh-status-container { display: flex; align-items: center; min-width: 100px; justify-content: center; }
+
+.rh-mode-box { display: flex; align-items: center; gap: 10px; background-color: #0a0c11; border: 1px solid #2a2d35; padding: 6px 16px; border-radius: 4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); justify-content: center; transition: all 0.3s ease; flex-shrink: 0; }
+
+.rh-status-container { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .rh-status-standby { border: 1px solid #4CAF50; color: #4CAF50; padding: 6px 16px; border-radius: 4px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1.5px; background-color: rgba(76, 175, 80, 0.05); text-shadow: 0 0 5px rgba(76, 175, 80, 0.5); box-shadow: inset 0 0 8px rgba(76, 175, 80, 0.2); }
 .rh-status-motion { border: 1px solid #FF9800; color: #FF9800; padding: 6px 16px; border-radius: 4px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1.5px; background-color: rgba(255, 152, 0, 0.1); text-shadow: 0 0 5px rgba(255, 152, 0, 0.8); animation: warningGlow 1s infinite alternate; }
+
 @keyframes warningGlow { 0% { box-shadow: inset 0 0 5px rgba(255, 152, 0, 0.2), 0 0 5px rgba(255, 152, 0, 0.2); } 100% { box-shadow: inset 0 0 15px rgba(255, 152, 0, 0.5), 0 0 15px rgba(255, 152, 0, 0.6); } }
 
 /* ==============================================================
-   INDUSTRIAL DISCONNECT BUTTON (KILL SWITCH) - RESPONSIVE & CLEAN
+   INDUSTRIAL DISCONNECT BUTTON (KILL SWITCH)
    ============================================================== */
 .industrial-disconnect-btn {
     background: linear-gradient(180deg, #f44336 0%, #b71c1c 100%);
     border: 2px solid #5a0000;
     border-radius: 6px;
     color: #ffffff;
-    
-    /* FLUID TYPOGRAPHY: Scales automatically based on screen width */
     font-size: clamp(0.7rem, 1vw, 0.85rem);
     font-weight: 900;
-    letter-spacing: 1px; /* Tighter letter spacing for a cleaner look */
-    
-    /* FLUID PADDING: Shrinks gracefully on smaller screens */
+    letter-spacing: 1px; 
     padding: clamp(4px, 1vh, 8px) clamp(10px, 2vw, 18px); 
-    
-    /* Strict constraints to keep the header clean */
     max-height: 32px; 
-    white-space: nowrap; /* Prevents the text from stacking on two lines */
-    
+    white-space: nowrap; 
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(4px, 1vw, 8px); /* Gap shrinks automatically */
-    
+    gap: clamp(4px, 1vw, 8px); 
     box-shadow: inset 0px 2px 2px rgba(255, 255, 255, 0.4), 0px 4px 6px rgba(0, 0, 0, 0.6);
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
     transition: all 0.1s ease-in-out;
     text-transform: uppercase;
+    
+    /* FIX 3: This guarantees the button NEVER gets squashed on small screens */
+    flex-shrink: 0; 
 }
 
-.industrial-disconnect-btn:hover {
-    background: linear-gradient(180deg, #ff5252 0%, #d32f2f 100%);
-    box-shadow: inset 0px 2px 3px rgba(255, 255, 255, 0.6), 0px 5px 8px rgba(0, 0, 0, 0.8);
-}
-
-.industrial-disconnect-btn:active {
-    transform: translateY(2px) scale(0.98);
-    background: linear-gradient(180deg, #b71c1c 0%, #d32f2f 100%);
-    box-shadow: inset 0px 3px 6px rgba(0, 0, 0, 0.8), 0px 1px 2px rgba(0, 0, 0, 0.5);
-    border-color: #3e0000;
-}
-
-.disconnect-icon {
-    /* Icon scales perfectly to match the text size */
-    font-size: clamp(0.8rem, 1.2vw, 1.05rem); 
-    color: #ffcccc;
-    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.8));
-}
+.industrial-disconnect-btn:hover { background: linear-gradient(180deg, #ff5252 0%, #d32f2f 100%); box-shadow: inset 0px 2px 3px rgba(255, 255, 255, 0.6), 0px 5px 8px rgba(0, 0, 0, 0.8); }
+.industrial-disconnect-btn:active { transform: translateY(2px) scale(0.98); background: linear-gradient(180deg, #b71c1c 0%, #d32f2f 100%); box-shadow: inset 0px 3px 6px rgba(0, 0, 0, 0.8), 0px 1px 2px rgba(0, 0, 0, 0.5); border-color: #3e0000; }
+.disconnect-icon { font-size: clamp(0.8rem, 1.2vw, 1.05rem); color: #ffcccc; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.8)); }
 /* ==============================================================
    OPERATOR FLOATING CONTROLS
    ============================================================== */
@@ -569,4 +591,21 @@ body, html { -webkit-touch-callout: none !important; }
     right: 0;
     left: auto;
     border-radius: 6px;
+}
+/* ==============================================================
+   BLINKING DOT INDICATOR
+   ============================================================== */
+.rh-blinking-dot { 
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+    background-color: #00bcd4; 
+    box-shadow: 0 0 8px rgba(0, 188, 212, 0.8);
+    animation: rhPulse 1.5s infinite alternate; 
+    flex-shrink: 0;
+}
+
+@keyframes rhPulse { 
+    0% { opacity: 0.3; filter: brightness(0.8); box-shadow: 0 0 2px rgba(0, 188, 212, 0.2); } 
+    100% { opacity: 1; filter: brightness(1.2); box-shadow: 0 0 12px rgba(0, 188, 212, 1); } 
 }

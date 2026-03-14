@@ -27,16 +27,23 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen, onSettingsClick, onDis
 
     return (
         <div className="rh-master-container">
-            {/* LEFT: Menu Toggle */}
+            
+            {/* 1. FAR LEFT: Menu Toggle */}
             <div className="rh-menu-btn" onClick={onMenuToggle}>
                 <span className={`rh-hamburger ${isOpen ? 'rotated' : ''}`}>≡</span>
                 <span style={{ fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1px' }}>MENU</span>
             </div>
 
-            {/* CENTER: Dynamic Mode Indicator */}
+            {/* 2. MIDDLE LEFT: Dynamic Mode Indicator */}
             <div className="rh-mode-box">
-                {/* The blinking dot dynamically changes color! */}
-                <div className="rh-blinking-dot" style={{ backgroundColor: dotColor, boxShadow: `0 0 8px ${dotColor}` }}></div>
+                {/* FIX: Added a fallback color so the dot NEVER disappears! */}
+                <div 
+                    className="rh-blinking-dot" 
+                    style={{ 
+                        backgroundColor: dotColor || '#00bcd4', 
+                        boxShadow: `0 0 8px ${dotColor || '#00bcd4'}` 
+                    }}
+                ></div>
                 
                 {/* Text changes to AUTO and gets a slight orange tint if in Auto mode */}
                 <span style={{ 
@@ -50,27 +57,26 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen, onSettingsClick, onDis
                 </span>
             </div>
 
-            {/* RIGHT: Status & Disconnect */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                
-                <div className="rh-status-container">
-                    {isMoving ? (
-                        <div className="rh-status-motion">IN MOTION</div>
-                    ) : (
-                        <div className="rh-status-standby">STANDBY</div>
-                    )}
-                </div>
-                
-                {/* --- INDUSTRIAL DISCONNECT BUTTON --- */}
-                <button 
-                    className="industrial-disconnect-btn" 
-                    onClick={onDisconnectClick}
-                    title="Disconnect from Robot"
-                >
-                    <span className="disconnect-icon">⏹</span> DISCONNECT
-                </button>
-                
+            {/* FIX: Removed the extra wrapper div! Now these are direct children. */}
+            
+            {/* 3. MIDDLE RIGHT: Status */}
+            <div className="rh-status-container">
+                {isMoving ? (
+                    <div className="rh-status-motion">IN MOTION</div>
+                ) : (
+                    <div className="rh-status-standby">STANDBY</div>
+                )}
             </div>
+            
+            {/* 4. FAR RIGHT: Industrial Disconnect Button */}
+            <button 
+                className="industrial-disconnect-btn" 
+                onClick={onDisconnectClick}
+                title="Disconnect from Robot"
+            >
+                <span className="disconnect-icon">⏹</span> DISCONNECT
+            </button>
+            
         </div>
     );
 };

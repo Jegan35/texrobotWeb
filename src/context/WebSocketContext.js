@@ -11,7 +11,7 @@ export const WebSocketProvider = ({ children }) => {
   const [rejectMessage, setRejectMessage] = useState("");
 
   // --- AUTHENTICATION STATES ---
-  const [authStatus, setAuthStatus] = useState('idle'); // 'idle', 'authenticating', 'waiting_admin', 'rejected'
+  const [authStatus, setAuthStatus] = useState('idle'); // 'idle', 'authenticating', 'waiting_admin', 'rejected', 'safety_lock'
   const [authMessage, setAuthMessage] = useState('');
   const [userRole, setUserRole] = useState(null); 
   
@@ -19,7 +19,7 @@ export const WebSocketProvider = ({ children }) => {
   const [loginCreds, setLoginCredsState] = useState(null);
   const loginCredsRef = useRef(null);
   
-  // FIX: Make sure the role is saved in the state and ref!
+  // Make sure the role is saved in the state and ref!
   const setLoginCreds = (creds) => {
       setLoginCredsState(creds);
       loginCredsRef.current = creds;
@@ -50,14 +50,14 @@ export const WebSocketProvider = ({ children }) => {
     program_count_output: "0", is_calculating_trajectory: false,
     is_physically_moving: false,
     speed_op: 0, di_val: 0, do_val: 0,
+    highlighted_instruction: -1, // <--- 1. INITIAL STATE ADDED HERE
     staging_data: {},
     error_pos_data: {}, ether_cat_data: {}, variable_data: {}, mech_data: {},
     blueTrajectory: [], redTrajectory: [],
     graph_data: []
   });
 
-  // --- LOGIN HANDLER (Now accepts the 'role' parameter from the LoginPortal UI) ---
-// --- LOGIN HANDLER WITH OFFLINE DUMMY BYPASS ---
+  // --- LOGIN HANDLER WITH OFFLINE DUMMY BYPASS ---
   const loginToRobot = (ip, user, pass, role) => {
       
       // ========================================================
@@ -118,12 +118,12 @@ export const WebSocketProvider = ({ children }) => {
         if (loginCredsRef.current) {
             console.log(`Sending REMOTE_AUTH: User=${loginCredsRef.current.user}, Role=${loginCredsRef.current.role}`);
             
-            // This JSON payload exactly matches what your new C++ logic is looking for!
+            // This JSON payload exactly matches your C++ logic
             wsRef.current.send(JSON.stringify({
                 command: "REMOTE_AUTH",
                 username: loginCredsRef.current.user,
                 password: loginCredsRef.current.pass,
-                role: loginCredsRef.current.role // Passes "Operator" or "Programmer" to C++
+                role: loginCredsRef.current.role 
             }));
         }
       };
@@ -145,12 +145,8 @@ export const WebSocketProvider = ({ children }) => {
 
         // --- AUTHENTICATION RESPONSES FROM C++ ---
         
-        // 1. C++ rejected us (Invalid password, or strict Role Mismatch!)
-        // --- AUTHENTICATION RESPONSES FROM C++ ---
-        
         // 1. C++ rejected us
         if (data.type === "auth_rejected") {
-            // NEW: Detect if it's a safety lock or a standard rejection
             if (data.message.includes("Safety Lock")) {
                 setAuthStatus('safety_lock');
             } else {
@@ -250,6 +246,9 @@ export const WebSocketProvider = ({ children }) => {
               do_val: data.do_val !== undefined ? data.do_val : prevState.do_val,
               variable_data: data.variable_data || prevState.variable_data || {},
               staging_data: data.staging_data || prevState.staging_data || {},
+              
+              // <--- 2. STATE UPDATE ADDED HERE --->
+              highlighted_instruction: data.highlighted_instruction !== undefined ? data.highlighted_instruction : prevState.highlighted_instruction,
 
               tp_list: finalTpList,
               pr_program_data: finalPrList,
@@ -303,7 +302,7 @@ export const WebSocketProvider = ({ children }) => {
       isConnected, isConnecting, ipAddress, setIpAddress, connectWebSocket, disconnectWebSocket, sendCommand, robotState,
       accessFull, setAccessFull, connectionFailed, setConnectionFailed, rejectMessage,
       isGraphReading, setGraphReading, 
-      loginToRobot, authStatus, authMessage, userRole // EXPORTED LOGIN VARIABLES
+      loginToRobot, authStatus, authMessage, userRole 
     }}>
       {children}
     </WebSocketContext.Provider>

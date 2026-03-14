@@ -44,7 +44,7 @@ const MemoizedTpTableBody = memo(({ tpList, expandedTable, selectedTpIndex, onRo
     );
 });
 
-const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, onRowClick }) => {
+const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, activeInstruction, onRowClick }) => {
     if (prList.length === 0) {
         const colCount = expandedTable === 'PR' ? 12 : 4;
         return <tbody><tr><td colSpan={colCount} className="empty-table-text" style={{ border: 'none' }}>Please open a Program file</td></tr></tbody>;
@@ -59,16 +59,33 @@ const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, onRo
             </thead>
             <tbody>
                 {prList.map((item, i) => (
-                    <tr key={i} className={`tr-hover ${i === selectedPrIndex ? "tr-blue" : ""}`} onClick={() => onRowClick(i)}>
-                        <td>{i + 1}</td><td>{item.inst || 'MOVL'}</td><td>{item.name || ''}</td><td>{item.value || ''}</td>
-                        {expandedTable === 'PR' && (<><td>{item.speed || '--'}</td><td>{item.deg || '--'}</td><td>{item.rad || '--'}</td><td>{item.tool || '--'}</td><td>{item.frame || '--'}</td><td>{item.comt || '--'}</td><td>{item.dist || '--'}</td><td>{item.time || '--'}</td></>)}
+                    <tr 
+                        key={i} 
+                        className={`tr-hover ${i === selectedPrIndex ? "tr-blue" : ""} ${i === activeInstruction ? "tr-executing" : ""}`} 
+                        onClick={() => onRowClick(i)}
+                    >
+                        <td>{i + 1}</td>
+                        <td>{item.inst || 'MOVL'}</td>
+                        <td>{item.name || ''}</td>
+                        <td>{item.value || ''}</td>
+                        {expandedTable === 'PR' && (
+                            <>
+                                <td>{item.speed || '--'}</td>
+                                <td>{item.deg || '--'}</td>
+                                <td>{item.rad || '--'}</td>
+                                <td>{item.tool || '--'}</td>
+                                <td>{item.frame || '--'}</td>
+                                <td>{item.comt || '--'}</td>
+                                <td>{item.dist || '--'}</td>
+                                <td>{item.time || '--'}</td>
+                            </>
+                        )}
                     </tr>
                 ))}
             </tbody>
         </table>
     );
 });
-
 const PremiumSpeedGauge = memo(({ speedVal }) => {
     const radius = 40;
     const circumference = Math.PI * radius; 
@@ -108,6 +125,7 @@ const RightPart = () => {
   }, []);
   
  const { sendCommand, robotState, isGraphReading, setGraphReading, userRole, disconnectWebSocket } = useWebSocket();
+  const activeInstruction = robotState?.highlighted_instruction ?? -1;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
 
@@ -167,6 +185,7 @@ const RightPart = () => {
   const [selectedPrIndex, setSelectedPrIndex] = useState(0);
   const [showModTpModal, setShowModTpModal] = useState(false);
   const [modTpData, setModTpData] = useState({ name: '', x: '', y: '', z: '' });
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const [activeRow4Tab, setActiveRow4Tab] = useState('Inst');
 
   const [selectedGraphAxis, setSelectedGraphAxis] = useState('All-axis');
@@ -735,18 +754,35 @@ const RightPart = () => {
       )}
 
       {/* MODALS */}
-      {showModTpModal && (
-        <div className="modal-overlay">
-            <div className="modal-box">
-                <div className="modal-title">MODIFY TP</div>
+     {/* --- DISCONNECT CONFIRMATION MODAL --- */}
+      {showDisconnectModal && (
+        <div className="modal-overlay" style={{ backdropFilter: 'blur(8px)' }}>
+            <div className="modal-box" style={{ borderTopColor: '#f44336' }}>
+                <div className="modal-title" style={{ color: '#f44336', fontSize: '1.3rem' }}>
+                    ⚠️ SYSTEM DISCONNECT
+                </div>
                 <div className="modal-divider"></div>
-                <input type="text" className="modal-input" placeholder="TP Name" value={modTpData.name} onChange={e => setModTpData({...modTpData, name: e.target.value})} />
-                <input type="number" className="modal-input" placeholder="X Value (mm)" value={modTpData.x} onChange={e => setModTpData({...modTpData, x: e.target.value})} />
-                <input type="number" className="modal-input" placeholder="Y Value (mm)" value={modTpData.y} onChange={e => setModTpData({...modTpData, y: e.target.value})} />
-                <input type="number" className="modal-input" placeholder="Z Value (mm)" value={modTpData.z} onChange={e => setModTpData({...modTpData, z: e.target.value})} />
-                <div className="modal-btn-row">
-                    <button className="modal-btn modal-btn-cancel" onClick={() => setShowModTpModal(false)}>Cancel</button>
-                    <button className="modal-btn modal-btn-confirm" onClick={handleModifyConfirm}>Confirm</button>
+                <div style={{ color: '#ddd', textAlign: 'center', fontSize: '0.95rem', lineHeight: '1.5', marginTop: '10px' }}>
+                    Are you sure you want to disconnect from the robot controller? All live monitoring will stop.
+                </div>
+                <div className="modal-btn-row" style={{ marginTop: '20px' }}>
+                    <button 
+                        className="modal-btn" 
+                        style={{ background: '#333947', borderColor: '#111' }} 
+                        onClick={() => setShowDisconnectModal(false)}
+                    >
+                        CANCEL
+                    </button>
+                    <button 
+                        className="modal-btn" 
+                        style={{ background: 'linear-gradient(180deg, #f44336 0%, #b71c1c 100%)' }} 
+                        onClick={() => {
+                            setShowDisconnectModal(false);
+                            disconnectWebSocket();
+                        }}
+                    >
+                        DISCONNECT
+                    </button>
                 </div>
             </div>
         </div>
@@ -771,13 +807,14 @@ const RightPart = () => {
             
             <div className="rp-upper-half">
                 
-                {/* Header */}
+               {/* Header */}
                 <div className="rp-header-col">
                     <RightHeader 
                         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
                         currentMode={!isTopPanelOpen ? 'PROGRAM FILE' : currentView} 
                         isOpen={isSidebarOpen} 
-                        onDisconnectClick={disconnectWebSocket} 
+                        // FIX: Now it triggers the modal instead of instant disconnect!
+                        onDisconnectClick={() => setShowDisconnectModal(true)} 
                      />
                 </div>
                 
@@ -851,31 +888,19 @@ const RightPart = () => {
                                     <div className="table-wrapper">
                                         
                                         <div className="table-scroller">
-                                            <MemoizedPrTableBody prList={prList} expandedTable={'PR'} selectedPrIndex={selectedPrIndex} onRowClick={handlePrRowClick} />
+                                            <MemoizedPrTableBody 
+    prList={prList} 
+    expandedTable={'PR'} 
+    selectedPrIndex={selectedPrIndex} 
+    activeInstruction={activeInstruction} // <--- THIS PASSES THE LIVE ROW NUMBER!
+    onRowClick={handlePrRowClick} 
+/>
                                         </div>
 
                                         {/* --- OPERATOR MODE: PURE FLOATING BUTTONS --- */}
                                         {/* FIX: Now securely trapped INSIDE the white table-wrapper! */}
                                         {userRole !== 'Programmer' && (
                                             <div className="operator-floating-controls">
-                                                
-                                                {/* 1. INST DROPDOWN BUTTON */}
-                                                <div className="rel-flex">
-                                                    <button className="tp-btn btn-purple" onClick={() => toggleDropdown('OP_INST')}>
-                                                        📄 INST
-                                                    </button>
-                                                    
-                                                    {openDropdown === 'OP_INST' && (
-                                                        <div className="dropdown-menu inst-qty-input-dropdown operator-dropdown">
-                                                            <div className="gap-flex">
-                                                                <input type="text" placeholder="S..." value={instInput || ''} onChange={e => setInstInput(e.target.value)} className="inst-qty-input" />
-                                                                <button className="dd-btn dd-purple f1" onClick={() => { sendCommand(instInput ? 'INSERT_PR_INSTRUCTION_AT' : 'INSERT_PR_INSTRUCTION', instInput); setOpenDropdown(null); }}>📄 Insert</button>
-                                                            </div>
-                                                            <button className="dd-btn dd-purple" onClick={() => { setOpenDropdown(null); }}>📄 Modify Inst</button>
-                                                            <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_PR_INSTRUCTION'); setOpenDropdown(null); }}>⎋ Delete Inst</button>
-                                                        </div>
-                                                    )}
-                                                </div>
                                                 
                                                 {/* 2. RUN INST BUTTON */}
                                                 <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>

@@ -63,15 +63,16 @@
 
 /* BUTTON COLOR THEMES */
 .btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); }
-.btn-green { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); }
-.btn-green-full { background: linear-gradient(180deg, #00E676 0%, #1B5E20 100%); color:white; text-shadow: none; }
-.btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); }
-.btn-yellow { background: linear-gradient(180deg, #ccc04f 0%, #F57F17 100%); color: white; text-shadow: none; }
-.btn-orange { background: linear-gradient(180deg, #FFA726 0%, #E65100 100%); }
-.btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); }
-.btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); }
-.btn-pink { background: linear-gradient(180deg, #F06292 0%, #880E4F 100%); }
-.btn-purple-dark { background: linear-gradient(180deg, #9575CD 0%, #4527A0 100%); }
+.btn-green { background: linear-gradient(180deg, #4CAF50 0%, #4bc153 100%); }
+.btn-green-full { background: linear-gradient(180deg, #4de39a 0%, #2d8532 100%); color:white; text-shadow: none; }
+.btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #5689d6 100%); }
+.btn-yellow { background: linear-gradient(180deg, rgb(243, 243, 81) 0%, #ed7e51 100%); color: white; text-shadow: none; }
+.btn-orange { background: linear-gradient(180deg, #e49011 0%, #ee844a 100%); }
+.btn-red { background: linear-gradient(180deg, #EF5350 0%, #e94d4d 100%); }
+.btn-red1 { background: linear-gradient(180deg, #EF5350 0%, #dc0808 100%); }
+.btn-purple { background: linear-gradient(180deg, #ac27c4 0%, #8d3bc0 100%); }
+.btn-pink { background: linear-gradient(180deg, #F06292 0%, #ee60ac 100%); }
+.btn-purple-dark { background: linear-gradient(180deg, #9575CD 0%, #6c4dc8 100%); }
 
 .btn-outline-green { 
     background: #1a1e29; 
