@@ -554,7 +554,6 @@ body, html { -webkit-touch-callout: none !important; }
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
     transition: all 0.1s ease-in-out;
     text-transform: uppercase;
-    
     /* FIX 3: This guarantees the button NEVER gets squashed on small screens */
     flex-shrink: 0; 
 }
