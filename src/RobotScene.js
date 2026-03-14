@@ -380,5 +380,4 @@ const RobotScene = () => { // Removed props related to controls
   );
 };
 
-
 export default RobotScene;
