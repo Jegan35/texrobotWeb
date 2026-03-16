@@ -1,21 +1,46 @@
 /* ==============================================================
+   0. GLOBAL PREMIUM SCROLLBARS (Edit here to change all!)
+   ============================================================== */
+/* This controls every scrollbar in the entire interface */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent; /* Invisible track */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #90a4ae; /* Sleek industrial gray */
+    border-radius: 10px;       /* Pill shape */
+    border: 2px solid transparent; /* Creates the floating padding effect */
+    background-clip: content-box; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #607d8b; /* Darkens on hover */
+}
+
+/* Exception: We specifically hide the scrollbar for the dark tabs so they look clean */
+.dark-tabs::-webkit-scrollbar { 
+    display: none; 
+}
+
+
+/* ==============================================================
    1. MAIN LAYOUT & DYNAMIC RESPONSIVE STRUCTURE
    ============================================================== */
 .rp-master-container { display: flex; flex-direction: row; height: 100%; width: 100%; background-color: #202430; overflow: hidden; position: relative; }
 
-/* FIX: Added overflow-y: auto. If the screen is too tiny, it will neatly scroll instead of breaking UI */
 .rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; }
 
-/* FIX: Top half flexes to fill available space, but stops shrinking at 150px */
 .rp-upper-half { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 150px; overflow: hidden; }
 
-/* FIX: Both Row 1 and Row 2 share space dynamically. They never crush below 120px */
 .rp-row-1 { flex: 1 1 0; min-height: 120px; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; position: relative; transition: all 0.3s ease; }
 .rp-row-2 { flex: 1 1 0; min-height: 120px; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; } 
 
-/* FIX: The INST tab and bottom controls are LOCKED (flex-shrink: 0). They will NEVER squash or break. */
 .rp-row-4 { flex: 0 0 auto !important; flex-shrink: 0 !important; height: max-content; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; position: relative; z-index: 10; } 
-/* FIX: z-index pushed to 100000 so the entire bottom panel and its popups sit above EVERYTHING */
 .rp-row-5 { 
     flex: 0 0 auto !important; 
     flex-shrink: 0 !important; 
@@ -85,7 +110,6 @@
 .panel-action-btn:active { background: #008ba3; border-left-color: #008ba3; }
 
 .dark-tabs { display: flex; background: #1a1e29; padding-top: 5px; padding-left: 5px; border-bottom: 2px solid #00bcd4; flex-shrink: 0; border-radius: 0; overflow-x: auto; overflow-y: hidden; -ms-overflow-style: none; scrollbar-width: none; }
-.dark-tabs::-webkit-scrollbar { display: none; } 
 .bg-dark-deep { background: #202430; }
 .dark-tab { padding: 6px 10px; color: #aaa; font-weight: bold; font-size: clamp(9px, 1vw, 13px); cursor: pointer; border-radius: 0; white-space: nowrap; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; }
 .dark-tab.active { background: #202430; color: #00bcd4; border: 1px solid #444; border-top: 2px solid #00bcd4; border-bottom: none; z-index: 10; }
@@ -118,31 +142,16 @@
 .premium-slider::-webkit-slider-thumb:active { transform: scale(1.1); }
 
 
-
-
-
 /* ==============================================================
    4. JOG PANEL (CARTESIAN & JOINTS)
    ============================================================== */
 .jog-panel-container { 
     display: flex; flex-direction: column; width: 100%; height: 100%; 
     padding: clamp(20px, 3vh, 30px) 20px clamp(65px, 8vh, 75px) 20px; 
-    box-sizing: border-box; 
-    /* CRITICAL FIX: This stops the top from getting chopped off when the screen shrinks! */
-    justify-content: flex-start; 
-    overflow-y: auto; 
+    box-sizing: border-box; justify-content: flex-start; overflow-y: auto; 
 }
 
-/* ==========================================
-   PERFECT JOINTS LAYOUT
-   ========================================== */
-.joints-two-col-layout { 
-    display: flex; justify-content: center; width: 100%; 
-    margin: auto 0; /* Centers vertically IF there is extra space */
-    padding-top: 15px; 
-    /* FIX: Decreased space between columns */
-    gap: clamp(10px, 2vw, 30px); 
-}
+.joints-two-col-layout { display: flex; justify-content: center; width: 100%; margin: auto 0; padding-top: 15px; gap: clamp(10px, 2vw, 30px); }
 .joints-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: auto; gap: clamp(10px, 2vh, 20px); }
 .joints-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
 
@@ -152,115 +161,80 @@
 .jib-btn { width: clamp(65px, 8vw, 90px); height: clamp(45px, 6.5vh, 65px); background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 6px; font-weight: 900; font-size: clamp(1.2rem, 1.5vw, 1.6rem); cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.5); transition: 0.1s; display: flex; align-items: center; justify-content: center; }
 .jib-btn:active { transform: translateY(2px); box-shadow: inset 2px 2px 4px rgba(0,0,0,0.8); }
 
-/* ==========================================
-   MIDDLE DIVIDER & BADGE
-   ========================================== */
-.joints-divider { 
-    width: 2px; 
-    background: linear-gradient(to bottom, transparent, #444, transparent); 
-    height: auto; 
-    margin: 10px 0; 
-    position: relative;
-    display: flex;
-    justify-content: center;
-}
-.divider-badge {
-    position: absolute;
-    top: -15px; /* Safely clears the title */
-    background: #151822; 
-    color: #00bcd4;
-    font-weight: 900;
-    font-size: clamp(0.85rem, 1.1vw, 1.1rem);
-    letter-spacing: 2px;
-    padding: 4px 12px;
-    border-radius: 4px;
-    border: 1px solid #333;
-    white-space: nowrap;
-    text-transform: uppercase;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    z-index: 2;
-}
+.joints-divider { width: 2px; background: linear-gradient(to bottom, transparent, #444, transparent); height: auto; margin: 10px 0; position: relative; display: flex; justify-content: center; }
+.divider-badge { position: absolute; top: -15px; background: #151822; color: #00bcd4; font-weight: 900; font-size: clamp(0.85rem, 1.1vw, 1.1rem); letter-spacing: 2px; padding: 4px 12px; border-radius: 4px; border: 1px solid #333; white-space: nowrap; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 2; }
 
-/* ==============================================================
-   PERFECT DPAD LAYOUT
-   ============================================================== */
-.dpad-two-col-layout { 
-    display: flex; justify-content: center; width: 100%; 
-    margin: auto 0; padding-top: 15px; 
-    padding-right: clamp(5px, 1vw, 15px); 
-    gap: clamp(10px, 2vw, 30px); 
-}
+.dpad-two-col-layout { display: flex; justify-content: center; width: 100%; margin: auto 0; padding-top: 15px; padding-right: clamp(5px, 1vw, 15px); gap: clamp(10px, 2vw, 30px); }
 .dpad-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: auto; gap: clamp(10px, 2vh, 20px); }
 .dpad-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
 
-/* FIX: 5-Column Grid! 
-   Cols 1,2,3 are the D-Pad. Col 4 is an INVISIBLE SPACER. Col 5 is for Z/Rz. 
-   This guarantees ALL buttons are exactly the same size! */
-.dpad-cross { 
-    display: grid; 
-    grid-template-columns: clamp(45px, 5.5vw, 65px) clamp(45px, 5.5vw, 65px) clamp(45px, 5.5vw, 65px) clamp(10px, 2vw, 20px) clamp(45px, 5.5vw, 65px); 
-    grid-template-rows: repeat(3, clamp(45px, 5.5vw, 65px)); 
-    gap: clamp(5px, 1vh, 10px); 
-    margin-bottom: 0; 
-}
+.dpad-cross { display: grid; grid-template-columns: clamp(45px, 5.5vw, 65px) clamp(45px, 5.5vw, 65px) clamp(45px, 5.5vw, 65px) clamp(10px, 2vw, 20px) clamp(45px, 5.5vw, 65px); grid-template-rows: repeat(3, clamp(45px, 5.5vw, 65px)); gap: clamp(5px, 1vh, 10px); margin-bottom: 0; }
 
-/* Added width: 100% and height: 100% to force them to perfectly fill the grid cell */
 .dpad-btn { width: 100%; height: 100%; background: linear-gradient(180deg, #373d49 0%, #262b33 100%); border: 1px solid #111; border-radius: 8px; font-weight: 900; font-size: clamp(1rem, 1.2vw, 1.25rem); cursor: pointer; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 4px 6px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: 0.1s; }
 .dpad-btn:active { transform: scale(0.95); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
 
 .text-pos { color: #4caf50 !important; text-shadow: 0 0 2px rgba(76, 175, 80, 0.4); }
 .text-neg { color: #ff5252 !important; text-shadow: 0 0 2px rgba(255, 82, 82, 0.4); }
 
-/* Main Cross positions */
 .dpad-up { grid-column: 2; grid-row: 1; }
 .dpad-down { grid-column: 2; grid-row: 3; }
 .dpad-left { grid-column: 1; grid-row: 2; }
 .dpad-right { grid-column: 3; grid-row: 2; }
 .dpad-center { grid-column: 2; grid-row: 2; background: #151822; border: 2px solid #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #03a9f4; font-size: clamp(0.6rem, 0.8vw, 0.8rem); font-weight: bold; margin: 4px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
-
-/* FIX: Z/Rz buttons moved to Column 5. Margins completely removed so they stay full size! */
 .dpad-z-up { grid-column: 5; grid-row: 1; }
 .dpad-z-down { grid-column: 5; grid-row: 3; }
 
 
-/* 5. DATA PANELS & SETTINGS TABLES
+/* ==============================================================
+   5. DATA PANELS & SETTINGS TABLES
    ============================================================== */
 .row2-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f4f3ef; color: #111; display: flex; flex-direction: column; width: 100%; min-height: 0; transition: filter 0.3s; }
-.light-panel { padding: 10px 15px; font-size: 0.75rem; background: #f4f3ef; overflow-x: auto; flex: 1; width: 100%; box-sizing: border-box; }
-.error-pos-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 4px 10px; align-items: center; width: 100%; }
-.ether-cat-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 8px 10px; align-items: center; width: 100%; }
-.encoder-offset-grid { display: grid; grid-template-columns: max-content minmax(60px, 1fr) max-content minmax(60px, 1fr) max-content minmax(60px, 1fr); gap: 12px 20px; align-items: center; min-width: 800px; padding: 10px 5px; }
-.settings-view-grid { display: grid; grid-template-columns: repeat(3, max-content minmax(50px, 1fr)); gap: 15px 20px; align-items: center; width: 100%; }
-.axis-limit-wrapper { display: flex; gap: 15px; justify-content: space-between; width: 100%; min-width: 800px; }
-.axis-limit-grid { display: grid; grid-template-columns: max-content 1fr; gap: 8px; align-items: center; }
-.sim-grid { display: grid; grid-template-columns: max-content 1fr 1fr; gap: 8px; align-items: center; }
-.data-var-wrapper { display: flex; gap: 20px; justify-content: space-between; width: 100%; min-width: 800px; }
-.data-var-col { flex: 1; border-right: 1px solid #ccc; padding-right: 15px; min-width: 0; }
+.light-panel { padding: 20px 35px 20px 20px; font-size: 0.75rem; background: transparent; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; flex: 1; }
+
+/* GRIDS */
+.error-pos-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 8px 10px; align-items: center; width: 100%; box-sizing: border-box; }
+.ether-cat-grid { display: grid; grid-template-columns: repeat(4, max-content minmax(20px, 1fr)); gap: 12px 10px; align-items: center; width: 100%; box-sizing: border-box; }
+.encoder-offset-grid { display: grid; grid-template-columns: max-content minmax(60px, 1fr) max-content minmax(60px, 1fr) max-content minmax(60px, 1fr); gap: 15px 20px; align-items: center; width: 100%; box-sizing: border-box; }
+.settings-view-grid { display: grid; grid-template-columns: repeat(3, max-content minmax(50px, 1fr)); gap: 15px 20px; align-items: center; width: 100%; box-sizing: border-box; }
+
+/* RESPONSIVE WRAPPERS */
+.axis-limit-wrapper, .data-var-wrapper { display: flex; flex-wrap: wrap; gap: 30px; width: 100%; box-sizing: border-box; }
+
+/* COLUMNS */
+.data-var-col { flex: 1 1 250px; border-right: 1px solid #ccc; padding-right: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px; }
 .data-var-col.no-border { border-right: none; padding-right: 0; }
-.data-var-title { font-weight: 900; margin-bottom: 15px; text-align: center; color: #333; font-size: clamp(10px, 1.2vw, 14px); }
-.data-var-flex { display: flex; gap: 10px; align-items: center; }
+.data-var-title { font-weight: 900; margin-bottom: 5px; text-align: center; color: #333; font-size: clamp(12px, 1.2vw, 15px); text-transform: uppercase; letter-spacing: 1px; }
+.data-var-flex { display: flex; gap: 10px; align-items: center; width: 100%; }
 
-.io-modules-wrapper { display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; width: 100%; height: 100%; box-sizing: border-box; overflow-y: auto; padding: 5px 0; min-width: 600px; }
-.io-module-box { background: #fff; border: 1px solid #ccc; border-radius: 0; padding: 10px; box-sizing: border-box; width: 100%; min-height: max-content; }
-.io-module-title { border-left: 4px solid; padding-left: 8px; font-weight: 900; color: #333; margin-bottom: 10px; font-size: clamp(9px, 1vw, 12px); }
-.io-module-flex { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; width: 100%; justify-items: center; }
-.io-led-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.io-led-col span { font-size: 8px; font-weight: bold; color: #555; }
+/* INNER GRIDS */
+.axis-limit-grid { display: grid; grid-template-columns: minmax(90px, max-content) 1fr; gap: 10px 15px; align-items: center; width: 100%; }
+.sim-grid { display: grid; grid-template-columns: minmax(70px, max-content) 1fr 1fr; gap: 10px 10px; align-items: center; width: 100%; }
 
-.io-led { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #111; transition: 0.2s; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
+/* I/O MODULES */
+.io-modules-wrapper { display: flex; flex-direction: column; gap: 20px; width: 100%; box-sizing: border-box; }
+.io-module-box { background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 15px; box-sizing: border-box; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.io-module-title { border-left: 4px solid; padding-left: 10px; font-weight: 900; color: #333; margin-bottom: 15px; font-size: 13px; text-transform: uppercase; }
+.io-module-flex { display: grid; grid-template-columns: repeat(16, 1fr); gap: 5px; width: 100%; justify-items: center; }
+.io-led-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.io-led-col span { font-size: 9px; font-weight: 900; color: #555; }
+
+/* COMPONENTS */
+.io-led { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #111; transition: 0.2s; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
 .io-led.off { background: #00E676; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6); }
 .io-led.on { background: #FF3B30; box-shadow: 0 0 10px #FF3B30, inset 1px 1px 2px rgba(255,255,255,0.6); }
 
-.light-input { border: 1px solid #888; padding: 4px; border-radius: 0; width: 100%; box-sizing: border-box; font-weight: 900; font-size: clamp(10px, 1vw, 12px); color: #111; background: #fff; outline: none; box-shadow: inset 0px 1px 2px rgba(0,0,0,0.1); height: 32px; cursor: pointer; text-align: center; }
+.light-input { border: 1px solid #888; padding: 6px; border-radius: 2px; width: 100%; box-sizing: border-box; font-weight: 900; font-size: 12px; color: #111; background: #fff; outline: none; box-shadow: inset 0px 1px 2px rgba(0,0,0,0.1); height: 34px; text-align: center; }
 .light-input:focus { border-color: #039BE5; background: #e3f2fd; }
-.light-btn { background: #e0e0e0; border: 1px solid #555; padding: 4px 6px; cursor: pointer; font-weight: 900; text-align: center; border-radius: 0; color: #111; font-size: clamp(9px, 1vw, 12px); transition: 0.1s; white-space: nowrap; text-transform: uppercase; height: 32px; }
-.light-btn:active { background: #d0d0d0; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.3); }
-.light-label { font-weight: 900; text-align: right; padding-right: 5px; white-space: nowrap; align-self: center; color: #333; font-size: clamp(9px, 1vw, 12px); text-transform: uppercase; }
+.light-btn { background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%); border: 1px solid #777; padding: 0 10px; cursor: pointer; font-weight: 900; text-align: center; border-radius: 2px; color: #222; font-size: 11px; transition: 0.1s; white-space: nowrap; text-transform: uppercase; height: 34px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.light-btn:active { background: #d0d0d0; box-shadow: inset 1px 1px 4px rgba(0,0,0,0.4); transform: translateY(1px); }
+.light-label { font-weight: 900; text-align: right; padding-right: 5px; white-space: nowrap; align-self: center; color: #444; font-size: 11px; text-transform: uppercase; }
 
-.mech-table { width: 100%; border-collapse: collapse; text-align: center; border: 2px solid #111; min-width: 800px; }
-.mech-table th { border: 1px solid #999; padding: 6px; font-size: 0.75rem; background: #cfd8dc; color: #111; position: sticky; top: 0; text-transform: uppercase; border-bottom: 2px solid #111; border-radius: 0; }
-.mech-table td { padding: 3px 5px; border: 1px solid #ccc; }
-.mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 4px; font-weight: 900; font-size: 0.75rem; border-radius: 0; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
+/* MECH TABLE */
+.mech-table { width: 100%; border-collapse: collapse; text-align: center; border: 2px solid #111; box-sizing: border-box; background: #fff; }
+.mech-table th { border: 1px solid #999; padding: 8px; font-size: 11px; background: #cfd8dc; color: #111; position: sticky; top: 0; text-transform: uppercase; border-bottom: 2px solid #111; }
+.mech-table td { padding: 4px 6px; border: 1px solid #ccc; }
+.mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 6px; font-weight: 900; font-size: 12px; border-radius: 2px; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
+
 
 /* ==============================================================
    6. TABLE, SCROLL, AND ACTION BARS
@@ -279,42 +253,86 @@
 .pro-th-btn.edit-btn.active { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); color: #fff; border-color: #111; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), 0 0 8px rgba(76, 175, 80, 0.6); }
 
 .table-scroller { flex: 1; overflow: auto; width: 100%; height: 100%; }
-.table-scroller::-webkit-scrollbar { width: 14px; height: 14px; }
-.table-scroller::-webkit-scrollbar-track { background: #1a1e29; border-left: 1px solid #444; border-top: 1px solid #444; }
-.table-scroller::-webkit-scrollbar-thumb { background: #555; border-radius: 0; border: 1px solid #111; }
 
-.data-table { width: 100%; min-width: max-content; border-collapse: collapse; font-weight: bold; background: white; text-align: center; }
+/* ==============================================================
+   TABLE BASE STYLES
+   ============================================================== */
+.data-table { 
+    width: 100%; 
+    min-width: max-content; 
+    border-collapse: collapse; 
+    font-weight: bold; 
+    background: white; 
+    text-align: center; 
+}
 
-/* FIX: Restored the borders between the table columns */
-.data-table th, .data-table td { border: 1px solid #999; white-space: nowrap; }
+.data-table th, .data-table td { 
+    border: 1px solid #999; 
+    white-space: nowrap; 
+    font-size: 0.95rem; 
+    padding: 8px 15px; 
+}
 
-.data-table th { background: #cfd8dc; color: #111; position: sticky; top: 0; z-index: 5; text-transform: uppercase; border-bottom: 2px solid #111; }
+.data-table th { 
+    background: #cfd8dc; 
+    color: #111; 
+    position: sticky; 
+    top: 0; 
+    z-index: 5; 
+    text-transform: uppercase; 
+    border-bottom: 2px solid #111; 
+    padding: 12px 15px; 
+    letter-spacing: 0.5px;
+}
+
 .data-table td { color: #111; }
-.data-table th:nth-child(1), .data-table td:nth-child(1) { width: 30px; }
-.data-table th:nth-child(2), .data-table td:nth-child(2) { width: 60px; }
-.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 70px; }
-.data-table th:last-child, .data-table td:last-child { width: 20%; padding-right: 15px !important; text-align: left; }
+
+/* ==============================================================
+   INDIVIDUAL COLUMN WIDTHS
+   ============================================================== */
+.data-table th:nth-child(1),  .data-table td:nth-child(1)  { width: 60px;  } /* S.No */
+.data-table th:nth-child(2),  .data-table td:nth-child(2)  { width: 160px; } /* Instruction / Inst */
+.data-table th:nth-child(3),  .data-table td:nth-child(3)  { width: 120px; } /* Name */
+.data-table th:nth-child(4),  .data-table td:nth-child(4)  { width: 100px; } /* Value 1 / Value */
+.data-table th:nth-child(5),  .data-table td:nth-child(5)  { width: 100px; } /* Degree 1 / Speed */
+.data-table th:nth-child(6),  .data-table td:nth-child(6)  { width: 100px; } /* Name 2 / Deg */
+.data-table th:nth-child(7),  .data-table td:nth-child(7)  { width: 100px; } /* Value 2 / Rad */
+.data-table th:nth-child(8),  .data-table td:nth-child(8)  { width: 100px; } /* Degree 2 / Tool */
+.data-table th:nth-child(9),  .data-table td:nth-child(9)  { width: 90px;  } /* Speed / Frame */
+.data-table th:nth-child(10), .data-table td:nth-child(10) { width: 90px;  } /* Radius / Com */
+.data-table th:nth-child(11), .data-table td:nth-child(11) { width: 90px;  } /* Frame / Dist */
+.data-table th:nth-child(12), .data-table td:nth-child(12) { width: 90px;  } /* Tool / Time */
+
+.data-table th:last-child, .data-table td:last-child { 
+    width: 10%; 
+    padding-right: 15px !important; 
+    text-align: center; 
+}
 
 .rp-row-2 .data-table th, .rp-row-2 .data-table td { padding: clamp(4px, 1vh, 8px) 6px; height: auto; font-size: clamp(10px, 1vw, 13px); }
 .rp-row-4 .data-table th, .rp-row-4 .data-table td { padding: clamp(2px, 1vh, 14px) clamp(4px, 1vw, 12px); font-size: clamp(10px, 1.2vw, 16px); }
 
 .tr-blue { background-color: #bbdefb !important; }
 .tr-hover:hover { background-color: #e3f2fd; cursor: pointer; }
-/* ==============================================================
-   ACTIVE RUNNING INSTRUCTION HIGHLIGHT
-   ============================================================== */
-.tr-executing {
-    background-color: #00E676 !important; /* Bright Industrial Green */
-    color: #111 !important;
-    font-weight: 900 !important;
-    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
-}
-.tr-executing td {
-    border-top: 2px solid #1B5E20 !important;
-    border-bottom: 2px solid #1B5E20 !important;
-}
-.empty-table-text { color: #555; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding: 20px !important; }
 
+/* ACTIVE RUNNING INSTRUCTION HIGHLIGHT */
+.tr-executing { background-color: #00E676 !important; color: #111 !important; font-weight: 900 !important; box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2); }
+.tr-executing td { border-top: 2px solid #1B5E20 !important; border-bottom: 2px solid #1B5E20 !important; }
+
+/* PERFECTLY CENTERED EMPTY TABLE TEXT */
+/* PERFECTLY CENTERED EMPTY TABLE TEXT */
+.empty-table-text { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    color: #888; 
+    font-weight: 900;
+    font-size: 1.2rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+}
 .row4-auto-height { flex: 0 0 auto !important; height: auto !important; flex-shrink: 0 !important; }
 .row4-table-wrapper { flex: 0 0 auto !important; height: auto !important; border: none; flex-shrink: 0 !important; }
 .row4-scroller { overflow-y: hidden !important; overflow-x: auto !important; height: auto; padding-bottom: 10px; flex-shrink: 0 !important; }
@@ -326,7 +344,6 @@
 .gap-flex { display: flex; gap: 5px; }
 .f1 { flex: 1; }
 
-/* FIX: Edit Panel buttons scale dynamically */
 .tp-btn { width: 100%; height: clamp(28px, 5vh, 35px); box-sizing: border-box; border-radius: 0; color: white; font-weight: 900; font-size: clamp(7px, 0.9vw, 12px); cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(0,0,0,0.8); box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); transition: 0.1s; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.6); padding: 0 2px; }
 .tp-btn:active { transform: translateY(2px); box-shadow: none; border-color: rgba(0,0,0,0.8); }
 
@@ -344,10 +361,6 @@
 .custom-select-menu { position: absolute; left: 0; width: 100%; min-width: max-content; max-height: 250px; overflow-y: auto; background: #e3f2fd; border: 2px solid #111; z-index: 10000; display: flex; flex-direction: column; }
 .custom-select-menu-up { bottom: 100%; box-shadow: 4px -4px 10px rgba(0,0,0,0.6); }
 .custom-select-menu-down { top: 100%; box-shadow: 4px 4px 10px rgba(0,0,0,0.6); }
-
-.custom-select-menu::-webkit-scrollbar { width: 12px; }
-.custom-select-menu::-webkit-scrollbar-track { background: #202430; border-left: 1px solid #111; }
-.custom-select-menu::-webkit-scrollbar-thumb { background: #555; border: 1px solid #111; border-radius: 0; }
 
 .custom-select-item { padding: 10px 15px; font-size: 0.85rem; font-weight: 900; color: #111; border-bottom: 1px solid #999; cursor: pointer; text-transform: uppercase; text-align: center; transition: 0.1s; }
 .custom-select-item:hover, .custom-select-item:active { background: #039BE5; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
@@ -394,10 +407,7 @@
     width: 100vw; 
     height: 100vh; 
     background-color: rgba(0, 0, 0, 0.7); 
-    
-    /* CRITICAL FIX: 9999999 forces it to cover the 100000 bottom panel */
     z-index: 9999999 !important; 
-    
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -434,7 +444,7 @@
     position: absolute; 
     top: 0; 
     right: 0; 
-    z-index: 999999 !important; /* <--- FIX: Forces menu to slide OVER the bottom buttons */
+    z-index: 999999 !important; 
     width: 260px; 
     height: 100%; 
     background-color: #1a1e29; 
@@ -504,21 +514,12 @@ body, html { -webkit-touch-callout: none !important; }
    13. RIGHT HEADER (MENU, INDICATORS, SETTINGS)
    ============================================================== */
 .rh-master-container { 
-    display: flex; 
-    /* FIX 1: This forces all 4 elements to have perfectly even space between them */
-    justify-content: space-between; 
-    align-items: center; 
-    width: 100%; 
-    height: 100%; 
-    
-    /* FIX 2: Increased right padding to 30px so the scrollbar NEVER hides the Disconnect button! */
-    padding: 0 30px 0 20px; 
-    
-    background-color: #151822; 
-    box-sizing: border-box;
+    display: flex; justify-content: space-between; align-items: center; 
+    width: 100%; height: 100%; 
+    padding: 0 45px 0 20px; 
+    background-color: #151822; box-sizing: border-box;
 }
 
-/* Force all 4 main elements to hold their shape and never squash */
 .rh-menu-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #ffffff; transition: color 0.2s ease-in-out; flex-shrink: 0; }
 .rh-hamburger { font-size: 1.5rem; line-height: 1; transition: transform 0.3s ease-in-out; }
 .rh-hamburger.rotated { transform: rotate(90deg); color: #00bcd4; }
@@ -532,7 +533,7 @@ body, html { -webkit-touch-callout: none !important; }
 @keyframes warningGlow { 0% { box-shadow: inset 0 0 5px rgba(255, 152, 0, 0.2), 0 0 5px rgba(255, 152, 0, 0.2); } 100% { box-shadow: inset 0 0 15px rgba(255, 152, 0, 0.5), 0 0 15px rgba(255, 152, 0, 0.6); } }
 
 /* ==============================================================
-   INDUSTRIAL DISCONNECT BUTTON (KILL SWITCH)
+   14. OPERATOR & DISCONNECT BUTTONS
    ============================================================== */
 .industrial-disconnect-btn {
     background: linear-gradient(180deg, #f44336 0%, #b71c1c 100%);
@@ -554,47 +555,38 @@ body, html { -webkit-touch-callout: none !important; }
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
     transition: all 0.1s ease-in-out;
     text-transform: uppercase;
-
-    /* FIX 3: This guarantees the button NEVER gets squashed on small screens */
     flex-shrink: 0; 
 }
-
 .industrial-disconnect-btn:hover { background: linear-gradient(180deg, #ff5252 0%, #d32f2f 100%); box-shadow: inset 0px 2px 3px rgba(255, 255, 255, 0.6), 0px 5px 8px rgba(0, 0, 0, 0.8); }
 .industrial-disconnect-btn:active { transform: translateY(2px) scale(0.98); background: linear-gradient(180deg, #b71c1c 0%, #d32f2f 100%); box-shadow: inset 0px 3px 6px rgba(0, 0, 0, 0.8), 0px 1px 2px rgba(0, 0, 0, 0.5); border-color: #3e0000; }
 .disconnect-icon { font-size: clamp(0.8rem, 1.2vw, 1.05rem); color: #ffcccc; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.8)); }
-/* ==============================================================
-   OPERATOR FLOATING CONTROLS
-   ============================================================== */
-   
+
 .operator-floating-controls {
     position: absolute;
-    bottom: 45px; /* <--- FIX: Increased to push it safely above the taskbar when maximized! */
-    right: 30px;  /* <--- Gives it a nice clean margin from the right edge */
+    bottom: 45px; 
+    right: 30px;  
     display: flex;
     gap: 12px;
     z-index: 9999; 
     align-items: center;
 }
-
-/* TOTAL CONTROL FOR THE BUTTONS */
 .operator-floating-controls .tp-btn {
     height: 35px;
-    min-width: 100px;         
+    min-width: 100px;        
     padding: 0 12px;          
     font-size: 0.75rem;       
     border-radius: 6px;       
     letter-spacing: 0.5px;
 }
-
-/* TOTAL CONTROL FOR THE POPUP DROPDOWN MENU */
 .operator-floating-controls .operator-dropdown {
     bottom: calc(100% + 10px); 
     right: 0;
     left: auto;
     border-radius: 6px;
 }
+
 /* ==============================================================
-   BLINKING DOT INDICATOR
+   15. BLINKING DOT INDICATOR
    ============================================================== */
 .rh-blinking-dot { 
     width: 10px; 
@@ -605,7 +597,6 @@ body, html { -webkit-touch-callout: none !important; }
     animation: rhPulse 1.5s infinite alternate; 
     flex-shrink: 0;
 }
-
 @keyframes rhPulse { 
     0% { opacity: 0.3; filter: brightness(0.8); box-shadow: 0 0 2px rgba(0, 188, 212, 0.2); } 
     100% { opacity: 1; filter: brightness(1.2); box-shadow: 0 0 12px rgba(0, 188, 212, 1); } 

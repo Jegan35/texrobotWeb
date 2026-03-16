@@ -21,8 +21,7 @@ const SIM_STATE_LIST = ["State", "High", "Low"];
 
 const MemoizedTpTableBody = memo(({ tpList, expandedTable, selectedTpIndex, onRowClick }) => {
     if (tpList.length === 0) {
-        const colCount = expandedTable === 'TP' ? 6 : 4;
-        return <tbody><tr><td colSpan={colCount} className="empty-table-text" style={{ border: 'none' }}>Please open a Target Point file</td></tr></tbody>;
+        return <div className="empty-table-text">PLEASE OPEN A TARGET POINT FILE</div>;
     }
     return (
         <table className="data-table">
@@ -46,8 +45,7 @@ const MemoizedTpTableBody = memo(({ tpList, expandedTable, selectedTpIndex, onRo
 
 const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, activeInstruction, onRowClick }) => {
     if (prList.length === 0) {
-        const colCount = expandedTable === 'PR' ? 12 : 4;
-        return <tbody><tr><td colSpan={colCount} className="empty-table-text" style={{ border: 'none' }}>Please open a Program file</td></tr></tbody>;
+        return <div className="empty-table-text">PLEASE OPEN A PROGRAM FILE</div>;
     }
     return (
         <table className="data-table">
@@ -86,6 +84,7 @@ const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, acti
         </table>
     );
 });
+
 const PremiumSpeedGauge = memo(({ speedVal }) => {
     const radius = 40;
     const circumference = Math.PI * radius; 
@@ -124,7 +123,7 @@ const RightPart = () => {
     return () => { document.removeEventListener("contextmenu", disableContextMenu); };
   }, []);
   
- const { sendCommand, robotState, isGraphReading, setGraphReading, userRole, disconnectWebSocket } = useWebSocket();
+  const { sendCommand, robotState, isGraphReading, setGraphReading, userRole, disconnectWebSocket } = useWebSocket();
   const activeInstruction = robotState?.highlighted_instruction ?? -1;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
@@ -132,9 +131,8 @@ const RightPart = () => {
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
   const [bottomPanelMode, setBottomPanelMode] = useState('MAIN_CTRL'); 
   
-  const [activeFileTab, setActiveFileTab] = useState('PR'); 
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [row2Tab, setRow2Tab] = useState('PROGRAM_FILE'); // 'PROGRAM_FILE' or 'IO_MODULES'
+  const [row2Tab, setRow2Tab] = useState('PROGRAM_FILE');
   
   const [isTopPanelOpen, setIsTopPanelOpen] = useState(false);
 
@@ -247,6 +245,14 @@ const RightPart = () => {
   const handleTpModeSelect = (uiLabel, backendCmd) => { setDisplayTpMode(uiLabel); sendCommand('SET_TP_RUN_MODE', backendCmd); setOpenDropdown(null); };
   const handleTpRowClick = useCallback((index) => { setSelectedTpIndex(index); sendCommand('SELECT_TP_INDEX', index); }, [sendCommand]);
   const handlePrRowClick = useCallback((index) => { setSelectedPrIndex(index); sendCommand('SELECT_PR_ROW', index); }, [sendCommand]);
+
+  // Tab Switcher - Auto minimizes if a non-table tab is selected
+  const handleTabSwitch = (tabName) => {
+      setRow2Tab(tabName);
+      if (tabName !== 'PROGRAM_FILE' && tabName !== 'TP_FILE') {
+          setExpandedRowPanel('NONE');
+      }
+  };
 
   const openModifyTpModal = () => {
       const item = tpList[selectedTpIndex] || {};
@@ -753,8 +759,7 @@ const RightPart = () => {
           </div>
       )}
 
-      {/* MODALS */}
-     {/* --- DISCONNECT CONFIRMATION MODAL --- */}
+      {/* --- DISCONNECT CONFIRMATION MODAL --- */}
       {showDisconnectModal && (
         <div className="modal-overlay" style={{ backdropFilter: 'blur(8px)' }}>
             <div className="modal-box" style={{ borderTopColor: '#f44336' }}>
@@ -811,9 +816,9 @@ const RightPart = () => {
                 <div className="rp-header-col">
                     <RightHeader 
                         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
-                        currentMode={!isTopPanelOpen ? 'PROGRAM FILE' : currentView} 
+                        /* FIX: Now dynamically reads the active tab and formats the text perfectly! */
+                        currentMode={!isTopPanelOpen ? (row2Tab === 'IO_MODULES' ? 'I/O PANEL' : row2Tab.replace('_', ' ')) : currentView} 
                         isOpen={isSidebarOpen} 
-                        // FIX: Now it triggers the modal instead of instant disconnect!
                         onDisconnectClick={() => setShowDisconnectModal(true)} 
                      />
                 </div>
@@ -849,14 +854,14 @@ const RightPart = () => {
                 ) : (
                     <div className={`rp-row-2 ${expandedRowPanel === 'PROGRAM' ? 'row-maximized' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         {/* ========================================== */}
-                        {/* ROW 2: PROGRAM FILE & IO MODULES TABS      */}
+                        {/* ROW 2: TABS NAVIGATION                     */}
                         {/* ========================================== */}
-                        <div className="dark-tabs bg-dark-deep" style={{ justifyContent: 'space-between' }}>
+                        <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '35px', boxSizing: 'border-box', width: '100%' }}>
                             <div style={{ display: 'flex' }}>
                                 {/* PROGRAM FILE TAB */}
                                 <div 
                                     className={`dark-tab ${row2Tab === 'PROGRAM_FILE' ? 'active' : ''}`} 
-                                    onClick={() => setRow2Tab('PROGRAM_FILE')}
+                                    onClick={() => handleTabSwitch('PROGRAM_FILE')}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     PROGRAM FILE
@@ -865,17 +870,46 @@ const RightPart = () => {
                                 {/* IO MODULES TAB */}
                                 <div 
                                     className={`dark-tab ${row2Tab === 'IO_MODULES' ? 'active' : ''}`} 
-                                    onClick={() => setRow2Tab('IO_MODULES')}
+                                    onClick={() => handleTabSwitch('IO_MODULES')}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     I/O PANEL
                                 </div>
+
+                                {/* --- SECURE PROGRAMMER TABS --- */}
+                                {userRole === 'Programmer' && (
+                                    <>
+                                        <div 
+                                            className={`dark-tab ${row2Tab === 'TP_FILE' ? 'active' : ''}`} 
+                                            onClick={() => handleTabSwitch('TP_FILE')}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            TP FILE
+                                        </div>
+                                        <div 
+                                            className={`dark-tab ${row2Tab === 'DATA_VAR' ? 'active' : ''}`} 
+                                            onClick={() => handleTabSwitch('DATA_VAR')}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            DATA VAR
+                                        </div>
+                                        <div 
+                                            className={`dark-tab ${row2Tab === 'AXIS_LIMIT' ? 'active' : ''}`} 
+                                            onClick={() => handleTabSwitch('AXIS_LIMIT')}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            AXIS LIMIT
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             
-                            {/* MAX / MIN TOGGLE BUTTON */}
-                            <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'PROGRAM' ? 'NONE' : 'PROGRAM')}>
-                                {expandedRowPanel === 'PROGRAM' ? '▼ MIN' : '⛶ MAX'}
-                            </div>
+                            {/* MAX / MIN TOGGLE BUTTON - ONLY SHOWS FOR TABLES! */}
+                            {(row2Tab === 'PROGRAM_FILE' || row2Tab === 'TP_FILE') && (
+                                <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'PROGRAM' ? 'NONE' : 'PROGRAM')}>
+                                    {expandedRowPanel === 'PROGRAM' ? '▼ MIN' : '⛶ MAX'}
+                                </div>
+                            )}
                         </div>
 
                         <div className="row2-content" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
@@ -884,46 +918,95 @@ const RightPart = () => {
                             {row2Tab === 'PROGRAM_FILE' && (
                                 <div className="table-container" style={{ width: '100%', height: '100%' }}>
                                     
-                                    {/* The White Box Area */}
                                     <div className="table-wrapper">
-                                        
                                         <div className="table-scroller">
                                             <MemoizedPrTableBody 
-    prList={prList} 
-    expandedTable={'PR'} 
-    selectedPrIndex={selectedPrIndex} 
-    activeInstruction={activeInstruction} // <--- THIS PASSES THE LIVE ROW NUMBER!
-    onRowClick={handlePrRowClick} 
-/>
+                                                prList={prList} 
+                                                expandedTable={'PR'} 
+                                                selectedPrIndex={selectedPrIndex} 
+                                                activeInstruction={activeInstruction}
+                                                onRowClick={handlePrRowClick} 
+                                            />
                                         </div>
 
-                                        {/* --- OPERATOR MODE: PURE FLOATING BUTTONS --- */}
-                                        {/* FIX: Now securely trapped INSIDE the white table-wrapper! */}
+                                        {/* --- NEAT INDUSTRIAL OPERATOR CONTROLS --- */}
                                         {userRole !== 'Programmer' && (
-                                            <div className="operator-floating-controls">
+                                            <div className="operator-floating-controls" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                                 
-                                                {/* 2. RUN INST BUTTON */}
-                                                <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>
+                                                {/* --- LOCKED OP BOX (Strictly Backend Output) --- */}
+                                                <div style={{ display: 'flex', flexShrink: 0, height: '34px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.8)', boxShadow: '0 4px 6px rgba(0,0,0,0.5)' }}>
+                                                    <div style={{ background: 'linear-gradient(180deg, #373d49 0%, #262b33 100%)', color: '#fff', padding: '0 10px', display: 'flex', alignItems: 'center', fontSize: '0.8rem', fontWeight: '900', whiteSpace: 'nowrap', borderRight: '1px solid #111' }}>
+                                                        📄 OP
+                                                    </div>
+                                                    <input 
+                                                        readOnly 
+                                                        style={{ 
+                                                            background: '#e0e0e0', 
+                                                            color: '#111', 
+                                                            border: 'none', 
+                                                            width: '45px', 
+                                                            textAlign: 'center', 
+                                                            fontSize: '0.95rem', 
+                                                            fontWeight: '900', 
+                                                            outline: 'none', 
+                                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)',
+                                                            cursor: 'not-allowed' 
+                                                        }}
+                                                        value={rs.program_count_output || '0'} 
+                                                        title="Current Output Program (Locked)"
+                                                    />
+                                                </div>
+
+                                                <button className="tp-btn btn-green" style={{ width: 'auto', height: '34px', padding: '0 15px', fontSize: '0.8rem', minWidth: '100px', flexShrink: 0 }} onClick={() => sendCommand('RUN_PROGRAM')}>
                                                     ▶ RUN INST
                                                 </button>
-                                                
-                                                {/* 3. CALC TRAJ BUTTON */}
-                                                <button className="tp-btn btn-teal" onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>
+                                                <button className="tp-btn btn-teal" style={{ width: 'auto', height: '34px', padding: '0 15px', fontSize: '0.8rem', minWidth: '100px', flexShrink: 0 }} onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>
                                                     🧮 CALC TRAJ
                                                 </button>
-                                                
+
                                             </div>
                                         )}
                                         
-                                    </div> {/* <--- END OF TABLE WRAPPER */}
-
+                                    </div>
                                 </div>
                             )}
 
                             {/* IF IO MODULES IS SELECTED */}
                             {row2Tab === 'IO_MODULES' && (
-                                <div style={{ width: '100%', height: '100%', padding: '15px', overflowY: 'auto' }}>
+                                <div style={{ width: '100%', height: '100%', padding: '15px 35px 15px 15px', overflowY: 'auto', boxSizing: 'border-box' }}>
                                     {renderIOModules()}
+                                </div>
+                            )}
+
+                            {/* --- SECURE TAB CONTENT RENDERERS --- */}
+                            
+                            {/* IF TP FILE IS SELECTED */}
+                            {row2Tab === 'TP_FILE' && userRole === 'Programmer' && (
+                                <div className="table-container" style={{ width: '100%', height: '100%' }}>
+                                    <div className="table-wrapper">
+                                        <div className="table-scroller">
+                                            <MemoizedTpTableBody 
+                                                tpList={tpList} 
+                                                expandedTable={'TP'} 
+                                                selectedTpIndex={selectedTpIndex} 
+                                                onRowClick={handleTpRowClick} 
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* IF DATA VARIABLE IS SELECTED */}
+                            {row2Tab === 'DATA_VAR' && userRole === 'Programmer' && (
+                                <div style={{ width: '100%', height: '100%', padding: '15px 35px 15px 15px', overflowY: 'auto', boxSizing: 'border-box' }}>
+                                    {renderDataVariable()}
+                                </div>
+                            )}
+
+                            {/* IF AXIS LIMIT IS SELECTED */}
+                            {row2Tab === 'AXIS_LIMIT' && userRole === 'Programmer' && (
+                                <div style={{ width: '100%', height: '100%', padding: '15px 35px 15px 15px', overflowY: 'auto', boxSizing: 'border-box' }}>
+                                    {renderAxisLimit()}
                                 </div>
                             )}
 
@@ -935,7 +1018,7 @@ const RightPart = () => {
                 {/* SECURE BLOCK: ENTIRE INSTRUCTION ROW ONLY SHOWS FOR PROGRAMMER */}
                 {userRole === 'Programmer' && (
                     <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
-                        <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '10px' }}>
+                        <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '35px', boxSizing: 'border-box', width: '100%' }}>
                             <div style={{ display: 'flex' }}>
                                 <div className="dark-tab active">INSTRUCTION</div>
                             </div>
@@ -988,7 +1071,7 @@ const RightPart = () => {
                         </div>
                     </div>
                 )}
-            </div> {/* <--- CRITICAL FIX: THIS CLOSES rp-upper-half */}
+            </div> 
 
             {/* --- ROW 5: BOTTOM PANEL COMMANDS --- */}
             <div className={`rp-row-5 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
@@ -1072,11 +1155,11 @@ const RightPart = () => {
                             </div>
                             <div className="grid-7-col">
                                 <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_INPUT", ipPgInput)}>📄 Ip Pg</button>
-                                <input className="tp-standalone-input" value={ipPgInput} onChange={(e) => setIpPgInput(e.target.value)} />
+                                <input className="tp-standalone-input" value={ipPgInput} onChange={(e) => setIpPgInput(e.target.value)} onBlur={() => sendCommand("SET_PROGRAM_INPUT", ipPgInput)} />
                                 <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_TP_NAME", tpNameVal)}>🏷 Tp name</button>
-                                <input className="tp-standalone-input" value={tpNameVal} onChange={(e) => setTpNameVal(e.target.value)} />
+                                <input className="tp-standalone-input" value={tpNameVal} onChange={(e) => setTpNameVal(e.target.value)} onBlur={() => sendCommand("SET_TP_NAME", tpNameVal)} />
                                 <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_COMMENT", comVal)}>🌍 Com</button>
-                                <input className="tp-standalone-input" value={comVal} onChange={(e) => setComVal(e.target.value)} />
+                                <input className="tp-standalone-input" value={comVal} onChange={(e) => setComVal(e.target.value)} onBlur={() => sendCommand("SET_PROGRAM_COMMENT", comVal)} />
                                 <button className="tp-btn btn-teal" onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>🧮 Calc Traj</button>
                             </div>
                         </>
