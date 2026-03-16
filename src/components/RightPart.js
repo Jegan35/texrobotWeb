@@ -85,6 +85,7 @@ const MemoizedPrTableBody = memo(({ prList, expandedTable, selectedPrIndex, acti
     );
 });
 
+
 const PremiumSpeedGauge = memo(({ speedVal }) => {
     const radius = 40;
     const circumference = Math.PI * radius; 
