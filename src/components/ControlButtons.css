@@ -31,7 +31,7 @@
     border-radius:4px; 
     font-weight: 900;
     /* Font size shrunk slightly to fit SERVO:OFF perfectly */
-    font-size: clamp(9px, 1.1vw, 13px);
+    font-size: clamp(20px, 1.1vw, 13px);
     color: white;
     cursor: pointer;
     display: flex;

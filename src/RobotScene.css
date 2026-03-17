@@ -1,0 +1,241 @@
+/* ==============================================================
+   ROBOT SCENE (3D CANVAS & OVERLAYS)
+   ============================================================== */
+
+.rs-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.rs-canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+/* --- JOINTS PANEL (RIGHT SIDE) --- */
+/* --- JOINTS PANEL (RIGHT SIDE) --- */
+.rs-joints-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px; 
+    bottom: 0;
+    background-color: rgb(2, 238, 255); 
+    backdrop-filter: blur(8px);
+    /* STRONG INDUSTRIAL BORDER */
+    border-left: 4px solid #111;
+    box-sizing: border-box; /* Prevents the border from changing the 100px width */
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    pointer-events: none;
+}
+
+.rs-joints-header {
+    color:black;
+    font-size: 1rem;
+    font-family: 'Arial Narrow';
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-top: 15px;
+}
+
+.rs-joints-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+    justify-content: space-evenly;
+    margin-bottom: 100px; /* Adjusted to match new bottom indicator height */
+}
+
+.rs-joint-item {
+    text-align: center;
+    width: 100%;
+}
+
+.rs-joint-label {
+    color: black;
+    font-size: 1.4rem;
+    font-weight: 900;
+    margin-bottom: 2px;
+}
+
+.rs-joint-value {
+    color:  black;
+    font-size : 1.8rem;
+    font-weight : 900;
+}
+
+/* --- SYSTEM INDICATOR BULB --- */
+/* --- SYSTEM INDICATOR BULB --- */
+.rs-sys-indicator-panel {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* STRONG INDUSTRIAL BORDER */
+    border-top: 4px solid #111;
+    box-sizing: border-box;
+}
+
+.rs-sys-bulb-base {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #333, #111);
+    padding: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.3);
+    position: relative;
+}
+
+.rs-sys-bulb-glow {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.rs-sys-bulb-glow.ok {
+    background: radial-gradient(circle at 30% 30%, #4aff95, #00E676, #00b35c);
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.8), inset 0 0 8px rgba(255,255,255,0.6);
+}
+
+.rs-sys-bulb-glow.err {
+    background: radial-gradient(circle at 30% 30%, #ff7b72, #FF3B30, #cc2e26);
+    box-shadow: 0 0 15px rgba(255, 59, 48, 0.8), inset 0 0 8px rgba(255,255,255,0.6);
+}
+
+.rs-sys-text {
+    font-size:0.6rem;
+    font-weight: 900;
+    margin-top: 8px;
+    letter-spacing: 1px;
+}
+.rs-sys-text.ok { color: #050605; }
+.rs-sys-text.err { color: #FF3B30; }
+
+/* --- RECENTER BUTTON --- */
+.rs-recenter-btn {
+    position: absolute;
+    bottom: 115px; /* MOVED UP to clear the taller Cartesian panel */
+    left: 20px;
+    z-index: 20;
+    background:black; /* MATCHED to grey theme */
+    backdrop-filter: blur(8px);
+    border: 1px solid #00bcd4;
+    border-radius: 6px;
+    color: #00bcd4;
+    padding: 8px 15px;
+    font-weight: 900;
+    font-size: clamp(1rem, 1vw, 0.85rem);
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 0 8px rgba(0, 188, 212, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.1s ease;
+}
+
+.rs-recenter-btn:hover {
+    background: #00bcd4;
+    color: #111;
+}
+
+.rs-recenter-btn:active {
+    transform: scale(0.95);
+}
+
+.rs-recenter-icon {
+    font-size: 1.2rem;
+}
+
+/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
+/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
+/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
+.rs-cartesian-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 100px; /* Meets the 100px Joints panel width perfectly */
+    height: 100px; 
+    background-color: rgb(2, 238, 255); 
+    backdrop-filter: blur(8px);
+    
+    /* ONLY KEEP THE TOP BORDER */
+    border-top: 4px solid #111;
+    /* (I removed the border-right here so it doesn't double-stack!) */
+    
+    box-sizing: border-box; 
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    user-select: none;
+    pointer-events: none;
+}
+/* THIS CONTROLS THE WORD "CARTESIAN" ON THE LEFT */
+/* THIS CONTROLS THE WORD "CARTESIAN" ON THE LEFT */
+.rs-cartesian-title {
+    color: black; 
+    font-family: "Arial Narrow"; 
+    font-weight: 900;
+    font-size: 1rem; /* Slightly larger */
+    letter-spacing: 2px;
+    margin-right: 15px; /* Added more space between title and X(mm) */
+    flex-shrink: 0;
+}
+
+/* CHANGED FROM GRID TO FLEX FOR PERFECT SPACING */
+.rs-cartesian-grid {
+    display: flex;
+    justify-content: space-between; /* Spreads X, Y, Z, A, B, C evenly across the bar */
+    flex: 1;
+    align-items: center;
+    min-width: 0;
+    padding-right: 20px; /* Keeps them from touching the SYS OK button */
+}
+
+/* Individual X, Y, Z containers */
+.rs-cartesian-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Ensures label and value are perfectly centered over each other */
+    min-width: 60px; /* Gives each number room to breathe */
+}
+
+/* THIS CONTROLS THE "X(mm)", "Y(mm)", "A(°)", ETC. */
+.rs-cartesian-label {
+    color: black; 
+    font-family: "Arial Narrow", Arial, sans-serif; 
+    font-size: 1.4rem; 
+    margin-bottom: 2px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+/* THE NUMBERS (0.00) */
+.rs-cartesian-value {
+    color: black !important; 
+    font-size: 1.8rem; 
+    font-weight: 900;
+    font-family: "Arial Narrow", Arial, sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* REMOVED margin-right: -10px; which was breaking the layout */
+}

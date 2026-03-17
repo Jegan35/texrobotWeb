@@ -128,7 +128,7 @@ const RightPart = () => {
   const activeInstruction = robotState?.highlighted_instruction ?? -1;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentView, setCurrentView] = useState('JOG JOINTS');
-
+  const [dpadMode, setDpadMode] = useState('TRANSLATION');
   const [expandedRowPanel, setExpandedRowPanel] = useState('NONE'); 
   const [bottomPanelMode, setBottomPanelMode] = useState('MAIN_CTRL'); 
   
@@ -624,46 +624,49 @@ const RightPart = () => {
         );
     } else {
         return (
-          <div className="jog-panel-container">
-            <div className="dpad-two-col-layout">
-                <div className="dpad-col">
-                    <div className="dpad-col-title">TRANSLATION</div>
-                    
-                    <div className="dpad-cross">
-                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Y+')} onPointerUp={()=>handlePointerUp('Y+')} onPointerLeave={()=>handlePointerUp('Y+')}>Y+</button>
-                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('X-')} onPointerUp={()=>handlePointerUp('X-')} onPointerLeave={()=>handlePointerUp('X-')}>X-</button>
-                        <div className="dpad-center">XYZ</div>
-                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('X+')} onPointerUp={()=>handlePointerUp('X+')} onPointerLeave={()=>handlePointerUp('X+')}>X+</button>
-                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Y-')} onPointerUp={()=>handlePointerUp('Y-')} onPointerLeave={()=>handlePointerUp('Y-')}>Y-</button>
-                        
-                        <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown('Z+')} onPointerUp={()=>handlePointerUp('Z+')} onPointerLeave={()=>handlePointerUp('Z+')}>Z+</button>
-                        <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown('Z-')} onPointerUp={()=>handlePointerUp('Z-')} onPointerLeave={()=>handlePointerUp('Z-')}>Z-</button>
-                    </div>
+          <div className="jog-panel-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px', position: 'relative' }}>
+            
+            {/* --- PREMIUM TOGGLE SWITCH (PINNED TO TOP LEFT) --- */}
+            <div style={{ position: 'absolute', top: '20px', left: '20px', display: 'flex', background: '#111', borderRadius: '8px', padding: '4px', border: '1px solid #333', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)' }}>
+                <div 
+                    onClick={() => setDpadMode('TRANSLATION')}
+                    style={{ padding: '8px 20px', cursor: 'pointer', borderRadius: '4px', fontWeight: '900', fontSize: '0.9rem', transition: '0.2s', background: dpadMode === 'TRANSLATION' ? '#00bcd4' : 'transparent', color: dpadMode === 'TRANSLATION' ? '#111' : '#888', boxShadow: dpadMode === 'TRANSLATION' ? '0 2px 5px rgba(0,0,0,0.5)' : 'none' }}
+                >
+                    TRANSLATION
                 </div>
-
-                <div className="joints-divider">
-                    <div className="divider-badge">D-PAD</div>
+                <div 
+                    onClick={() => setDpadMode('ROTATION')}
+                    style={{ padding: '8px 20px', cursor: 'pointer', borderRadius: '4px', fontWeight: '900', fontSize: '0.9rem', transition: '0.2s', background: dpadMode === 'ROTATION' ? '#00bcd4' : 'transparent', color: dpadMode === 'ROTATION' ? '#111' : '#888', boxShadow: dpadMode === 'ROTATION' ? '0 2px 5px rgba(0,0,0,0.5)' : 'none' }}
+                >
+                    ROTATION
                 </div>
+            </div>
 
+            {/* --- DYNAMIC UNIFIED D-PAD --- */}
+            <div className="dpad-two-col-layout" style={{ paddingTop: '20px', paddingRight: '0' }}>
                 <div className="dpad-col">
-                    <div className="dpad-col-title">ROTATION</div>
-                    
                     <div className="dpad-cross">
-                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown('Ry+')} onPointerUp={()=>handlePointerUp('Ry+')} onPointerLeave={()=>handlePointerUp('Ry+')}>Ry+</button>
-                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown('Rx-')} onPointerUp={()=>handlePointerUp('Rx-')} onPointerLeave={()=>handlePointerUp('Rx-')}>Rx-</button>
-                        <div className="dpad-center">ROT</div>
-                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown('Rx+')} onPointerUp={()=>handlePointerUp('Rx+')} onPointerLeave={()=>handlePointerUp('Rx+')}>Rx+</button>
-                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown('Ry-')} onPointerUp={()=>handlePointerUp('Ry-')} onPointerLeave={()=>handlePointerUp('Ry-')}>Ry-</button>
+                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+')}>{dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+'}</button>
+                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-')}>{dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-'}</button>
                         
-                        <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown('Rz+')} onPointerUp={()=>handlePointerUp('Rz+')} onPointerLeave={()=>handlePointerUp('Rz+')}>Rz+</button>
-                        <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown('Rz-')} onPointerUp={()=>handlePointerUp('Rz-')} onPointerLeave={()=>handlePointerUp('Rz-')}>Rz-</button>
+                        {/* --- HOME BUTTON IN CENTER --- */}
+                        <div className="dpad-center" onClick={() => sendCommand('HOME')} title="Return to Home Position">
+                            <span className="home-icon-span">HOME</span>
+                        </div>
+                        
+                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+')}>{dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+'}</button>
+                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-')}>{dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-'}</button>
+                        
+                        <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+')}>{dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+'}</button>
+                        <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz-')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz-')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz+')}>{dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz-'}</button>
                     </div>
                 </div>
             </div>
+
           </div>
         );
     }
-  };
+}
   
   return (
     <>
@@ -857,60 +860,49 @@ const RightPart = () => {
                         {/* ========================================== */}
                         {/* ROW 2: TABS NAVIGATION                     */}
                         {/* ========================================== */}
-                        <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '35px', boxSizing: 'border-box', width: '100%' }}>
+                        <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '15px', boxSizing: 'border-box', width: '100%' }}>
                             <div style={{ display: 'flex' }}>
                                 {/* PROGRAM FILE TAB */}
-                                <div 
-                                    className={`dark-tab ${row2Tab === 'PROGRAM_FILE' ? 'active' : ''}`} 
-                                    onClick={() => handleTabSwitch('PROGRAM_FILE')}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    PROGRAM FILE
-                                </div>
+                                <div className={`dark-tab ${row2Tab === 'PROGRAM_FILE' ? 'active' : ''}`} onClick={() => handleTabSwitch('PROGRAM_FILE')} style={{ cursor: 'pointer' }}>PROGRAM FILE</div>
                                 
                                 {/* IO MODULES TAB */}
-                                <div 
-                                    className={`dark-tab ${row2Tab === 'IO_MODULES' ? 'active' : ''}`} 
-                                    onClick={() => handleTabSwitch('IO_MODULES')}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    I/O PANEL
-                                </div>
+                                <div className={`dark-tab ${row2Tab === 'IO_MODULES' ? 'active' : ''}`} onClick={() => handleTabSwitch('IO_MODULES')} style={{ cursor: 'pointer' }}>I/O PANEL</div>
 
                                 {/* --- SECURE PROGRAMMER TABS --- */}
                                 {userRole === 'Programmer' && (
                                     <>
-                                        <div 
-                                            className={`dark-tab ${row2Tab === 'TP_FILE' ? 'active' : ''}`} 
-                                            onClick={() => handleTabSwitch('TP_FILE')}
-                                            style={{ cursor: 'pointer' }}
-                                        >
-                                            TP FILE
-                                        </div>
-                                        <div 
-                                            className={`dark-tab ${row2Tab === 'DATA_VAR' ? 'active' : ''}`} 
-                                            onClick={() => handleTabSwitch('DATA_VAR')}
-                                            style={{ cursor: 'pointer' }}
-                                        >
-                                            DATA VAR
-                                        </div>
-                                        <div 
-                                            className={`dark-tab ${row2Tab === 'AXIS_LIMIT' ? 'active' : ''}`} 
-                                            onClick={() => handleTabSwitch('AXIS_LIMIT')}
-                                            style={{ cursor: 'pointer' }}
-                                        >
-                                            AXIS LIMIT
-                                        </div>
+                                        <div className={`dark-tab ${row2Tab === 'TP_FILE' ? 'active' : ''}`} onClick={() => handleTabSwitch('TP_FILE')} style={{ cursor: 'pointer' }}>TP FILE</div>
+                                        <div className={`dark-tab ${row2Tab === 'DATA_VAR' ? 'active' : ''}`} onClick={() => handleTabSwitch('DATA_VAR')} style={{ cursor: 'pointer' }}>DATA VAR</div>
+                                        <div className={`dark-tab ${row2Tab === 'AXIS_LIMIT' ? 'active' : ''}`} onClick={() => handleTabSwitch('AXIS_LIMIT')} style={{ cursor: 'pointer' }}>AXIS LIMIT</div>
                                     </>
                                 )}
                             </div>
                             
-                            {/* MAX / MIN TOGGLE BUTTON - ONLY SHOWS FOR TABLES! */}
-                            {(row2Tab === 'PROGRAM_FILE' || row2Tab === 'TP_FILE') && (
-                                <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'PROGRAM' ? 'NONE' : 'PROGRAM')}>
-                                    {expandedRowPanel === 'PROGRAM' ? '▼ MIN' : '⛶ MAX'}
-                                </div>
-                            )}
+                            {/* --- RIGHT SIDE ALIGNMENT (OP BOX + MAX BTN) --- */}
+                            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                
+                                {/* MOVED OP BOX: Shows in all tabs for operators */}
+                                {userRole !== 'Programmer' && (
+                                    <div style={{ display: 'flex', flexShrink: 0, height: '26px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.8)' }}>
+                                        <div style={{ background: 'linear-gradient(180deg, #373d49 0%, #262b33 100%)', color: '#fff', padding: '0 8px', display: 'flex', alignItems: 'center', fontSize: '0.7rem', fontWeight: '900', whiteSpace: 'nowrap', borderRight: '1px solid #111' }}>
+                                            📄 OP
+                                        </div>
+                                        <input 
+                                            readOnly 
+                                            style={{ background: '#e0e0e0', color: '#111', border: 'none', width: '40px', textAlign: 'center', fontSize: '0.85rem', fontWeight: '900', outline: 'none', cursor: 'not-allowed' }}
+                                            value={rs.program_count_output || '0'} 
+                                            title="Current Output Program"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* MAX / MIN TOGGLE BUTTON - ONLY SHOWS FOR TABLES! */}
+                                {(row2Tab === 'PROGRAM_FILE' || row2Tab === 'TP_FILE') && (
+                                    <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'PROGRAM' ? 'NONE' : 'PROGRAM')}>
+                                        {expandedRowPanel === 'PROGRAM' ? '▼ MIN' : '⛶ MAX'}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="row2-content" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
@@ -928,43 +920,29 @@ const RightPart = () => {
                                                 activeInstruction={activeInstruction}
                                                 onRowClick={handlePrRowClick} 
                                             />
+                                            {/* --- FIX: GHOST SPACER --- */}
+                                            {/* This allows the user to scroll the last row safely past the floating buttons! */}
+                                            {userRole !== 'Programmer' && <div style={{ height: '110px', width: '100%' }}></div>}
                                         </div>
 
-                                        {/* --- NEAT INDUSTRIAL OPERATOR CONTROLS --- */}
+                                        {/* --- NEAT INDUSTRIAL OPERATOR ROUND BUTTONS --- */}
                                         {userRole !== 'Programmer' && (
-                                            <div className="operator-floating-controls" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                
-                                                {/* --- LOCKED OP BOX (Strictly Backend Output) --- */}
-                                                <div style={{ display: 'flex', flexShrink: 0, height: '34px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.8)', boxShadow: '0 4px 6px rgba(0,0,0,0.5)' }}>
-                                                    <div style={{ background: 'linear-gradient(180deg, #373d49 0%, #262b33 100%)', color: '#fff', padding: '0 10px', display: 'flex', alignItems: 'center', fontSize: '0.8rem', fontWeight: '900', whiteSpace: 'nowrap', borderRight: '1px solid #111' }}>
-                                                        📄 OP
-                                                    </div>
-                                                    <input 
-                                                        readOnly 
-                                                        style={{ 
-                                                            background: '#e0e0e0', 
-                                                            color: '#111', 
-                                                            border: 'none', 
-                                                            width: '45px', 
-                                                            textAlign: 'center', 
-                                                            fontSize: '0.95rem', 
-                                                            fontWeight: '900', 
-                                                            outline: 'none', 
-                                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)',
-                                                            cursor: 'not-allowed' 
-                                                        }}
-                                                        value={rs.program_count_output || '0'} 
-                                                        title="Current Output Program (Locked)"
-                                                    />
-                                                </div>
-
-                                                <button className="tp-btn btn-green" style={{ width: 'auto', height: '34px', padding: '0 15px', fontSize: '0.8rem', minWidth: '100px', flexShrink: 0 }} onClick={() => sendCommand('RUN_PROGRAM')}>
-                                                    ▶ RUN INST
-                                                </button>
-                                                <button className="tp-btn btn-teal" style={{ width: 'auto', height: '34px', padding: '0 15px', fontSize: '0.8rem', minWidth: '100px', flexShrink: 0 }} onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>
-                                                    🧮 CALC TRAJ
+                                            <div className="operator-floating-actions">
+                                                <button 
+                                                    className="fab-btn fab-teal" 
+                                                    title="Calculate Trajectory"
+                                                    onClick={() => sendCommand('CALCULATE_TRAJECTORY')}
+                                                >
+                                                    <span className="fab-icon-calc">🧮</span>
                                                 </button>
 
+                                                <button 
+                                                    className="fab-btn fab-green" 
+                                                    title="Run Instruction"
+                                                    onClick={() => sendCommand('RUN_PROGRAM')}
+                                                >
+                                                    <span className="fab-icon-play">▶</span>
+                                                </button>
                                             </div>
                                         )}
                                         

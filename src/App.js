@@ -103,7 +103,7 @@ function AppContent() {
             
             {/* 1. LEFT: BRANDING */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TECSONICS</div>
+                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.8rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TECSONICS</div>
             </div>
 
            {/* 2. CENTER: GREEN ROLE INDICATOR */}
@@ -131,8 +131,8 @@ function AppContent() {
 
                 <div style={{ 
                     backgroundColor: '#0a0c11', 
-                    border: '1px solid #00E676', 
-                    borderRadius: '20px', 
+                    border: '2px solid #00E676', 
+                    borderRadius: '0px', 
                     padding: '4px 15px', 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -145,7 +145,7 @@ function AppContent() {
                     <span style={{ 
                         color: '#fff', 
                         fontWeight: '1000', 
-                        fontSize: '0.85rem', 
+                        fontSize: '1.5rem', 
                         letterSpacing: '2px',
                         textShadow: 'none', 
                         WebkitFontSmoothing: 'antialiased', 

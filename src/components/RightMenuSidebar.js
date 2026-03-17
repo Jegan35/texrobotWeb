@@ -43,7 +43,7 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
 
             {menuLevel === 'JOG_SUB' && (
                 <>
-                    <button className="rms-btn btn-back" onClick={() => setMenuLevel('MAIN')}><span>◄</span> BACK TO MENUS</button>
+                    <button className="rms-btn btn-back" onClick={() => setMenuLevel('MAIN')}><span>◄</span> BACK </button>
                     <button className={`rms-btn btn-jog ${activeView === 'JOG JOINTS' ? 'rms-active' : ''}`} onClick={() => handleViewClick('JOG JOINTS')}>JOINTS</button>
                     <button className={`rms-btn btn-jog ${activeView === 'JOG CARTESIAN' ? 'rms-active' : ''}`} onClick={() => handleViewClick('JOG CARTESIAN')}>CARTESIAN</button>
                 </>
@@ -51,7 +51,7 @@ const RightMenuSidebar = ({ isOpen, onClose, onSelectView, activeView }) => {
 
             {menuLevel === 'MOVE_SUB' && (
                 <>
-                    <button className="rms-btn btn-back" onClick={() => setMenuLevel('MAIN')}><span>◄</span> BACK TO MENUS</button>
+                    <button className="rms-btn btn-back" onClick={() => setMenuLevel('MAIN')}><span>◄</span> BACK </button>
                     <button className={`rms-btn btn-move ${activeView === 'MOVE JOINTS' ? 'rms-active' : ''}`} onClick={() => handleViewClick('MOVE JOINTS')}>JOINTS</button>
                     <button className={`rms-btn btn-move ${activeView === 'MOVE CARTESIAN' ? 'rms-active' : ''}`} onClick={() => handleViewClick('MOVE CARTESIAN')}>CARTESIAN</button>
                 </>

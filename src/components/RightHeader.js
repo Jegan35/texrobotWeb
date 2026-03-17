@@ -74,7 +74,7 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen, onSettingsClick, onDis
                 onClick={onDisconnectClick}
                 title="Disconnect from Robot"
             >
-                <span className="disconnect-icon">⏹</span> DISCONNECT
+                <span className="disconnect-icon">⏻</span>DISCONNECT
             </button>
             
         </div>
