@@ -314,15 +314,17 @@
 }
 
 /* JOG BUTTONS NOW MATCH MASSIVE CYAN D-PAD BUTTONS */
+/* JOG BUTTONS NOW MATCH MASSIVE CYAN D-PAD BUTTONS */
 .jib-btn { 
-    width: clamp(75px, 9vw, 110px); /* Massively increased size */
+    width: clamp(75px, 9vw, 110px); 
     height: clamp(60px, 8vh, 85px); 
-    background: rgb(2, 238, 255); /* Bright Cyan */
+    background: rgb(2, 238, 255); 
     border: 2px solid #111; 
-    border-radius: 16px; /* Smooth rounded corners */
+    border-radius: 16px; 
     font-weight: 900; 
-    font-size: clamp(1.4rem, 1.8vw, 2rem); /* Massive font */
-    color: black !important; /* Pure black text */
+    font-size: clamp(3rem, 1.8vw, 2rem); 
+    color: black !important; /* FORCED PURE BLACK */
+    text-shadow: none !important; /* REMOVES ANY CONFLICTING SHADOWS */
     cursor: pointer; 
     box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6), 0 6px 8px rgba(0,0,0,0.5); 
     transition: 0.1s; 
@@ -332,10 +334,15 @@
 
 .jib-btn:active { 
     transform: scale(0.92); 
-    background: rgb(0, 200, 215); /* Slightly darker cyan when pressed */
+    background: rgb(0, 200, 215); 
     box-shadow: inset 2px 2px 6px rgba(0,0,0,0.8); 
 }
 
+/* OVERRIDE TO BLOCK WHITE TEXT-POS/NEG CLASSES ON THESE SPECIFIC BUTTONS */
+.jib-btn.text-pos, .jib-btn.text-neg {
+    color: black !important;
+    text-shadow: none !important;
+}
 .joints-divider { width: 2px; background: linear-gradient(to bottom, transparent, #444, transparent); height: auto; margin: 10px 0; position: relative; display: flex; justify-content: center; }
 .divider-badge { position: absolute; top: -15px; background: #151822; color: #00bcd4; font-weight: 900; font-size: clamp(0.85rem, 1.1vw, 1.1rem); letter-spacing: 2px; padding: 4px 12px; border-radius: 4px; border: 1px solid #333; white-space: nowrap; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 2; }
 
@@ -344,79 +351,93 @@
 .dpad-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
 
 /* MASSIVELY INCREASED DPAD SIZES */
-/* MASSIVELY INCREASED DPAD SIZES */
+/* MASSIVELY INCREASED DPAD SIZES & CUSTOM COLORS */
 .dpad-cross { 
     display: grid; 
-    /* INCREASED BUTTON WIDTHS up to 100px */
     grid-template-columns: clamp(65px, 8vw, 100px) clamp(65px, 8vw, 100px) clamp(65px, 8vw, 100px) clamp(20px, 4vw, 40px) clamp(65px, 8vw, 100px); 
-    /* INCREASED BUTTON HEIGHTS up to 100px */
     grid-template-rows: repeat(3, clamp(65px, 8vw, 100px)); 
     gap: clamp(10px, 2vh, 20px); 
     margin-bottom: 0; 
 }
 
+/* BASE DPAD BUTTON STYLES (Shared) */
 .dpad-btn { 
     width: 100%; height: 100%; 
-    background: rgb(2, 238, 255); 
-    border: 2px solid #111; 
-    border-radius: 16px; /* Smooth rounded corners for bigger buttons */
+    border: 1px solid rgba(0,0,0,0.5); /* Thinner border for cleaner look */
+    border-radius: 12px; /* Slightly less rounded to match image */
     font-weight: 900; 
-    font-size: clamp(2.5rem, 1.8vw, 2rem); /* MASSIVE FONT SIZE */
-    color: black !important; 
+    font-size: clamp(2rem, 1.8vw, 2.5rem); 
+    color: white !important; /* ALL TEXT WHITE */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Subtle shadow for depth */
     cursor: pointer; 
-    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6), 0 6px 8px rgba(0,0,0,0.5); 
+    box-shadow: inset 0px 2px 2px rgba(255,255,255,0.4), 0 4px 6px rgba(0,0,0,0.5); /* Modern pillowy 3D effect */
     display: flex; align-items: center; justify-content: center; 
     transition: 0.1s; 
     -webkit-touch-callout: none !important; user-select: none !important;
 }
 
 .dpad-btn:active { 
-    transform: scale(0.92); 
-    background: rgb(0, 200, 215); 
-    box-shadow: inset 2px 2px 6px rgba(0,0,0,0.8); 
+    transform: scale(0.95) translateY(2px); 
+    box-shadow: inset 0px 4px 6px rgba(0,0,0,0.6); 
 }
 
-/* HOME BUTTON CENTER DESIGN */
-/* HOME BUTTON CENTER DESIGN (CYAN DEFAULT) */
+/* 🔴 X AXIS (LEFT / RIGHT) - RED */
+.dpad-left, .dpad-right {
+    background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
+}
+.dpad-left:active, .dpad-right:active { background: #D32F2F; }
+
+/* 🟢 Y AXIS (UP / DOWN) - GREEN */
+.dpad-up, .dpad-down {
+    background: linear-gradient(180deg, #66BB6A 0%, #4CAF50 100%);
+}
+.dpad-up:active, .dpad-down:active { background: #4CAF50; }
+
+/* 🔵 Z AXIS (TOP RIGHT / BOTTOM RIGHT) - BLUE */
+.dpad-z-up, .dpad-z-down {
+    background: linear-gradient(180deg, #29B6F6 0%, #039BE5 100%);
+}
+.dpad-z-up:active, .dpad-z-down:active { background: #039BE5; }
+
+/* 🔵 HOME BUTTON CENTER DESIGN - BLUE */
 .dpad-center { 
     grid-column: 2; grid-row: 2; 
-    background: rgb(2, 238, 255) !important; /* Forces Bright Cyan Background Always */
-    border: 2px solid #111; 
+    background: linear-gradient(180deg, #29B6F6 0%, #039BE5 100%) !important; 
+    border: 1px solid rgba(0,0,0,0.5); 
     border-radius: 50%; 
     display: flex; align-items: center; justify-content: center; 
-    margin: 2px; 
-    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6), 0 6px 8px rgba(0,0,0,0.5); /* Matches other buttons */
+    margin: 4px; 
+    box-shadow: inset 0px 2px 2px rgba(255,255,255,0.4), 0 4px 6px rgba(0,0,0,0.5); 
     cursor: pointer; 
     transition: 0.1s;
 }
 
-/* SLIGHTLY DARKER WHEN CLICKED */
 .dpad-center:active {
-    transform: scale(0.92);
-    background: rgb(0, 200, 215) !important; /* Slightly darker cyan when pressed */
-    box-shadow: inset 2px 2px 6px rgba(0,0,0,0.8);
+    transform: scale(0.95) translateY(2px);
+    background: #039BE5 !important; 
+    box-shadow: inset 0px 4px 6px rgba(0,0,0,0.6);
 }
 
-/* HOME TEXT DESIGN (BLACK ALWAYS) */
+/* HOME TEXT DESIGN (WHITE) */
 .home-icon-span {
-    color: black !important; /* Pure black text */
+    color: white !important; 
     font-weight: 900; 
     font-size: clamp(0.7rem, 1vw, 1rem) !important; 
-    text-shadow: none; /* No shadow for crisp text */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6); 
     letter-spacing: 0.5px;
 }
-/* WHEN CLICKED, TEXT TURNS PURE BLACK */
 .dpad-center:active .home-icon-span {
-    color: black !important;
-    text-shadow: none; /* Removes shadow so black is sharp */
+    color: #e0e0e0 !important;
 }
-.text-pos { color: black !important; text-shadow: 0 0 2px rgba(28, 210, 34, 0.4); }
-.text-neg { color: black !important; text-shadow: 0 0 2px rgba(255, 82, 82, 0.4); }
+
+/* REMOVE OLD TEXT COLOR OVERRIDES */
+.text-pos, .text-neg { text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important; color: white !important; }
+
+/* GRID POSITIONS (unchanged) */
 .dpad-up { grid-column: 2; grid-row: 1; }
 .dpad-down { grid-column: 2; grid-row: 3; }
 .dpad-left { grid-column: 1; grid-row: 2; }
 .dpad-right { grid-column: 3; grid-row: 2; }
-.dpad-center { grid-column: 2; grid-row: 2; background: #151822; border: 2px solid #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #03a9f4; font-size: clamp(0.6rem, 0.8vw, 0.8rem); font-weight: bold; margin: 4px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8); }
 .dpad-z-up { grid-column: 5; grid-row: 1; }
 .dpad-z-down { grid-column: 5; grid-row: 3; }
 

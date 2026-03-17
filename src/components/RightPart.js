@@ -583,7 +583,7 @@ const RightPart = () => {
     </div>
   );
 
-  const renderJogPanel = () => {
+const renderJogPanel = () => {
     if (isJoints) {
         return (
           <div className="jog-panel-container">
@@ -594,9 +594,13 @@ const RightPart = () => {
                      const ax = { id, m: `${id}-`, p: `${id}+` };
                      return (
                          <div key={ax.id} className="joint-industrial-block">
-                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>{ax.id}-</button>
+                             {/* CHANGED VISUAL TEXT TO JUST "-" */}
+                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>-</button>
+                             
                              <div className="jib-label">{ax.id}</div>
-                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>{ax.id}+</button>
+                             
+                             {/* CHANGED VISUAL TEXT TO JUST "+" */}
+                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>+</button>
                          </div>
                      )
                  })}
@@ -612,9 +616,13 @@ const RightPart = () => {
                      const ax = { id, m: `${id}-`, p: `${id}+` };
                      return (
                          <div key={ax.id} className="joint-industrial-block">
-                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>{ax.id}-</button>
+                             {/* CHANGED VISUAL TEXT TO JUST "-" */}
+                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>-</button>
+                             
                              <div className="jib-label">{ax.id}</div>
-                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>{ax.id}+</button>
+                             
+                             {/* CHANGED VISUAL TEXT TO JUST "+" */}
+                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>+</button>
                          </div>
                      )
                  })}

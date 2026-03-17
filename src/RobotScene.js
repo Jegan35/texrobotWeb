@@ -148,9 +148,9 @@ const RealRobot = () => {
 };
 
 const CustomGridWalls = React.memo(() => {
-  const size = 2500;
+  const size = 2000;
   const step = 100;
-  const height = 3000;
+  const height = 2600; /* EXTENDED Z-AXIS HEIGHT TO 2600 */
 
   const floorGrid = useMemo(() => {
     const pts = [];
@@ -159,45 +159,45 @@ const CustomGridWalls = React.memo(() => {
       pts.push(i, -size, 0, i, size, 0); 
     }
     return new Float32Array(pts);
-  }, []);
+  }, [size, step]); 
 
   const backWallGrid = useMemo(() => {
     const pts = [];
     for (let x = -size; x <= size; x += step) pts.push(x, 0, 0, x, 0, height);
     for (let z = 0; z <= height; z += step) pts.push(-size, 0, z, size, 0, z);
     return new Float32Array(pts);
-  }, []);
+  }, [size, step, height]);
 
   const sideWallGrid = useMemo(() => {
     const pts = [];
     for (let y = -size; y <= size; y += step) pts.push(0, y, 0, 0, y, height);
     for (let z = 0; z <= height; z += step) pts.push(0, -size, z, 0, size, z);
     return new Float32Array(pts);
-  }, []);
+  }, [size, step, height]);
 
   return (
     <group>
-      <lineSegments>
+      <lineSegments key={`floor-${size}`}>
         <bufferGeometry><bufferAttribute attach="attributes-position" count={floorGrid.length / 3} array={floorGrid} itemSize={3} /></bufferGeometry>
         <lineBasicMaterial color="#5ad15e" transparent opacity={0.7} /> 
       </lineSegments>
 
       <group position={[0, size, 0]}>
-        <lineSegments>
+        <lineSegments key={`back-${size}-${height}`}>
           <bufferGeometry><bufferAttribute attach="attributes-position" count={backWallGrid.length / 3} array={backWallGrid} itemSize={3} /></bufferGeometry>
           <lineBasicMaterial color="#2196F3" transparent opacity={0.7} /> 
         </lineSegments>
       </group>
 
       <group position={[-size, 0, 0]}>
-        <lineSegments>
+        <lineSegments key={`side-${size}-${height}`}>
           <bufferGeometry><bufferAttribute attach="attributes-position" count={sideWallGrid.length / 3} array={sideWallGrid} itemSize={3} /></bufferGeometry>
           <lineBasicMaterial color="#F44336" transparent opacity={0.7} /> 
         </lineSegments>
       </group>
 
-      <group position={[0, size - 10, 1600]} rotation={[Math.PI / 2, 0, 0]}>
-        {/* Dark text with white outlines for high contrast on light mode */}
+      {/* ADJUSTED Z POSITION TO 1300 SO TEXT CENTERS ON THE TALLER 2600 WALL */}
+      <group position={[0, size - 10, 1300]} rotation={[Math.PI / 2, 0, 0]}>
         <Text fontSize={300} color="#333333" fontWeight="900" anchorX="center" anchorY="bottom" letterSpacing={0.1} outlineWidth={5} outlineColor="#ffffff">
           TEXSONICS
         </Text>
@@ -208,29 +208,53 @@ const CustomGridWalls = React.memo(() => {
     </group>
   );
 });
-
 const WorldCoordinates = React.memo(() => {
   const labels = [];
-  const step = 100; /* LOCKED TO 100 */
+  const step = 100; 
   
-  /* PERFECT SIZE TO FIT STRAIGHTLY INSIDE A 100mm GAP */
-  const fontSize = 38;      
-  const axisLabelSize = 140; 
+  /* 🚀 ABSOLUTE MAXIMUM FONT SIZE THAT FITS IN A 100mm GAP */
+  const fontSize = 42;      
+  const axisLabelSize = 220; 
   
-  labels.push(<Billboard key="y" position={[0, -2600, 0]}><Text fontSize={axisLabelSize} color={COLORS.Y_GREEN} fontWeight="900" outlineWidth={4} outlineColor="#ffffff">Y</Text></Billboard>);
-  labels.push(<Billboard key="x" position={[2600, 0, 0]}><Text fontSize={axisLabelSize} color={COLORS.X_RED} fontWeight="900" outlineWidth={4} outlineColor="#ffffff">X</Text></Billboard>);
-  labels.push(<Billboard key="z" position={[2600, 2600, 1500]}><Text fontSize={axisLabelSize} color={COLORS.Z_BLUE} fontWeight="900" outlineWidth={4} outlineColor="#ffffff">Z</Text></Billboard>);
+  /* 🎯 PULLED LABELS TIGHTLY TO THE GRID EDGE */
+  const offset = 2040; 
   
-  for (let i = -2400; i <= 2400; i += step) {
-    /* STRAIGHT LINE - NO ZIG ZAG */
-    labels.push(<Billboard key={`yn-${i}`} position={[i, -2550, 0]}><Text fontSize={fontSize} color={COLORS.Y_GREEN} fontWeight="900" outlineWidth={2} outlineColor="#ffffff">{i}</Text></Billboard>);
-    if (i !== 0) labels.push(<Billboard key={`xn-${i}`} position={[2550, i, 0]}><Text fontSize={fontSize} color={COLORS.X_RED} fontWeight="900" outlineWidth={2} outlineColor="#ffffff">{i}</Text></Billboard>);
+  /* MAIN AXIS LABELS (XYZ) */
+  labels.push(<Billboard key="y" position={[0, -(offset + 200), 0]}><Text fontSize={axisLabelSize} color={COLORS.Y_GREEN} fontWeight="900" outlineWidth={6} outlineColor="#ffffff">Y</Text></Billboard>);
+  labels.push(<Billboard key="x" position={[offset + 200, 0, 0]}><Text fontSize={axisLabelSize} color={COLORS.X_RED} fontWeight="900" outlineWidth={6} outlineColor="#ffffff">X</Text></Billboard>);
+  
+  /* 🎯 THE FIX: MOVED 'Z' DOWN TO THE VERTICAL CENTER (Z=1300) AND PUSHED IT RIGHT */
+  labels.push(<Billboard key="z" position={[offset + 200, 2000, 1300]}><Text fontSize={axisLabelSize} color={COLORS.Z_BLUE} fontWeight="900" outlineWidth={6} outlineColor="#ffffff">Z</Text></Billboard>);
+  
+  /* Y-AXIS NUMBERS */
+  for (let i = -2000; i <= 2000; i += step) {
+    labels.push(
+      <Billboard key={`yn-${i}`} position={[i, -offset, 0]}>
+        <Text fontSize={fontSize} color={COLORS.Y_GREEN} fontWeight="900" outlineWidth={2} outlineColor="#ffffff">{i}</Text>
+      </Billboard>
+    );
   }
 
-  for (let z = 100; z <= 3000; z += step) { 
-    /* STRAIGHT VERTICAL LINE */
-    labels.push(<Billboard key={`zn-${z}`} position={[2550, 2550, z]}><Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="900" outlineWidth={2} outlineColor="#ffffff">{z}</Text></Billboard>);
+  /* X-AXIS NUMBERS */
+  for (let i = -2000; i <= 2000; i += step) {
+    if (i !== 0) {
+      labels.push(
+        <Billboard key={`xn-${i}`} position={[offset, i, 0]}>
+          <Text fontSize={fontSize} color={COLORS.X_RED} fontWeight="900" outlineWidth={2} outlineColor="#ffffff">{i}</Text>
+        </Billboard>
+      );
+    }
   }
+
+  /* Z-AXIS NUMBERS */
+  for (let z = 100; z <= 2600; z += step) { 
+    labels.push(
+      <Billboard key={`zn-${z}`} position={[offset, 2000, z]}>
+        <Text fontSize={fontSize} color={COLORS.Z_BLUE} fontWeight="900" outlineWidth={2} outlineColor="#ffffff">{z}</Text>
+      </Billboard>
+    );
+  }
+  
   return <group>{labels}</group>;
 });
 
