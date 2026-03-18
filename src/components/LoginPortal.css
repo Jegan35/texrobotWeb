@@ -19,12 +19,13 @@
 /* --- THE WHITE CARD --- */
 /* --- THE WHITE CARD --- */
 /* --- THE WHITE CARD (Applies to Phones & Tablets) --- */
+/* --- 1. DEFAULT (Phones) --- */
 .login-box {
     background: #ffffff;
     border-radius: 12px;
-    width: 90%;       /* 🚀 Shrinks safely on tablets */
+    width: 90%;       
     max-width: 400px; 
-    margin: 0 auto;   /* 🚀 Centers perfectly on tablets */
+    margin: 0 auto;   
     box-shadow: 0 25px 50px rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
@@ -32,13 +33,26 @@
     overflow-y: auto; 
     box-sizing: border-box;
     overflow: hidden; 
-    transition: transform 0.3s ease; 
+    /* Changed to 'all' so both shrinking and moving are smooth */
+    transition: all 0.3s ease; 
 }
 
-/* --- DESKTOP ONLY (Applies to Big Monitors) --- */
+/* --- 2. TABLET ONLY FIX (iPads / 11-inch screens) --- */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .login-box {
+        /* 🚀 Shrink the box so it easily fits between the arms */
+        max-width: 340px; 
+        
+        /* 🚀 Nudge it slightly right into the empty space */
+        transform: translateX(4vw); 
+    }
+}
+
+/* --- 3. DESKTOP ONLY (Big Monitors - Keeps your perfect fix!) --- */
 @media (min-width: 1200px) {
     .login-box {
-        transform: translateX(6vw); /* 🚀 Slides right ONLY on desktop! */
+        max-width: 400px; /* Keeps it full size on desktop */
+        transform: translateX(6vw); /* Slides it right */
     }
 }
 /* --- BLUE HEADER WITH IMAGE LOGO --- */
