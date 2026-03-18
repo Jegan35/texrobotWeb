@@ -103,7 +103,7 @@ function AppContent() {
             
             {/* 1. LEFT: BRANDING */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.8rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TEXSONICS</div>
+                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.5rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TEXSONICS</div>
             </div>
 
            {/* 2. CENTER: GREEN ROLE INDICATOR */}

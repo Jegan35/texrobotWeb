@@ -1,229 +1,228 @@
+/* --- FULL SCREEN BACKGROUND --- */
 .login-master-container {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100vw;
     height: 100vh;
-    background-color: #1a1e29;
-    background-image: radial-gradient(circle at center, #2b303b 0%, #151822 100%);
+    background-color: #0b1121; 
+    
+    /* Background image is handled inline in the JS file */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     font-family: Arial, sans-serif;
 }
 
+/* --- THE WHITE CARD --- */
+/* --- THE WHITE CARD --- */
 .login-box {
-    background: #1e222b;
-    border: 2px solid #333;
-    border-top: 4px solid #00bcd4;
-    border-radius: 8px;
+    background: #ffffff;
+    border-radius: 12px;
     width: 100%;
-    max-width: 380px; /* Keeps your original width */
-    /* FIX: Responsive padding. Shrinks when the screen is short */
-    padding: clamp(20px, 3vh, 40px) clamp(20px, 3vw, 30px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    max-width: 400px; 
+    
+    /* 🚀 ADD THIS LINE TO PUSH IT RIGHT */
+    margin-left: clamp(60px, 10vw, 1600px); /* Adjust the 6vw higher if you want it further right! */
+
+    box-shadow: 0 25px 50px rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
-    /* FIX: Force it to never be taller than 95% of the screen */
     max-height: 95vh; 
     overflow-y: auto; 
     box-sizing: border-box;
+    overflow: hidden; 
 }
 
-.login-header {
-    text-align: center;
-    margin-bottom: clamp(10px, 2vh, 15px); /* Responsive gap */
+/* --- BLUE HEADER WITH IMAGE LOGO --- */
+.login-header-blue {
+    background: #194ba0; /* Matched to the dark blue of your logo background */
+    padding: 25px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.login-title {
-    color: #00bcd4;
+.login-logo-img {
+    width: 100%;
+    max-width: 220px; /* Prevents the logo from getting too massive */
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+/* --- MAIN CARD BODY --- */
+.login-body {
+    padding: 30px 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- BLOCKY "CONTROLLER AUTHENTICATION" HEADING --- */
+.auth-heading-container {
+    border-left: 6px solid #415add; /* Blue bar matching the mockup */
+    padding-left: 15px;
+    margin-bottom: 30px;
+}
+
+.auth-heading {
+    color: #111;
     margin: 0;
-    font-size: 2.2rem;
+    font-size: 1.4rem;
     font-weight: 900;
-    letter-spacing: 3px;
-    font-family: Impact, sans-serif;
+    letter-spacing: 2px;
+    font-family: 'Courier New', Courier, monospace; 
+    text-transform: uppercase;
+    line-height: 1.3;
 }
 
-.login-subtitle {
-    color: #888;
-    font-size: 0.9rem;
-    font-weight: bold;
-    letter-spacing: 6px;
-    margin-top: 5px;
-}
-
-.login-divider {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #444, transparent);
-    margin: clamp(10px, 2vh, 20px) 0; /* Responsive gap */
-}
-
-.login-prompt {
-    color: #fff;
-    text-align: center;
-    font-size: clamp(0.9rem, 1.5vh, 1.1rem); /* Responsive text */
-    letter-spacing: 1.5px;
-    margin-bottom: clamp(15px, 3vh, 25px); /* Responsive gap */
-}
-
-.login-error {
-    background: rgba(229, 57, 53, 0.2);
-    color: #ff5252;
-    border: 1px solid #ff5252;
-    padding: clamp(8px, 1.5vh, 10px);
-    border-radius: 4px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 0.85rem;
-    margin-bottom: clamp(10px, 2vh, 20px);
-    letter-spacing: 0.5px;
-}
-
+/* --- INPUTS & LABELS --- */
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: clamp(10px, 2vh, 20px); /* Reduces space between inputs on small screens */
+    gap: 15px; 
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: clamp(4px, 1vh, 8px);
+    gap: 6px;
 }
 
 .input-group label {
-    color: #aaa;
-    font-size: 0.8rem;
-    font-weight: bold;
-    letter-spacing: 1px;
+    color: #194ba0; /* Dark blue labels */
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
 }
 
-.input-group input, 
-.input-group select {
-    background: #111;
-    border: 1px solid #444;
-    color: #fff;
-    /* FIX: Inputs scale down from 45px to 35px if screen is short */
-    height: clamp(35px, 5vh, 45px); 
-    padding: 0 12px;
+.input-group input[type="text"], 
+.input-group input[type="password"] {
+    background: #f9fafb; 
+    border: 1px solid #d1d5db; 
+    color: #111;
+    height: 45px; 
+    padding: 0 15px;
     box-sizing: border-box;
     font-size: 1rem;
-    border-radius: 4px;
+    border-radius: 6px;
     outline: none;
-    font-weight: bold;
+    font-weight: 600;
     transition: 0.2s;
 }
 
-.input-group input:focus, 
-.input-group select:focus {
-    border-color: #00bcd4;
-    box-shadow: 0 0 8px rgba(0, 188, 212, 0.3);
+.input-group input:focus {
+    border-color: #194ba0;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(25, 75, 160, 0.2);
 }
 
-.login-submit-btn {
-    background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%);
-    color: white;
-    border: 1px solid #111;
-    padding: clamp(10px, 2vh, 15px); /* Responsive padding */
-    font-size: 1.1rem;
-    font-weight: 900;
-    border-radius: 4px;
+/* --- RADIO BUTTONS --- */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333; 
+    font-weight: bold;
+    font-size: 0.95rem;
     cursor: pointer;
-    letter-spacing: 1.5px;
-    margin-top: clamp(5px, 1.5vh, 10px); /* Responsive gap */
-    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.2), 0 4px 6px rgba(0,0,0,0.6);
+}
+
+.radio-label input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #194ba0; 
+    cursor: pointer;
+    
+    /* 🚀 ADD THESE TO REMOVE THE BROWSER SHADOW */
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* 🚀 ADD THIS NEW BLOCK TO KILL THE FOCUS RING COMPLETELY */
+.radio-label input[type="radio"]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* --- LOGIN BUTTON --- */
+.login-submit-btn {
+    background: #194ba0; 
+    color: white;
+    border: none;
+    padding: 15px; 
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    margin-top: 15px; 
     transition: 0.1s;
 }
 
 .login-submit-btn:hover {
-    background: linear-gradient(180deg, #43a047 0%, #145014 100%);
+    background: #11367a; 
 }
 
 .login-submit-btn:active {
-    transform: translateY(2px);
-    box-shadow: none;
+    transform: scale(0.98);
+}
+
+.btn-disabled { background: #9ca3af !important; cursor: not-allowed !important; }
+
+/* --- LIGHT THEME ALERTS --- */
+.login-error {
+    background: rgba(229, 57, 53, 0.1);
+    color: #d32f2f;
+    border: 1px solid #ff5252;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.login-warning {
+    background: rgba(255, 152, 0, 0.1);
+    color: #e65100;
+    border: 1px solid #ff9800;
+    border-left: 5px solid #ff9800;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
 }
 
 .login-waiting {
-    background: rgba(0, 188, 212, 0.1);
-    color: #00bcd4;
-    border: 1px solid #00bcd4;
-    padding: clamp(10px, 2vh, 15px);
-    border-radius: 4px;
+    background: rgba(25, 75, 160, 0.1);
+    color: #194ba0;
+    border: 1px solid #194ba0;
+    padding: 15px;
+    border-radius: 6px;
     text-align: center;
     font-weight: bold;
     font-size: 0.9rem;
-    margin-bottom: clamp(10px, 2vh, 20px);
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    animation: pulseBorder 1.5s infinite;
 }
 
 .spinner {
     width: 24px; height: 24px;
-    border: 3px solid rgba(0, 188, 212, 0.3);
-    border-top: 3px solid #00bcd4;
+    border: 3px solid rgba(25, 75, 160, 0.3);
+    border-top: 3px solid #194ba0;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-@keyframes pulseBorder { 0% { box-shadow: 0 0 0 rgba(0,188,212,0); } 50% { box-shadow: 0 0 10px rgba(0,188,212,0.5); } 100% { box-shadow: 0 0 0 rgba(0,188,212,0); } }
-
-.btn-disabled { background: #555 !important; color: #aaa !important; cursor: not-allowed !important; box-shadow: none !important; }
-
-/* NEW: ROLE SELECTION BUTTONS */
-.role-btn-group {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
-
-.role-btn {
-    flex: 1;
-    background: #111;
-    color: #888;
-    border: 2px solid #333;
-    padding: clamp(8px, 1.5vh, 12px) 0; /* Responsive padding */
-    font-size: 0.9rem;
-    font-weight: 900;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: 0.2s;
-    letter-spacing: 1px;
-}
-
-.role-btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.role-active {
-    background: rgba(0, 188, 212, 0.1);
-    color: #00bcd4;
-    border-color: #00bcd4;
-    box-shadow: inset 0 0 10px rgba(0, 188, 212, 0.2);
-}
-
-/* NEW: SAFETY LOCK HAZARD WARNING */
-.login-warning {
-    background: rgba(255, 152, 0, 0.15);
-    color: #FFB300;
-    border: 2px solid #FF9800;
-    border-left: 6px solid #FF9800;
-    padding: clamp(8px, 1.5vh, 12px);
-    border-radius: 4px;
-    text-align: center;
-    font-weight: 900;
-    font-size: 0.85rem;
-    margin-bottom: clamp(10px, 2vh, 20px);
-    letter-spacing: 0.5px;
-    line-height: 1.4;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-    animation: hazardFlash 2s infinite;
-}
-
-@keyframes hazardFlash {
-    0% { border-color: #FF9800; box-shadow: 0 0 5px rgba(255, 152, 0, 0.2); }
-    50% { border-color: #FFC107; box-shadow: 0 0 15px rgba(255, 193, 7, 0.6); }
-    100% { border-color: #FF9800; box-shadow: 0 0 5px rgba(255, 152, 0, 0.2); }
-}
