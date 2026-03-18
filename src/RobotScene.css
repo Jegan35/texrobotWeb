@@ -19,17 +19,19 @@
 
 /* --- JOINTS PANEL (RIGHT SIDE) --- */
 /* --- JOINTS PANEL (RIGHT SIDE) --- */
+/* --- JOINTS PANEL (RIGHT SIDE) --- */
+/* --- JOINTS PANEL (RIGHT SIDE) --- */
 .rs-joints-panel {
     position: absolute;
     top: 0;
     right: 0;
-    width: 100px; 
+    /* 🚀 KEEPING 110px to perfectly match the Cartesian right offset! */
+    width: 110px; 
     bottom: 0;
     background-color: rgb(2, 238, 255); 
     backdrop-filter: blur(8px);
-    /* STRONG INDUSTRIAL BORDER */
     border-left: 4px solid #111;
-    box-sizing: border-box; /* Prevents the border from changing the 100px width */
+    box-sizing: border-box; 
     z-index: 10;
     display: flex;
     flex-direction: column;
@@ -38,54 +40,67 @@
     pointer-events: none;
 }
 
-.rs-joints-header {
-    color:black;
-    font-size: 1rem;
-    font-family: 'Arial Narrow';
-    font-weight: 900;
-    letter-spacing: 1px;
-    margin-top: 15px;
-}
-
 .rs-joints-list {
     display: flex;
     flex-direction: column;
     width: 100%;
     flex: 1;
     justify-content: space-evenly;
-    margin-bottom: 100px; /* Adjusted to match new bottom indicator height */
+    /* 🚀 KEEPING 90px to match SYS OK and Cartesian perfectly! */
+    margin-bottom: 90px; 
+}
+
+.rs-joints-header {
+    color: black;
+    /* 🚀 Dynamically shrinks on shorter screens */
+    font-size: clamp(1rem, 1.8vh, 1rem); 
+    font-family: 'Arial Narrow';
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-top: clamp(5px, 2vh, 15px);
 }
 
 .rs-joint-item {
     text-align: center;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 🚀 Dynamic gap prevents the J1 label and 0.00 value from colliding */
+    gap: clamp(0px, 0.5vh, 2px); 
 }
 
 .rs-joint-label {
     color: black;
-    font-size: 1.4rem;
+    /* 🚀 Scales down cleanly on tablets based on screen height */
+    font-size: clamp(1.5rem, 2vh, 1.4rem); 
     font-weight: 900;
-    margin-bottom: 2px;
+    margin-bottom: 0; 
+    white-space: nowrap; /* Forces it to stay on one line */
 }
 
 .rs-joint-value {
-    color:  black;
-    font-size : 1.8rem;
-    font-weight : 900;
+    color: black;
+    /* 🚀 Drastically scales down on short screens so J1-J6 NEVER overlap */
+    font-size: clamp(1.5rem, 2.5vh, 1.8rem); 
+    font-weight: 900;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-
+/* --- SYSTEM INDICATOR BULB --- */
 /* --- SYSTEM INDICATOR BULB --- */
 /* --- SYSTEM INDICATOR BULB --- */
 .rs-sys-indicator-panel {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 100px; 
+    /* 🚀 Locked to 90px so the border perfectly aligns with Cartesian */
+    height: 90px; 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* STRONG INDUSTRIAL BORDER */
     border-top: 4px solid #111;
     box-sizing: border-box;
 }
@@ -166,47 +181,50 @@
 /* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
 /* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
 /* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
+/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
+/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
 .rs-cartesian-panel {
     position: absolute;
     bottom: 0;
     left: 0;
-    right: 100px; /* Meets the 100px Joints panel width perfectly */
-    height: 100px; 
+    /* 🚀 EXACTLY matches the Joints panel width (110px) */
+    right: 110px; 
+    /* 🚀 EXACTLY matches the SYS OK height (90px) */
+    height: 90px; 
+    
     background-color: rgb(2, 238, 255); 
     backdrop-filter: blur(8px);
-    
-    /* ONLY KEEP THE TOP BORDER */
     border-top: 4px solid #111;
-    /* (I removed the border-right here so it doesn't double-stack!) */
-    
+    border-right: none !important; 
     box-sizing: border-box; 
     z-index: 10;
     display: flex;
     align-items: center;
-    padding: 0 15px;
+    padding: 0 clamp(5px, 1.5vw, 15px); 
     user-select: none;
     pointer-events: none;
 }
-/* THIS CONTROLS THE WORD "CARTESIAN" ON THE LEFT */
+
 /* THIS CONTROLS THE WORD "CARTESIAN" ON THE LEFT */
 .rs-cartesian-title {
     color: black; 
     font-family: "Arial Narrow"; 
     font-weight: 900;
-    font-size: 1rem; /* Slightly larger */
-    letter-spacing: 2px;
-    margin-right: 15px; /* Added more space between title and X(mm) */
+    font-size: clamp(0.7rem, 1.2vw, 1rem); /* 🚀 Shrinks word size on tablet */
+    letter-spacing: clamp(0.5px, 0.2vw, 2px);
+    margin-right: clamp(5px, 1vw, 15px); /* 🚀 Pulls it closer to the numbers on tablet */
     flex-shrink: 0;
 }
 
 /* CHANGED FROM GRID TO FLEX FOR PERFECT SPACING */
 .rs-cartesian-grid {
     display: flex;
-    justify-content: space-between; /* Spreads X, Y, Z, A, B, C evenly across the bar */
+    justify-content: space-between; 
     flex: 1;
     align-items: center;
     min-width: 0;
-    padding-right: 20px; /* Keeps them from touching the SYS OK button */
+    gap: clamp(2px, 0.5vw, 15px); /* 🚀 Squeezes the XYZ items closer on small screens */
+    padding-right: clamp(5px, 1vw, 20px); 
 }
 
 /* Individual X, Y, Z containers */
@@ -214,15 +232,15 @@
     text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Ensures label and value are perfectly centered over each other */
-    min-width: 60px; /* Gives each number room to breathe */
+    align-items: center; 
+    min-width: unset; /* 🚀 REMOVED the hardcoded 60px so they can shrink naturally! */
 }
 
 /* THIS CONTROLS THE "X(mm)", "Y(mm)", "A(°)", ETC. */
 .rs-cartesian-label {
     color: black; 
     font-family: "Arial Narrow", Arial, sans-serif; 
-    font-size: 1.4rem; 
+    font-size: clamp(0.75rem, 1.2vw, 1.4rem); /* 🚀 Dynamic font size */
     margin-bottom: 2px;
     font-weight: 900;
     white-space: nowrap;
@@ -231,11 +249,10 @@
 /* THE NUMBERS (0.00) */
 .rs-cartesian-value {
     color: black !important; 
-    font-size: 1.8rem; 
+    font-size: clamp(0.9rem, 1.5vw, 1.8rem); /* 🚀 Dynamic font size */
     font-weight: 900;
     font-family: "Arial Narrow", Arial, sans-serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* REMOVED margin-right: -10px; which was breaking the layout */
 }

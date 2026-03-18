@@ -98,18 +98,18 @@ function AppContent() {
         {/* LEFT PANEL */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', borderRight: '2px solid #333' }}>
           
-          {/* --- UPDATED TOP HEADER (3-COLUMN LAYOUT) --- */}
-          <div style={{ height: '40px', flexShrink: 0, backgroundColor: '#151822', borderBottom: '2px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' }}>
+          {/* --- DYNAMIC TOP HEADER --- */}
+          <div style={{ height: 'clamp(40px, 6vh, 50px)', flexShrink: 0, backgroundColor: '#151822', borderBottom: '2px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 clamp(10px, 2vw, 20px)', overflow: 'hidden', gap: '10px' }}>
             
             {/* 1. LEFT: BRANDING */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
-                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.5rem', letterSpacing: '1.5px', fontFamily: 'Impact, sans-serif' }}>TEXSONICS</div>
+            {/* flexShrink: 1 allows it to give up space if needed on tiny screens */}
+            <div style={{ display: 'flex', justifyContent: 'flex-start', flexShrink: 1, minWidth: 0 }}>
+                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(1rem, 2vw, 1.5rem)', letterSpacing: '1px', fontFamily: 'Impact, sans-serif', whiteSpace: 'nowrap' }}>TEXSONICS</div>
             </div>
 
            {/* 2. CENTER: GREEN ROLE INDICATOR */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                
-                {/* INJECTING CSS DIRECTLY HERE SO IT CAN NEVER FAIL */}
+           {/* flexShrink: 0 ensures this beautiful badge NEVER gets squished */}
+            <div style={{ display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
                 <style>
                     {`
                     @keyframes blinkBulb {
@@ -118,11 +118,11 @@ function AppContent() {
                         100% { opacity: 1; box-shadow: 0 0 6px #00E676, 0 0 12px #00E676; }
                     }
                     .live-blink-dot {
-                        width: 10px;
-                        height: 10px;
+                        width: clamp(8px, 1vw, 12px);
+                        height: clamp(8px, 1vw, 12px);
                         background-color: #00E676;
                         border-radius: 50%;
-                        margin-right: 8px;
+                        margin-right: clamp(6px, 1vw, 10px);
                         animation: blinkBulb 1.5s ease-in-out infinite;
                         flex-shrink: 0;
                     }
@@ -132,21 +132,20 @@ function AppContent() {
                 <div style={{ 
                     backgroundColor: '#0a0c11', 
                     border: '2px solid #00E676', 
-                    borderRadius: '0px', 
-                    padding: '4px 15px', 
+                    borderRadius: '4px', 
+                    padding: 'clamp(4px, 0.5vh, 6px) clamp(10px, 1.5vw, 20px)', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    boxShadow: 'inset 0 0 8px rgba(0, 230, 118, 0.1), 0 0 5px rgba(0, 230, 118, 0.3)' 
+                    boxShadow: 'inset 0 0 8px rgba(0, 230, 118, 0.1), 0 0 5px rgba(0, 230, 118, 0.3)',
+                    whiteSpace: 'nowrap'
                 }}>
-                    {/* The Blinking Dot */}
                     <div className="live-blink-dot"></div>
-                    
                     <span style={{ 
                         color: '#fff', 
                         fontWeight: '1000', 
-                        fontSize: '1.5rem', 
-                        letterSpacing: '2px',
+                        fontSize: 'clamp(0.9rem, 1.5vw, 1.3rem)', 
+                        letterSpacing: '1px',
                         textShadow: 'none', 
                         WebkitFontSmoothing: 'antialiased', 
                         lineHeight: '1',
@@ -156,9 +155,11 @@ function AppContent() {
                     </span>
                 </div>
             </div>
+
             {/* 3. RIGHT: VERSION */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '0.5px' }}>ROBOT CONTROLLER V1.0</div>
+            {/* flexShrink: 1 allows it to give up space gracefully */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', flexShrink: 1, minWidth: 0 }}>
+                <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: 'clamp(0.6rem, 1.2vw, 0.85rem)', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>ROBOT CONTROLLER V1.0</div>
             </div>
 
           </div>
