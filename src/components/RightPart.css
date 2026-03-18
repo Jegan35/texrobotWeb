@@ -300,33 +300,47 @@
 .joints-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
 
 /* REMOVED THE DARK RED BACKGROUND SO IT MATCHES THE CARTESIAN TAB */
+/* --- REDUCED VERTICAL PADDING TO FIT 6 ROWS --- */
+/* 🚀 REMOVED VERTICAL PADDING COMPLETELY TO SQUEEZE ROWS */
 .joint-industrial-block { 
-    display: flex; align-items: center; justify-content: center; gap: clamp(15px, 2vw, 30px); 
-    padding: clamp(8px, 1.5vh, 12px) clamp(10px, 1.5vw, 20px); 
+    display: flex; align-items: center; justify-content: center; 
+    gap: clamp(20px, 4vw, 50px); 
+    padding: 0px clamp(10px, 1.5vw, 20px); /* 0px top and bottom! */
     width: max-content; margin: 0 auto; 
-    background: transparent; /* Changed from red to transparent to match D-Pad style */
+    background: transparent; 
     box-sizing: border-box; 
 }
-
 .jib-label { 
-    color: #fff; font-weight: 900; font-size: clamp(1.4rem, 1.8vw, 2rem); 
-    width: 50px; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
+    color: #fff; 
+    font-weight: 900; 
+    
+    /* 🚀 INCREASE THIS FONT SIZE! */
+    /* You can make the clamp numbers bigger, like this: */
+    font-size: clamp(2rem, 3vw, 3rem); 
+    
+    /* OR, if you just want a fixed massive size, delete the clamp and use pixels: */
+    /* font-size: 40px; */
+
+    /* If the text gets too big and starts wrapping, increase this width too! */
+    width: 80px; 
+
+    text-align: center; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
 }
 
-/* JOG BUTTONS NOW MATCH MASSIVE CYAN D-PAD BUTTONS */
-/* JOG BUTTONS NOW MATCH MASSIVE CYAN D-PAD BUTTONS */
+/* 🚀 REDUCED HEIGHT SO ALL 6 FIT WITHOUT SCROLLING */
 .jib-btn { 
-    width: clamp(75px, 9vw, 110px); 
-    height: clamp(60px, 8vh, 85px); 
+    width: clamp(90px, 12vw, 150px); 
+    height: clamp(60px, 8vh, 60px); /* Lowered the max height to 50px */
     background: rgb(2, 238, 255); 
     border: 2px solid #111; 
-    border-radius: 16px; 
+    border-radius: 10px; /* Slightly tighter curves for shorter buttons */
     font-weight: 900; 
-    font-size: clamp(3rem, 1.8vw, 2rem); 
-    color: black !important; /* FORCED PURE BLACK */
-    text-shadow: none !important; /* REMOVES ANY CONFLICTING SHADOWS */
+    font-size: clamp(3.5rem, 2vw, 2.5rem); 
+    color: black !important; 
+    text-shadow: none !important; 
     cursor: pointer; 
-    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6), 0 6px 8px rgba(0,0,0,0.5); 
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6), 0 4px 6px rgba(0,0,0,0.5); 
     transition: 0.1s; 
     display: flex; align-items: center; justify-content: center; 
     -webkit-touch-callout: none !important; user-select: none !important;
@@ -338,7 +352,6 @@
     box-shadow: inset 2px 2px 6px rgba(0,0,0,0.8); 
 }
 
-/* OVERRIDE TO BLOCK WHITE TEXT-POS/NEG CLASSES ON THESE SPECIFIC BUTTONS */
 .jib-btn.text-pos, .jib-btn.text-neg {
     color: black !important;
     text-shadow: none !important;

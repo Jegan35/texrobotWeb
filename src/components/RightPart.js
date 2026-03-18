@@ -583,59 +583,47 @@ const RightPart = () => {
     </div>
   );
 
+// 1. ADD THIS FUNCTION RIGHT ABOVE renderJogPanel TO FIX THE ERROR
+  const handleHomeClick = () => {
+      console.log("HOME button clicked!");
+      // Add your robot's home API call here later, for example:
+      // if (ws) ws.send(JSON.stringify({ command: 'HOME' }));
+  };
+
+  // 2. THE FULLY UPDATED JOG PANEL
 const renderJogPanel = () => {
     if (isJoints) {
         return (
           <div className="jog-panel-container">
-            <div className="joints-two-col-layout">
-              <div className="joints-col">
-                 <div className="joints-col-title">BASE / ARM</div>
-                 {['J1', 'J2', 'J3'].map(id => {
-                     const ax = { id, m: `${id}-`, p: `${id}+` };
-                     return (
-                         <div key={ax.id} className="joint-industrial-block">
-                             {/* CHANGED VISUAL TEXT TO JUST "-" */}
-                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>-</button>
-                             
-                             <div className="jib-label">{ax.id}</div>
-                             
-                             {/* CHANGED VISUAL TEXT TO JUST "+" */}
-                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>+</button>
-                         </div>
-                     )
-                 })}
-              </div>
-              
-              <div className="joints-divider">
-                  <div className="divider-badge">JOINTS</div>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(8px, 1.5vh, 15px)', width: '100%', margin: 'auto 0' }}>
+               
+               {/* 🚀 ADDED THE JOINTS TITLE AT THE TOP CENTER */}
+               <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.2rem', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '5px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                   JOINTS
+               </div>
 
-              <div className="joints-col">
-                 <div className="joints-col-title">WRIST</div>
-                 {['J4', 'J5', 'J6'].map(id => {
-                     const ax = { id, m: `${id}-`, p: `${id}+` };
-                     return (
-                         <div key={ax.id} className="joint-industrial-block">
-                             {/* CHANGED VISUAL TEXT TO JUST "-" */}
-                             <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>-</button>
-                             
-                             <div className="jib-label">{ax.id}</div>
-                             
-                             {/* CHANGED VISUAL TEXT TO JUST "+" */}
-                             <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>+</button>
-                         </div>
-                     )
-                 })}
-              </div>
+               {['J1', 'J2', 'J3', 'J4', 'J5', 'J6'].map(id => {
+                   const ax = { id, m: `${id}-`, p: `${id}+` };
+                   return (
+                       <div key={ax.id} className="joint-industrial-block">
+                           <button className="jib-btn text-neg" onPointerDown={()=>handlePointerDown(ax.m)} onPointerUp={()=>handlePointerUp(ax.m)} onPointerLeave={()=>handlePointerUp(ax.m)}>-</button>
+                           
+                           <div className="jib-label">{ax.id}</div>
+                           
+                           <button className="jib-btn text-pos" onPointerDown={()=>handlePointerDown(ax.p)} onPointerUp={()=>handlePointerUp(ax.p)} onPointerLeave={()=>handlePointerUp(ax.p)}>+</button>
+                       </div>
+                   )
+               })}
             </div>
           </div>
         );
-    } else {
+// ... rest of the code ...
+} else {
         return (
-          <div className="jog-panel-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px', position: 'relative' }}>
+          <div className="jog-panel-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', position: 'relative' }}>
             
             {/* --- PREMIUM TOGGLE SWITCH (PINNED TO TOP LEFT) --- */}
-            <div style={{ position: 'absolute', top: '20px', left: '20px', display: 'flex', background: '#111', borderRadius: '8px', padding: '4px', border: '1px solid #333', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)' }}>
+            <div style={{ position: 'absolute', top: '20px', left: '20px', display: 'flex', background: '#111', borderRadius: '8px', padding: '4px', border: '1px solid #333', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)', zIndex: 10 }}>
                 <div 
                     onClick={() => setDpadMode('TRANSLATION')}
                     style={{ padding: '8px 20px', cursor: 'pointer', borderRadius: '4px', fontWeight: '900', fontSize: '0.9rem', transition: '0.2s', background: dpadMode === 'TRANSLATION' ? '#00bcd4' : 'transparent', color: dpadMode === 'TRANSLATION' ? '#111' : '#888', boxShadow: dpadMode === 'TRANSLATION' ? '0 2px 5px rgba(0,0,0,0.5)' : 'none' }}
@@ -651,31 +639,32 @@ const renderJogPanel = () => {
             </div>
 
             {/* --- DYNAMIC UNIFIED D-PAD --- */}
-            <div className="dpad-two-col-layout" style={{ paddingTop: '20px', paddingRight: '0' }}>
-                <div className="dpad-col">
-                    <div className="dpad-cross">
-                        <button className="dpad-btn dpad-up text-pos" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+')}>{dpadMode === 'TRANSLATION' ? 'Y+' : 'Ry+'}</button>
-                        <button className="dpad-btn dpad-left text-neg" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-')}>{dpadMode === 'TRANSLATION' ? 'X-' : 'Rx-'}</button>
-                        
-                        {/* --- HOME BUTTON IN CENTER --- */}
-                        <div className="dpad-center" onClick={() => sendCommand('HOME')} title="Return to Home Position">
-                            <span className="home-icon-span">HOME</span>
-                        </div>
-                        
-                        <button className="dpad-btn dpad-right text-pos" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+')}>{dpadMode === 'TRANSLATION' ? 'X+' : 'Rx+'}</button>
-                        <button className="dpad-btn dpad-down text-neg" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-')}>{dpadMode === 'TRANSLATION' ? 'Y-' : 'Ry-'}</button>
-                        
-                        <button className="dpad-btn dpad-z-up text-pos" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+')}>{dpadMode === 'TRANSLATION' ? 'Z+' : 'Rz+'}</button>
-                        <button className="dpad-btn dpad-z-down text-neg" onPointerDown={()=>handlePointerDown(dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz-')} onPointerUp={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz-')} onPointerLeave={()=>handlePointerUp(dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz+')}>{dpadMode === 'TRANSLATION' ? 'Z-' : 'Rz-'}</button>
+            <div className="dpad-two-col-layout" style={{ paddingTop: '10px', paddingRight: '0' }}>
+                <div className="dpad-cross">
+                    {/* 🚀 CHANGED ROTATION LABELS TO Rx, Ry, Rz */}
+                    
+                    {/* Y AXIS / Ry */}
+                    <button className="dpad-btn dpad-up" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Y+':'Ry+')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y+':'Ry+')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y+':'Ry+')}>{dpadMode==='TRANSLATION'?'Y+':'Ry+'}</button>
+                    <button className="dpad-btn dpad-down" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Y-':'Ry-')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y-':'Ry-')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y-':'Ry-')}>{dpadMode==='TRANSLATION'?'Y-':'Ry-'}</button>
+                    
+                    {/* X AXIS / Rx */}
+                    <button className="dpad-btn dpad-left" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'X-':'Rx-')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X-':'Rx-')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X-':'Rx-')}>{dpadMode==='TRANSLATION'?'X-':'Rx-'}</button>
+                    <button className="dpad-btn dpad-right" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'X+':'Rx+')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X+':'Rx+')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X+':'Rx+')}>{dpadMode==='TRANSLATION'?'X+':'Rx+'}</button>
+                    
+                    {/* HOME BUTTON */}
+                    <div className="dpad-center" onClick={handleHomeClick}>
+                        <span className="home-icon-span">HOME</span>
                     </div>
+
+                    {/* Z AXIS / Rz */}
+                    <button className="dpad-btn dpad-z-up" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Z+':'Rz+')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z+':'Rz+')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z+':'Rz+')}>{dpadMode==='TRANSLATION'?'Z+':'Rz+'}</button>
+                    <button className="dpad-btn dpad-z-down" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Z-':'Rz-')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z-':'Rz-')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z-':'Rz-')}>{dpadMode==='TRANSLATION'?'Z-':'Rz-'}</button>
                 </div>
             </div>
-
           </div>
         );
     }
-}
-  
+  };
   return (
     <>
       {/* SETTINGS OVERLAY */}
