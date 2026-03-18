@@ -827,7 +827,7 @@ const renderJogPanel = () => {
                 {/* --- WHEN OPEN: JOG / SPEED TAKES FULL SPACE --- */}
                 {isTopPanelOpen ? (
                     <div className="rp-row-1" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', minHeight: 0 }}>
-                        <div className="rp-content-col" style={{ display: 'flex', flex: 1, position: 'relative', width: '100%' }}>
+                        <div className="rp-content-col" style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', minHeight: 0 }}>
                             
                             {/* GUARANTEED VISIBLE BACK BUTTON */}
                             <button 
@@ -844,8 +844,8 @@ const renderJogPanel = () => {
                                 ◀ BACK
                             </button>
 
-                            {/* The tools render cleanly without any blurry overlays */}
-                            <div className={`rp-panel-full ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`}>
+                            {/* 🚀 ADDED overflowY: 'auto' so if it DOES get tight, you can easily scroll to the bottom buttons */}
+                            <div className={`rp-panel-full ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`} style={{ overflowY: 'auto' }}>
                                 {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : 
                                  renderJogPanel()}
                             </div>

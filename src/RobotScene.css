@@ -19,17 +19,16 @@
 
 /* --- JOINTS PANEL (RIGHT SIDE) --- */
 /* --- JOINTS PANEL (RIGHT SIDE) --- */
-/* --- JOINTS PANEL (RIGHT SIDE) --- */
-/* --- JOINTS PANEL (RIGHT SIDE) --- */
 .rs-joints-panel {
     position: absolute;
     top: 0;
     right: 0;
-    /* 🚀 KEEPING 110px to perfectly match the Cartesian right offset! */
     width: 110px; 
     bottom: 0;
-    background-color: rgb(2, 238, 255); 
-    backdrop-filter: blur(8px);
+    
+    /* 🚀 Pure transparent grey - NO BLUR */
+    background-color: rgba(43, 48, 59, 0.75); 
+    
     border-left: 4px solid #111;
     box-sizing: border-box; 
     z-index: 10;
@@ -46,14 +45,13 @@
     width: 100%;
     flex: 1;
     justify-content: space-evenly;
-    /* 🚀 KEEPING 90px to match SYS OK and Cartesian perfectly! */
     margin-bottom: 90px; 
 }
 
 .rs-joints-header {
-    color: black;
-    /* 🚀 Dynamically shrinks on shorter screens */
-    font-size: clamp(1rem, 1.8vh, 1rem); 
+    /* 🚀 CHANGED TO WHITE SO IT'S READABLE ON GREY */
+    color: white;
+    font-size: clamp(1.3rem, 1.8vh, 1rem); 
     font-family: 'Arial Narrow';
     font-weight: 900;
     letter-spacing: 1px;
@@ -66,41 +64,46 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* 🚀 Dynamic gap prevents the J1 label and 0.00 value from colliding */
     gap: clamp(0px, 0.5vh, 2px); 
 }
 
 .rs-joint-label {
-    color: black;
-    /* 🚀 Scales down cleanly on tablets based on screen height */
+    /* 🚀 LABELS IN RED */
+    color: white;
     font-size: clamp(1.5rem, 2vh, 1.4rem); 
     font-weight: 900;
     margin-bottom: 0; 
-    white-space: nowrap; /* Forces it to stay on one line */
+    white-space: nowrap; 
 }
 
 .rs-joint-value {
-    color: black;
-    /* 🚀 Drastically scales down on short screens so J1-J6 NEVER overlap */
-    font-size: clamp(1.5rem, 2.5vh, 1.8rem); 
+    /* 🚀 VALUES IN GREEN */
+    color: #00E676;
+    font-size: clamp(1.8rem, 2.5vh, 1.8rem); 
     font-weight: 900;
     white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Subtle glow for the green numbers */
+    text-shadow: 0 0 5px rgba(0, 230, 118, 0.3);
 }
+
 /* --- SYSTEM INDICATOR BULB --- */
-/* --- SYSTEM INDICATOR BULB --- */
-/* --- SYSTEM INDICATOR BULB --- */
+/* --- SYSTEM INDICATOR BULB PANEL --- */
 .rs-sys-indicator-panel {
     position: absolute;
     bottom: 0;
     width: 100%;
-    /* 🚀 Locked to 90px so the border perfectly aligns with Cartesian */
     height: 90px; 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    
+    /* 🚀 THE FIX: Make this completely transparent! 
+       It will now perfectly inherit the frosted glass from the Joints panel. */
+    background-color: transparent; 
+    
     border-top: 4px solid #111;
     box-sizing: border-box;
 }
@@ -109,9 +112,11 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #333, #111);
+    
+    /* Replaced black with a soft, clean transparent ring */
+    background: rgba(255, 255, 255, 0.1); 
+    
     padding: 4px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.3);
     position: relative;
 }
 
@@ -138,20 +143,24 @@
     margin-top: 8px;
     letter-spacing: 1px;
 }
-.rs-sys-text.ok { color: #050605; }
+/* 🚀 CHANGED 'OK' TEXT TO WHITE FOR GREY BG */
+.rs-sys-text.ok { color: #ffffff; }
 .rs-sys-text.err { color: #FF3B30; }
 
 /* --- RECENTER BUTTON --- */
 .rs-recenter-btn {
     position: absolute;
-    bottom: 115px; /* MOVED UP to clear the taller Cartesian panel */
+    bottom: 115px; 
     left: 20px;
     z-index: 20;
-    background:black; /* MATCHED to grey theme */
+    
+    /* 🚀 UPDATED RECENTER BUTTON COLORS */
+    background: #1a1e29; 
     backdrop-filter: blur(8px);
     border: 1px solid #00bcd4;
     border-radius: 6px;
     color: #00bcd4;
+    
     padding: 8px 15px;
     font-weight: 900;
     font-size: clamp(1rem, 1vw, 0.85rem);
@@ -179,21 +188,16 @@
 }
 
 /* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
-/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
-/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
-/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
-/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */
 .rs-cartesian-panel {
     position: absolute;
     bottom: 0;
     left: 0;
-    /* 🚀 EXACTLY matches the Joints panel width (110px) */
     right: 110px; 
-    /* 🚀 EXACTLY matches the SYS OK height (90px) */
     height: 90px; 
     
-    background-color: rgb(2, 238, 255); 
-    backdrop-filter: blur(8px);
+    /* 🚀 Pure transparent grey - NO BLUR */
+    background-color: rgba(43, 48, 59, 0.75); 
+    
     border-top: 4px solid #111;
     border-right: none !important; 
     box-sizing: border-box; 
@@ -204,43 +208,41 @@
     user-select: none;
     pointer-events: none;
 }
-
 /* THIS CONTROLS THE WORD "CARTESIAN" ON THE LEFT */
 .rs-cartesian-title {
-    color: black; 
+    /* 🚀 CHANGED TO WHITE SO IT'S READABLE ON GREY */
+    color: #ffffff; 
     font-family: "Arial Narrow"; 
     font-weight: 900;
-    font-size: clamp(0.7rem, 1.2vw, 1rem); /* 🚀 Shrinks word size on tablet */
-    letter-spacing: clamp(0.5px, 0.2vw, 2px);
-    margin-right: clamp(5px, 1vw, 15px); /* 🚀 Pulls it closer to the numbers on tablet */
+    font-size: clamp(1rem, 1.2vw, 1rem); 
+    margin-right: clamp(5px, 1vw, 15px); 
     flex-shrink: 0;
 }
 
-/* CHANGED FROM GRID TO FLEX FOR PERFECT SPACING */
 .rs-cartesian-grid {
     display: flex;
     justify-content: space-between; 
     flex: 1;
     align-items: center;
     min-width: 0;
-    gap: clamp(2px, 0.5vw, 15px); /* 🚀 Squeezes the XYZ items closer on small screens */
+    gap: clamp(2px, 0.5vw, 15px); 
     padding-right: clamp(5px, 1vw, 20px); 
 }
 
-/* Individual X, Y, Z containers */
 .rs-cartesian-item {
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center; 
-    min-width: unset; /* 🚀 REMOVED the hardcoded 60px so they can shrink naturally! */
+    min-width: unset; 
 }
 
 /* THIS CONTROLS THE "X(mm)", "Y(mm)", "A(°)", ETC. */
 .rs-cartesian-label {
-    color: black; 
+    /* 🚀 LABELS IN RED */
+    color: white; 
     font-family: "Arial Narrow", Arial, sans-serif; 
-    font-size: clamp(0.75rem, 1.2vw, 1.4rem); /* 🚀 Dynamic font size */
+    font-size: clamp(1rem, 1.2vw, 1.4rem); 
     margin-bottom: 2px;
     font-weight: 900;
     white-space: nowrap;
@@ -248,11 +250,14 @@
 
 /* THE NUMBERS (0.00) */
 .rs-cartesian-value {
-    color: black !important; 
-    font-size: clamp(0.9rem, 1.5vw, 1.8rem); /* 🚀 Dynamic font size */
+    /* 🚀 VALUES IN GREEN */
+    color: rgb(20, 230, 254) !important; 
+    font-size: clamp(0.9rem, 1.5vw, 1.8rem); 
     font-weight: 900;
     font-family: "Arial Narrow", Arial, sans-serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Subtle glow for the green numbers */
+    text-shadow: 0 0 5px rgba(0, 230, 118, 0.3) !important;
 }

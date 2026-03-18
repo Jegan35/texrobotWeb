@@ -37,22 +37,20 @@
     transition: all 0.3s ease; 
 }
 
-/* --- 2. TABLET ONLY FIX (iPads / 11-inch screens) --- */
+/* --- 2. TABLET ONLY FIX (iPads / 11-inch screens) --- 
 @media (min-width: 768px) and (max-width: 1199px) {
     .login-box {
-        /* 🚀 Shrink the box so it easily fits between the arms */
         max-width: 340px; 
         
-        /* 🚀 Nudge it slightly right into the empty space */
-        transform: translateX(4vw); 
+        transform: translateX(4.5vw); 
     }
-}
+}  */
 
 /* --- 3. DESKTOP ONLY (Big Monitors - Keeps your perfect fix!) --- */
 @media (min-width: 1200px) {
     .login-box {
         max-width: 400px; /* Keeps it full size on desktop */
-        transform: translateX(6vw); /* Slides it right */
+        transform: translateX(1vw); /* Slides it right */
     }
 }
 /* --- BLUE HEADER WITH IMAGE LOGO --- */

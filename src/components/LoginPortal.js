@@ -5,6 +5,7 @@ import './LoginPortal.css';
 const LoginPortal = () => {
     const { loginToRobot, authStatus, authMessage, connectionFailed } = useWebSocket();
     
+    // Set your default IP here
     const [ip, setIp] = useState('192.168.1.36'); 
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
@@ -60,14 +61,16 @@ const LoginPortal = () => {
 
                     <form onSubmit={handleSubmit} className="login-form">
                         
-                        {/* Hidden Server IP Field */}
-                        <div className="input-group" style={{ display: 'none' }}>
+                        {/* 🚀 FIXED: Server IP Field is now VISIBLE */}
+                        <div className="input-group">
                             <label>Server IP</label>
                             <input 
                                 type="text" 
+                                placeholder="Enter Server IP"
                                 value={ip} 
                                 onChange={(e) => setIp(e.target.value)} 
                                 disabled={authStatus === 'waiting_admin'}
+                                required
                             />
                         </div>
 
