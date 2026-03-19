@@ -238,39 +238,93 @@
     gap: clamp(10px, 4vw, 80px); 
     padding-right: clamp(5px, 1vw, 20px); 
 }
-/* 4. THE VERTICAL COLUMNS */
+/* ==============================================================
+   CARTESIAN PANEL - STRICT 20/40/40 PERCENTAGE LAYOUT
+   ============================================================== */
+
+/* 1. MAIN WRAPPER (100% of available space) */
+.rs-cartesian-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 110px; /* Protects the SYS OK bulb area */
+    height: 90px; 
+    background-color: #47A6DE; 
+    border-top: 4px solid #111;
+    border-right: none !important; 
+    box-sizing: border-box; 
+    z-index: 10;
+    display: flex;
+    align-items: stretch; /* Stretches columns to full height for the borders */
+    padding: 0; 
+    user-select: none;
+    pointer-events: none;
+    overflow: hidden; 
+}
+
+/* 2. THE WORD "CARTESIAN" (Exactly 20% Width) */
+.rs-cartesian-title {
+    flex: 0 0 20%; /* 🚀 20% ku strict ah lock panniduchu */
+    width: 20%;
+    color: black; 
+    font-weight: 600; 
+    font-size: clamp(0.8rem, 1.2vw, 1.3rem); /* Auto-scales text */
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center; 
+    justify-content: center; /* Centers perfectly in its 20% box */
+    margin: 0; 
+    padding: 0 5px;
+    box-sizing: border-box;
+    min-width: 0; 
+}
+
+/* 3. CARTESIAN SPLIT CONTAINER (The remaining 80%) */
+.rs-cartesian-split-container {
+    flex: 0 0 80%; /* 🚀 Balance 80% iku eduthukichu */
+    width: 80%;
+    display: flex;
+    align-items: stretch; 
+    gap: 0; /* No gap because borders handle the separation */
+    box-sizing: border-box;
+    min-width: 0; 
+}
+
+/* 4. THE VERTICAL COLUMNS (50% of 80% = Exactly 40% Total Width) */
 .rs-cartesian-col {
+    flex: 0 0 50%; /* 🚀 40-40 ya split aagidum */
+    width: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 1px; 
-    min-width: max-content; 
-    border-left: 3px solid #111; 
-    /* 🚀 Shrunk the side padding so the vertical black borders wrap tighter around the text */
-    padding: 0 clamp(10px, 2vw, 20px); 
+    box-sizing: border-box;
+    border-left: 3px solid #111; /* Solid lines like your drawing */
+    padding: 0 clamp(5px, 2vw, 20px); 
+    min-width: 0; /* CRITICAL: Stops text from breaking the 40% rule */
 }
 
-/* Add a right border to the very last column to cap it off */
+/* Cap off the final column with a right border */
 .rs-cartesian-col:last-child {
     border-right: 3px solid #111; 
 }
 
-/* 5. INDIVIDUAL ROW LAYOUT */
+/* 5. INDIVIDUAL ROW LAYOUT (Inside the 40% blocks) */
 .rs-cart-row {
     display: grid;
-    /* 🚀 THE PERFECT IDEA FIX: Dropped the middle column max width down to 90px.
-       This physically forces the right-aligned numbers much closer to the X, Y, Z labels! */
-    grid-template-columns: 20px clamp(75px, 8vw, 90px) 25px; 
+    /* 🚀 THE FIX: Replaced '1fr' with a clamped width. 
+       This prevents the numbers from floating too far to the right, pulling them tightly towards the labels! */
+    grid-template-columns: 25px clamp(65px, 8vw, 95px) 25px; 
     align-items: baseline; 
-    gap: 4px; 
+    gap: 2px; /* 🚀 Reduced the gap for an ultra-tight fit */
     line-height: 1.15; 
+    min-width: 0; 
 }
 
 /* 6. LABELS (X, Y, Z, A, B, C) */
 .rs-cart-lbl {
     color: black;
-    /* 🚀 Tweaked font size to match the tighter layout */
-    font-size: clamp(1.1rem, 1.4vw, 1.4rem); 
+    /* 🚀 FONT SIZE INCREASED */
+    font-size: clamp(1.2rem, 1.6vw, 1.8rem); 
     font-weight: 600; 
     text-align: left;
 }
@@ -278,20 +332,22 @@
 /* 7. THE NUMBERS */
 .rs-cart-val {
     color: black !important;
-    /* 🚀 Tweaked font size so 4-digit numbers still fit beautifully in the smaller 90px box */
-    font-size: clamp(1.1rem, 1.4vw, 1.4rem); 
+    /* 🚀 FONT SIZE INCREASED */
+    font-size: clamp(1.2rem, 1.6vw, 1.8rem); 
     font-weight: 600; 
     text-align: right; 
     padding-right: 0px; 
     white-space: nowrap;
     text-shadow: 0 0 5px rgba(0, 230, 118, 0.3);
     font-variant-numeric: tabular-nums; 
+    overflow: hidden; 
 }
 
 /* 8. UNITS (mm, °) */
 .rs-cart-unit {
     color: black;
-    font-size: clamp(0.7rem, 0.9vw, 1rem);
+    /* 🚀 FONT SIZE SLIGHTLY INCREASED to match the larger numbers */
+    font-size: clamp(0.8rem, 1vw, 1.1rem);
     font-weight: 600; 
     text-align: left;
     padding-left: 2px;
