@@ -333,25 +333,53 @@ const RobotScene = () => {
         <span className="rs-recenter-icon">🎯</span> RECENTER
       </button>
 
-      {/* --- CARTESIAN PANEL --- */}
+      {/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */}
       <div className="rs-cartesian-panel">
         <div className="rs-cartesian-title">CARTESIAN</div>
         
-        <div className="rs-cartesian-grid">
-          {[ {l: 'X(mm)', v: c.x, clr: '#00bcd4'}, {l: 'Y(mm)', v: c.y, clr: '#00bcd4'}, {l: 'Z(mm)', v: c.z, clr: '#00bcd4'},
-             {l: 'A(°)', v: c.rx, clr: '#fff'}, {l: 'B(°)', v: c.ry, clr: '#fff'}, {l: 'C(°)', v: c.rz, clr: '#fff'} 
-          ].map(item => (
-            <div key={item.l} className="rs-cartesian-item">
-              <div className="rs-cartesian-label">{item.l}</div>
-              {/* Dynamic inline style kept for dynamic color rendering */}
-              <div className="rs-cartesian-value" style={{ color: item.clr }}>
-                {item.v !== undefined ? item.v.toFixed(2) : "0.00"}
-              </div>
+        {/* 🚀 FIXED 2-COLUMN LAYOUT (3 & 3) */}
+        <div className="rs-cartesian-split-container">
+          
+          {/* COLUMN 1: X, Y, Z */}
+          <div className="rs-cartesian-col">
+            <div className="rs-cart-row">
+              <span className="rs-cart-lbl">X</span>
+              <span className="rs-cart-val">{c.x !== undefined ? c.x.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-unit">mm</span>
             </div>
-          ))}
+            <div className="rs-cart-row">
+              <span className="rs-cart-lbl">Y</span>
+              <span className="rs-cart-val">{c.y !== undefined ? c.y.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-unit">mm</span>
+            </div>
+            <div className="rs-cart-row">
+              <span className="rs-cart-lbl">Z</span>
+              <span className="rs-cart-val">{c.z !== undefined ? c.z.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-unit">mm</span>
+            </div>
+          </div>
+
+          {/* COLUMN 2: A, B, C */}
+          <div className="rs-cartesian-col">
+            <div className="rs-cart-row">
+              <span className="rs-cart-lbl">A</span>
+              <span className="rs-cart-val">{c.rx !== undefined ? c.rx.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-unit">°</span>
+            </div>
+            <div className="rs-cart-row">
+              <span className="rs-cart-lbl">B</span>
+              <span className="rs-cart-val">{c.ry !== undefined ? c.ry.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-unit">°</span>
+            </div>
+            <div className="rs-cart-row">
+              <span className="rs-cart-lbl">C</span>
+              <span className="rs-cart-val">{c.rz !== undefined ? c.rz.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-unit">°</span>
+            </div>
+          </div>
+
         </div>
       </div>
-
       {/* --- 3D CANVAS --- */}
       <div className="rs-canvas-container">
         <Canvas camera={{ position: [0, -6500, 3000], up: [0, 0, 1], fov: 45, near: 1, far: 30000 }}>

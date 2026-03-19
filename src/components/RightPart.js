@@ -639,7 +639,9 @@ const renderJogPanel = () => {
             </div>
 
             {/* --- DYNAMIC UNIFIED D-PAD --- */}
-            <div className="dpad-two-col-layout" style={{ paddingTop: '10px', paddingRight: '0' }}>
+            {/* --- DYNAMIC UNIFIED D-PAD --- */}
+{/* 🚀 THE FIX: Conditionally applies compact mode for Programmer, and massive mode for Operator! */}
+<div className={`dpad-two-col-layout ${userRole === 'Programmer' ? 'dpad-compact' : 'dpad-large'}`}>
                 <div className="dpad-cross">
                     {/* 🚀 CHANGED ROTATION LABELS TO Rx, Ry, Rz */}
                     

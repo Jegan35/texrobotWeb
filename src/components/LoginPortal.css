@@ -136,38 +136,68 @@
 }
 
 /* --- RADIO BUTTONS --- */
+/* --- RADIO BUTTONS WRAPPER --- */
 .radio-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     margin-top: 5px;
 }
 
+/* 🚀 THE FIX: Forces the circle and text to sit perfectly side-by-side */
 .radio-label {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: row;      /* Locks them in a horizontal line */
+    align-items: center;      /* Centers them vertically */
+    gap: 10px;                /* Space between circle and text */
     color: #333; 
     font-weight: bold;
     font-size: 0.95rem;
     cursor: pointer;
 }
 
+/* --- CUSTOM MODERN RADIO BUTTONS --- */
 .radio-label input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #47A6DE; 
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #ccc; 
+    background-color: #fff;
     cursor: pointer;
-    
-    /* 🚀 ADD THESE TO REMOVE THE BROWSER SHADOW */
+    margin: 0;
+    display: grid;
+    place-content: center;
+    transition: all 0.2s ease-in-out;
     outline: none !important;
     box-shadow: none !important;
+    flex-shrink: 0; /* 🚀 Prevents the circle from turning into an oval */
 }
 
-/* 🚀 ADD THIS NEW BLOCK TO KILL THE FOCUS RING COMPLETELY */
-.radio-label input[type="radio"]:focus {
-    outline: none !important;
-    box-shadow: none !important;
+/* The inner blue dot (hidden by default) */
+.radio-label input[type="radio"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: scale(0); 
+    transition: 0.2s transform ease-in-out;
+    background-color: #47A6DE; 
+}
+
+/* What happens when selected */
+.radio-label input[type="radio"]:checked {
+    border-color: #47A6DE; 
+}
+
+.radio-label input[type="radio"]:checked::before {
+    transform: scale(1); 
+}
+
+/* Subtle focus glow */
+.radio-label input[type="radio"]:focus-visible {
+    box-shadow: 0 0 0 3px rgba(25, 75, 160, 0.2) !important;
 }
 
 /* --- LOGIN BUTTON --- */

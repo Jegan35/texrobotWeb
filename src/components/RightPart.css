@@ -299,13 +299,10 @@
 .joints-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: auto; gap: clamp(10px, 2vh, 20px); }
 .joints-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
 
-/* REMOVED THE DARK RED BACKGROUND SO IT MATCHES THE CARTESIAN TAB */
-/* --- REDUCED VERTICAL PADDING TO FIT 6 ROWS --- */
-/* 🚀 REMOVED VERTICAL PADDING COMPLETELY TO SQUEEZE ROWS */
 .joint-industrial-block { 
     display: flex; align-items: center; justify-content: center; 
     gap: clamp(20px, 4vw, 50px); 
-    padding: 0px clamp(10px, 1.5vw, 20px); /* 0px top and bottom! */
+    padding: 0px clamp(10px, 1.5vw, 20px); 
     width: max-content; margin: 0 auto; 
     background: transparent; 
     box-sizing: border-box; 
@@ -313,28 +310,18 @@
 .jib-label { 
     color: #fff; 
     font-weight: 900; 
-    
-    /* 🚀 INCREASE THIS FONT SIZE! */
-    /* You can make the clamp numbers bigger, like this: */
     font-size: clamp(2rem, 3vw, 3rem); 
-    
-    /* OR, if you just want a fixed massive size, delete the clamp and use pixels: */
-    /* font-size: 40px; */
-
-    /* If the text gets too big and starts wrapping, increase this width too! */
     width: 80px; 
-
     text-align: center; 
     text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
 }
 
-/* 🚀 REDUCED HEIGHT SO ALL 6 FIT WITHOUT SCROLLING */
 .jib-btn { 
     width: clamp(90px, 12vw, 150px); 
-    height: clamp(60px, 8vh, 60px); /* Lowered the max height to 50px */
+    height: clamp(60px, 8vh, 60px); 
     background: rgb(2, 238, 255); 
     border: 2px solid #111; 
-    border-radius: 10px; /* Slightly tighter curves for shorter buttons */
+    border-radius: 10px; 
     font-weight: 900; 
     font-size: clamp(3.5rem, 2vw, 2.5rem); 
     color: black !important; 
@@ -358,43 +345,26 @@
 }
 .joints-divider { width: 2px; background: linear-gradient(to bottom, transparent, #444, transparent); height: auto; margin: 10px 0; position: relative; display: flex; justify-content: center; }
 .divider-badge { position: absolute; top: -15px; background: #151822; color: #00bcd4; font-weight: 900; font-size: clamp(0.85rem, 1.1vw, 1.1rem); letter-spacing: 2px; padding: 4px 12px; border-radius: 4px; border: 1px solid #333; white-space: nowrap; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 2; }
-/* --- UPDATED D-PAD CONTAINER FOR PROGRAMMER MODE --- */
-/* --- 1. UPDATED D-PAD CONTAINER --- */
+
+/* --- D-PAD LAYOUTS (OPERATOR VS PROGRAMMER) --- */
+/* 1. BASE D-PAD LAYOUT */
 .dpad-two-col-layout { 
     display: flex; 
     justify-content: center; 
     width: 100%; 
-    
-    /* 🚀 THE ULTIMATE FIX: Forces the D-Pad down to ALWAYS clear the toggle switch! */
-    margin-top: clamp(65px, 8vh, 85px); 
-    margin-bottom: auto; /* Pushes extra space to the bottom, preventing upward overlap */
-    
     padding-right: clamp(5px, 1vw, 15px); 
-    gap: clamp(10px, 2vw, 30px); 
 }
 
-/* --- 2. TIGHTENED D-PAD GRID SIZES --- */
 .dpad-cross { 
     display: grid; 
-    
-    /* 🚀 REDUCED BUTTON SIZES SO IT FITS ABOVE THE PROGRAMMER PANEL */
-    grid-template-columns: clamp(50px, 6vw, 85px) clamp(50px, 6vw, 85px) clamp(50px, 6vw, 85px) clamp(15px, 3vw, 30px) clamp(50px, 6vw, 85px); 
-    grid-template-rows: repeat(3, clamp(50px, 5.3vw, 85px)); 
-    
-    gap: clamp(6px, 1.5vh, 15px); 
     margin-bottom: 0; 
 }
 
-/* --- 3. BASE DPAD BUTTON STYLES --- */
 .dpad-btn { 
     width: 100%; height: 100%; 
     border: 1px solid rgba(0,0,0,0.5); 
     border-radius: 12px; 
     font-weight: 900; 
-    
-    /* 🚀 SHRUNK FONT SLIGHTLY TO MATCH NEW BUTTON SIZE */
-    font-size: clamp(1.4rem, 2vw, 2.2rem); 
-    
     color: white !important; 
     text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
     cursor: pointer; 
@@ -403,36 +373,49 @@
     transition: 0.1s; 
     -webkit-touch-callout: none !important; user-select: none !important;
 }
-.dpad-col { display: flex; flex-direction: column; align-items: center; justify-content: center; width: auto; gap: clamp(10px, 2vh, 20px); }
-.dpad-col-title { color: #888; font-weight: 900; font-size: clamp(0.85rem, 1.2vw, 1.05rem); margin-bottom: 5px; letter-spacing: 1.5px; text-transform: uppercase; }
 
+/* 2. OPERATOR MODE (MASSIVE SIZE - LOTS OF SPACE) */
+.dpad-large {
+    margin: auto 0; 
+    padding-top: clamp(60px, 8vh, 80px); 
+}
+.dpad-large .dpad-cross {
+    grid-template-columns: clamp(65px, 8vw, 100px) clamp(65px, 8vw, 100px) clamp(65px, 8vw, 100px) clamp(20px, 4vw, 40px) clamp(65px, 8vw, 100px); 
+    grid-template-rows: repeat(3, clamp(65px, 8vw, 100px)); 
+    gap: clamp(10px, 2vh, 20px); 
+}
+.dpad-large .dpad-btn {
+    font-size: clamp(2rem, 1.8vw, 2.5rem); 
+}
 
-
+/* 3. PROGRAMMER MODE (COMPACT SIZE - FITS ABOVE PANELS) */
+.dpad-compact {
+    margin-top: clamp(88px, 8vh, 85px); 
+    margin-bottom: auto; 
+}
+.dpad-compact .dpad-cross {
+    grid-template-columns: clamp(50px, 6vw, 85px) clamp(50px, 6vw, 85px) clamp(50px, 6vw, 85px) clamp(15px, 3vw, 30px) clamp(50px, 6vw, 85px); 
+    grid-template-rows: repeat(3, clamp(50px, 6vw, 85px)); 
+    gap: clamp(6px, 1.5vh, 15px); 
+}
+.dpad-compact .dpad-btn {
+    font-size: clamp(1.4rem, 2vw, 2.2rem); 
+}
 
 .dpad-btn:active { 
     transform: scale(0.95) translateY(2px); 
     box-shadow: inset 0px 4px 6px rgba(0,0,0,0.6); 
 }
 
-/* 🔴 X AXIS (LEFT / RIGHT) - RED */
-.dpad-left, .dpad-right {
-    background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
-}
+.dpad-left, .dpad-right { background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%); }
 .dpad-left:active, .dpad-right:active { background: #D32F2F; }
 
-/* 🟢 Y AXIS (UP / DOWN) - GREEN */
-.dpad-up, .dpad-down {
-    background: linear-gradient(180deg, #66BB6A 0%, #4CAF50 100%);
-}
+.dpad-up, .dpad-down { background: linear-gradient(180deg, #66BB6A 0%, #4CAF50 100%); }
 .dpad-up:active, .dpad-down:active { background: #4CAF50; }
 
-/* 🔵 Z AXIS (TOP RIGHT / BOTTOM RIGHT) - BLUE */
-.dpad-z-up, .dpad-z-down {
-    background: linear-gradient(180deg, #29B6F6 0%, #039BE5 100%);
-}
+.dpad-z-up, .dpad-z-down { background: linear-gradient(180deg, #29B6F6 0%, #039BE5 100%); }
 .dpad-z-up:active, .dpad-z-down:active { background: #039BE5; }
 
-/* 🔵 HOME BUTTON CENTER DESIGN - BLUE */
 .dpad-center { 
     grid-column: 2; grid-row: 2; 
     background: linear-gradient(180deg, #29B6F6 0%, #039BE5 100%) !important; 
@@ -451,7 +434,6 @@
     box-shadow: inset 0px 4px 6px rgba(0,0,0,0.6);
 }
 
-/* HOME TEXT DESIGN (WHITE) */
 .home-icon-span {
     color: white !important; 
     font-weight: 900; 
@@ -459,20 +441,17 @@
     text-shadow: 0 1px 2px rgba(0,0,0,0.6); 
     letter-spacing: 0.5px;
 }
-.dpad-center:active .home-icon-span {
-    color: #e0e0e0 !important;
-}
+.dpad-center:active .home-icon-span { color: #e0e0e0 !important; }
 
-/* REMOVE OLD TEXT COLOR OVERRIDES */
 .text-pos, .text-neg { text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important; color: white !important; }
 
-/* GRID POSITIONS (unchanged) */
 .dpad-up { grid-column: 2; grid-row: 1; }
 .dpad-down { grid-column: 2; grid-row: 3; }
 .dpad-left { grid-column: 1; grid-row: 2; }
 .dpad-right { grid-column: 3; grid-row: 2; }
 .dpad-z-up { grid-column: 5; grid-row: 1; }
 .dpad-z-down { grid-column: 5; grid-row: 3; }
+
 
 .modern-graph-container { display: flex; flex-direction: column; width: 100%; height: 100%; background: #fdfdfd; padding: 10px 15px; box-sizing: border-box; overflow-x: auto; }
 .mg-scroll-wrapper { min-width: 650px; flex: 1; display: flex; flex-direction: column; }
@@ -589,3 +568,180 @@
 .slider-box-custom input[type="range"]::-webkit-slider-thumb:active, .premium-slider::-webkit-slider-thumb:active { 
     transform: scale(1.1); 
 }
+
+/* ==============================================================
+   ROBOT SCENE (3D CANVAS & OVERLAYS)
+   ============================================================== */
+
+.rs-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.rs-canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+/* --- JOINTS PANEL (RIGHT SIDE) --- */
+.rs-joints-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 110px; 
+    bottom: 0;
+    
+    background-color: #47A6DE; 
+    
+    border-left: 4px solid #111;
+    box-sizing: border-box; 
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    pointer-events: none;
+}
+
+.rs-joints-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+    justify-content: space-evenly;
+    margin-bottom: 90px; 
+}
+
+.rs-joints-header {
+    color: black;
+    font-size: clamp(1.3rem, 1.8vh, 1rem); 
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-top: clamp(5px, 2vh, 15px);
+}
+
+.rs-joint-item {
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0px, 0.5vh, 2px); 
+}
+
+.rs-joint-label {
+    color: black;
+    font-size: clamp(1.5rem, 2vh, 1.4rem); 
+    font-weight: 900;
+    margin-bottom: 0; 
+    white-space: nowrap; 
+}
+
+.rs-joint-value {
+    color: black;
+    font-size: clamp(1.8rem, 2.5vh, 1.8rem); 
+    font-weight: 600;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0 5px rgba(0, 230, 118, 0.3);
+}
+
+/* --- SYSTEM INDICATOR BULB PANEL --- */
+.rs-sys-indicator-panel {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 90px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    background-color: transparent; 
+    
+    border-top: 4px solid #111;
+    box-sizing: border-box;
+}
+
+.rs-sys-bulb-base {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    
+    background: rgba(255, 255, 255, 0.1); 
+    
+    padding: 4px;
+    position: relative;
+}
+
+.rs-sys-bulb-glow {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.rs-sys-bulb-glow.ok {
+    background: radial-gradient(circle at 30% 30%, #4aff95, #00E676, #00b35c);
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.8), inset 0 0 8px rgba(255,255,255,0.6);
+}
+
+.rs-sys-bulb-glow.err {
+    background: radial-gradient(circle at 30% 30%, #ff7b72, #FF3B30, #cc2e26);
+    box-shadow: 0 0 15px rgba(255, 59, 48, 0.8), inset 0 0 8px rgba(255,255,255,0.6);
+}
+
+.rs-sys-text {
+    font-size:0.6rem;
+    font-weight: 900;
+    margin-top: 8px;
+    letter-spacing: 1px;
+}
+.rs-sys-text.ok { color: black; }
+.rs-sys-text.err { color: #FF3B30; }
+
+/* --- RECENTER BUTTON --- */
+.rs-recenter-btn {
+    position: absolute;
+    bottom: 115px; 
+    left: 20px;
+    z-index: 20;
+    
+    background: #1a1e29; 
+    backdrop-filter: blur(8px);
+    border: 1px solid #00bcd4;
+    border-radius: 6px;
+    color: #00bcd4;
+    
+    padding: 8px 15px;
+    font-weight: 900;
+    font-size: clamp(1rem, 1vw, 0.85rem);
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 0 8px rgba(0, 188, 212, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.1s ease;
+}
+
+.rs-recenter-btn:hover {
+    background: #00bcd4;
+    color: #111;
+}
+
+.rs-recenter-btn:active {
+    transform: scale(0.95);
+}
+
+.rs-recenter-icon {
+    font-size: 1.2rem;
+}
+
