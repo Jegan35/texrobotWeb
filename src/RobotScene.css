@@ -238,35 +238,39 @@
     gap: clamp(10px, 4vw, 80px); 
     padding-right: clamp(5px, 1vw, 20px); 
 }
-
 /* 4. THE VERTICAL COLUMNS */
 .rs-cartesian-col {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 1px; /* 🚀 Tiny gap to stop vertical Y-axis collapsing */
-    
-    /* 🚀 THE MAGIC SHIELD: Forbids the browser from squishing the layout */
+    gap: 1px; 
     min-width: max-content; 
+    border-left: 3px solid #111; 
+    /* 🚀 Shrunk the side padding so the vertical black borders wrap tighter around the text */
+    padding: 0 clamp(10px, 2vw, 20px); 
+}
+
+/* Add a right border to the very last column to cap it off */
+.rs-cartesian-col:last-child {
+    border-right: 3px solid #111; 
 }
 
 /* 5. INDIVIDUAL ROW LAYOUT */
 .rs-cart-row {
     display: grid;
-    /* 🚀 HYBRID LOCK: 
-       - 25px permanently locks the Label 'X' so it never bleeds.
-       - clamp() allows the number to shrink to 85px safely on iPads, but sit at 115px normally.
-       - 30px permanently locks the 'mm' so it NEVER shifts horizontally! */
-    grid-template-columns: 25px clamp(85px, 10vw, 115px) 30px; 
+    /* 🚀 THE PERFECT IDEA FIX: Dropped the middle column max width down to 90px.
+       This physically forces the right-aligned numbers much closer to the X, Y, Z labels! */
+    grid-template-columns: 20px clamp(75px, 8vw, 90px) 25px; 
     align-items: baseline; 
-    gap: 4px; /* Unbreakable 4px wall between columns */
+    gap: 4px; 
     line-height: 1.15; 
 }
 
 /* 6. LABELS (X, Y, Z, A, B, C) */
 .rs-cart-lbl {
     color: black;
-    font-size: clamp(1.1rem, 1.5vw, 1.6rem); 
+    /* 🚀 Tweaked font size to match the tighter layout */
+    font-size: clamp(1.1rem, 1.4vw, 1.4rem); 
     font-weight: 600; 
     text-align: left;
 }
@@ -274,7 +278,8 @@
 /* 7. THE NUMBERS */
 .rs-cart-val {
     color: black !important;
-    font-size: clamp(1.1rem, 1.5vw, 1.6rem); 
+    /* 🚀 Tweaked font size so 4-digit numbers still fit beautifully in the smaller 90px box */
+    font-size: clamp(1.1rem, 1.4vw, 1.4rem); 
     font-weight: 600; 
     text-align: right; 
     padding-right: 0px; 
