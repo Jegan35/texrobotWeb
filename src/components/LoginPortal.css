@@ -14,101 +14,92 @@
     font-family: Arial, sans-serif;
 }
 
-/* --- THE WHITE CARD --- */
-/* --- THE WHITE CARD --- */
-/* --- THE WHITE CARD --- */
-/* --- THE WHITE CARD --- */
 /* --- THE WHITE CARD (Applies to Phones & Tablets) --- */
 /* --- 1. DEFAULT (Phones) --- */
 .login-box {
     background: #ffffff;
     border-radius: 12px;
     width: 100%;       
-    max-width: 400px; 
+    max-width: 380px; /* 🚀 Lightly smaller portal width */
     margin: 0 auto;   
     box-shadow: 0 25px 50px rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
-    max-height: 95vh; 
-    overflow-y: auto; 
+    max-height: 90vh; /* 🚀 Prevents it from going off-screen */
     box-sizing: border-box;
-    overflow: hidden; 
-    /* Changed to 'all' so both shrinking and moving are smooth */
+    overflow: hidden; /* 🚀 Keeps border radius crisp (scrolling is handled in login-body) */
     transition: all 0.3s ease; 
 }
 
-/* --- 2. TABLET ONLY FIX (iPads / 11-inch screens) --- 
-@media (min-width: 768px) and (max-width: 1199px) {
-    .login-box {
-        max-width: 340px; 
-        
-        transform: translateX(4.5vw); 
-    }
-}  */
-
-/* --- 3. DESKTOP ONLY (Big Monitors - Keeps your perfect fix!) --- */
+/* --- 2. DESKTOP ONLY (Big Monitors - Keeps your perfect fix!) --- */
 @media (min-width: 1200px) {
     .login-box {
         max-width: 400px; /* Keeps it full size on desktop */
         transform: translateX(1vw); /* Slides it right */
     }
 }
+
 /* --- BLUE HEADER WITH IMAGE LOGO --- */
 .login-header-blue {
-    background: #47A6DE; /* Matched to the dark blue of your logo background */
-    padding: 25px 20px;
+    background: #47A6DE; 
+    padding: 20px; /* Slightly tighter padding */
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0; /* Prevents header from squishing */
 }
 
 .login-logo-img {
     width: 100%;
-    max-width: 220px; /* Prevents the logo from getting too massive */
+    max-width: 200px; /* Scaled down slightly */
     height: auto;
     display: block;
     object-fit: contain;
 }
 
-/* --- MAIN CARD BODY --- */
+/* --- MAIN CARD BODY (THE MAGIC SCROLL FIX) --- */
 .login-body {
-    padding: 30px 40px;
+    padding: clamp(20px, 3vh, 30px) clamp(25px, 4vw, 40px);
     display: flex;
     flex-direction: column;
+    flex: 1; /* 🚀 Takes up remaining space */
+    overflow-y: auto; /* 🚀 THE FIX: Form scrolls if errors take up too much room! */
 }
 
 /* --- BLOCKY "CONTROLLER AUTHENTICATION" HEADING --- */
 .auth-heading-container {
-    border-left: 6px solid #47A6DE; /* Blue bar matching the mockup */
+    border-left: 6px solid #47A6DE; 
     padding-left: 15px;
-    margin-bottom: 30px;
+    margin-bottom: 20px; /* 🚀 Tighter margin */
+    flex-shrink: 0;
 }
 
 .auth-heading {
     color: #111;
     margin: 0;
-    font-size: 1.4rem;
-    font-weight: 9000;
+    font-size: 1.3rem; /* Slightly smaller */
+    font-weight: 900;
     letter-spacing: 2px;
     text-transform: uppercase;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 /* --- INPUTS & LABELS --- */
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 15px; 
+    gap: 12px; /* 🚀 Tighter gaps between inputs */
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
+    flex-shrink: 0;
 }
 
 .input-group label {
-    color: black; /* Dark blue labels */
+    color: black; 
     font-size: 0.95rem;
     font-weight: 900;
     letter-spacing: 0.5px;
@@ -119,8 +110,8 @@
     background: #f9fafb; 
     border: 1px solid #d1d5db; 
     color: #111;
-    height: 45px; 
-    padding: 0 15px;
+    height: 40px; /* 🚀 Slightly shorter inputs to save space */
+    padding: 0 12px;
     box-sizing: border-box;
     font-size: 1rem;
     border-radius: 6px;
@@ -135,21 +126,20 @@
     box-shadow: 0 0 0 3px rgba(25, 75, 160, 0.2);
 }
 
-/* --- RADIO BUTTONS --- */
 /* --- RADIO BUTTONS WRAPPER --- */
 .radio-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     margin-top: 5px;
+    flex-shrink: 0;
 }
 
-/* 🚀 THE FIX: Forces the circle and text to sit perfectly side-by-side */
 .radio-label {
     display: flex;
-    flex-direction: row;      /* Locks them in a horizontal line */
-    align-items: center;      /* Centers them vertically */
-    gap: 10px;                /* Space between circle and text */
+    flex-direction: row;      
+    align-items: center;      
+    gap: 10px;                
     color: #333; 
     font-weight: bold;
     font-size: 0.95rem;
@@ -172,10 +162,9 @@
     transition: all 0.2s ease-in-out;
     outline: none !important;
     box-shadow: none !important;
-    flex-shrink: 0; /* 🚀 Prevents the circle from turning into an oval */
+    flex-shrink: 0; 
 }
 
-/* The inner blue dot (hidden by default) */
 .radio-label input[type="radio"]::before {
     content: "";
     width: 10px;
@@ -186,7 +175,6 @@
     background-color: #47A6DE; 
 }
 
-/* What happens when selected */
 .radio-label input[type="radio"]:checked {
     border-color: #47A6DE; 
 }
@@ -195,9 +183,8 @@
     transform: scale(1); 
 }
 
-/* Subtle focus glow */
 .radio-label input[type="radio"]:focus-visible {
-    box-shadow: 0 0 0 3px rgba(25, 75, 160, 0.2) !important;
+    box-shadow: 0 0 0 3px rgba(71, 166, 222, 0.2) !important;
 }
 
 /* --- LOGIN BUTTON --- */
@@ -205,14 +192,15 @@
     background: #47A6DE; 
     color: white;
     border: none;
-    padding: 15px; 
+    padding: 14px; 
     font-size: 1.1rem;
     font-weight: bold;
     border-radius: 6px;
     cursor: pointer;
     letter-spacing: 1px;
-    margin-top: 15px; 
+    margin-top: 10px; 
     transition: 0.1s;
+    flex-shrink: 0; /* Prevents button from shrinking */
 }
 
 .login-submit-btn:hover {
@@ -230,12 +218,13 @@
     background: rgba(229, 57, 53, 0.1);
     color: #d32f2f;
     border: 1px solid #ff5252;
-    padding: 12px;
+    padding: 10px; /* 🚀 Tighter padding */
     border-radius: 6px;
     text-align: center;
     font-weight: bold;
     font-size: 0.85rem;
-    margin-bottom: 20px;
+    margin-bottom: 10px; /* 🚀 Reduced bottom margin */
+    flex-shrink: 0; /* 🚀 Prevents error text from squishing */
 }
 
 .login-warning {
@@ -243,32 +232,34 @@
     color: #e65100;
     border: 1px solid #ff9800;
     border-left: 5px solid #ff9800;
-    padding: 12px;
+    padding: 10px;
     border-radius: 6px;
     font-size: 0.85rem;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 .login-waiting {
-    background: rgba(25, 75, 160, 0.1);
+    background: rgba(71, 166, 222, 0.1);
     color: #194ba0;
-    border: 1px solid #194ba0;
-    padding: 15px;
+    border: 1px solid #47A6DE;
+    padding: 12px;
     border-radius: 6px;
     text-align: center;
     font-weight: bold;
     font-size: 0.9rem;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 .spinner {
     width: 24px; height: 24px;
-    border: 3px solid rgba(25, 75, 160, 0.3);
-    border-top: 3px solid #194ba0;
+    border: 3px solid rgba(71, 166, 222, 0.3);
+    border-top: 3px solid #47A6DE;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
