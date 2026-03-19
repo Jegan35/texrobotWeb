@@ -311,11 +311,12 @@
 /* 5. INDIVIDUAL ROW LAYOUT (Inside the 40% blocks) */
 .rs-cart-row {
     display: grid;
-    /* 🚀 THE FIX: Replaced '1fr' with a clamped width. 
-       This prevents the numbers from floating too far to the right, pulling them tightly towards the labels! */
-    grid-template-columns: 25px clamp(65px, 8vw, 95px) 25px; 
+    /* 🚀 LOCKED THE LAYOUT: No more clamp() on the middle column! 
+       By locking it strictly to 95px, the gap between X and 0.000 is permanently fixed. */
+    grid-template-columns: 20px 95px 25px; 
     align-items: baseline; 
-    gap: 2px; /* 🚀 Reduced the gap for an ultra-tight fit */
+    justify-content: center; /* 🚀 Centers the tight grid inside your 40% column */
+    gap: 2px; /* Ultra-tight gap */
     line-height: 1.15; 
     min-width: 0; 
 }
@@ -323,8 +324,8 @@
 /* 6. LABELS (X, Y, Z, A, B, C) */
 .rs-cart-lbl {
     color: black;
-    /* 🚀 FONT SIZE INCREASED */
-    font-size: clamp(1.2rem, 1.6vw, 1.8rem); 
+    /* 🚀 BIG FONT LOCKED: Minimum size is now 1.4rem so it never gets tiny on iPads */
+    font-size: clamp(1.4rem, 1.6vw, 1.6rem); 
     font-weight: 600; 
     text-align: left;
 }
@@ -332,8 +333,8 @@
 /* 7. THE NUMBERS */
 .rs-cart-val {
     color: black !important;
-    /* 🚀 FONT SIZE INCREASED */
-    font-size: clamp(1.2rem, 1.6vw, 1.8rem); 
+    /* 🚀 BIG FONT LOCKED: Matches the label, stays large and readable */
+    font-size: clamp(1.4rem, 1.6vw, 1.6rem); 
     font-weight: 600; 
     text-align: right; 
     padding-right: 0px; 
@@ -346,8 +347,8 @@
 /* 8. UNITS (mm, °) */
 .rs-cart-unit {
     color: black;
-    /* 🚀 FONT SIZE SLIGHTLY INCREASED to match the larger numbers */
-    font-size: clamp(0.8rem, 1vw, 1.1rem);
+    /* 🚀 Kept proportional to the big numbers */
+    font-size: clamp(0.9rem, 1vw, 1.1rem);
     font-weight: 600; 
     text-align: left;
     padding-left: 2px;
