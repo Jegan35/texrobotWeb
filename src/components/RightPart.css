@@ -388,6 +388,7 @@
     font-size: clamp(2rem, 1.8vw, 2.5rem); 
 }
 
+
 /* 3. PROGRAMMER MODE (COMPACT SIZE - FITS ABOVE PANELS) */
 .dpad-compact {
     margin-top: clamp(88px, 8vh, 85px); 
