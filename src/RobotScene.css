@@ -215,8 +215,6 @@
     color: black; 
     font-weight: 600; 
     font-size: clamp(0.8rem, 1.5vw, 1.5rem); 
-    letter-spacing: 1px;
-    
     flex: 0 0 20%; 
     width: 20%;
     
