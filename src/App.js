@@ -7,7 +7,7 @@ import RightPart from './components/RightPart';
 import LoginPortal from './components/LoginPortal'; // IMPORT THE NEW LOGIN PORTAL
 
 function AppContent() {
-  const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket, userRole } = useWebSocket(); 
+  const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket, userRole, isConnected } = useWebSocket(); 
   
   const [showReloadWarning, setShowReloadWarning] = useState(false);
   const [reloadFocus, setReloadFocus] = useState('cancel');
@@ -16,7 +16,38 @@ function AppContent() {
   useEffect(() => { if (connectionFailed) setFailedFocus('retry'); }, [connectionFailed]);
   useEffect(() => { if (showReloadWarning) setReloadFocus('cancel'); }, [showReloadWarning]);
 
-  // --- RELOAD INTERCEPTOR LOGIC ---
+  // ========================================================
+  // 🚀 BROWSER LOCKDOWN (KIOSK MODE TRAPS)
+  // ========================================================
+  useEffect(() => {
+    // Only deploy the traps if they are actively logged in
+    if (isConnected) {
+      
+      // 1. TRAP THE BACK BUTTON & SWIPES (History API Hijack)
+      window.history.pushState(null, "", window.location.href);
+      const handlePopState = (e) => {
+        window.history.pushState(null, "", window.location.href);
+        console.warn("Back button disabled by Robot Controller!");
+      };
+      window.addEventListener("popstate", handlePopState);
+
+      // 2. TRAP PAGE RELOADS & CLOSING THE TAB
+      const handleBeforeUnload = (e) => {
+        e.preventDefault();
+        // Standard browsers require this exact property to trigger the warning box
+        e.returnValue = "Are you sure? This will instantly cut the robot connection!"; 
+      };
+      window.addEventListener("beforeunload", handleBeforeUnload);
+
+      // Cleanup when they use the proper Disconnect button
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+    }
+  }, [isConnected]);
+
+  // --- RELOAD INTERCEPTOR LOGIC (F5 / CTRL+R) ---
   useEffect(() => {
     const handleF5 = (e) => {
       if (e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key === 'R'))) {
@@ -24,10 +55,8 @@ function AppContent() {
         setShowReloadWarning(true); 
       }
     };
-    const handleBeforeUnload = (e) => { e.preventDefault(); e.returnValue = ""; };
     window.addEventListener('keydown', handleF5);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => { window.removeEventListener('keydown', handleF5); window.removeEventListener('beforeunload', handleBeforeUnload); };
+    return () => window.removeEventListener('keydown', handleF5);
   }, []);
 
   // --- KEYBOARD MODAL CONTROLS ---
@@ -102,13 +131,11 @@ function AppContent() {
           <div style={{ height: 'clamp(40px, 6vh, 50px)', flexShrink: 0, backgroundColor: '#151822', borderBottom: '2px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 clamp(10px, 2vw, 20px)', overflow: 'hidden', gap: '10px' }}>
             
             {/* 1. LEFT: BRANDING */}
-            {/* flexShrink: 1 allows it to give up space if needed on tiny screens */}
             <div style={{ display: 'flex', justifyContent: 'flex-start', flexShrink: 1, minWidth: 0 }}>
                 <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(1rem, 2vw, 1.5rem)', letterSpacing: '1px', fontFamily: 'Impact, sans-serif', whiteSpace: 'nowrap' }}>TEXSONICS</div>
             </div>
 
            {/* 2. CENTER: GREEN ROLE INDICATOR */}
-           {/* flexShrink: 0 ensures this beautiful badge NEVER gets squished */}
             <div style={{ display: 'flex', justifyContent: 'center', flexShrink: 0 }}>
                 <style>
                     {`
@@ -157,7 +184,6 @@ function AppContent() {
             </div>
 
             {/* 3. RIGHT: VERSION */}
-            {/* flexShrink: 1 allows it to give up space gracefully */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', flexShrink: 1, minWidth: 0 }}>
                 <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: 'clamp(0.6rem, 1.2vw, 0.85rem)', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>ROBOT CONTROLLER V1.0</div>
             </div>

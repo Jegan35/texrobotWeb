@@ -37,7 +37,36 @@ export const WebSocketProvider = ({ children }) => {
   };
 
   useEffect(() => { ipRef.current = ipAddress; }, [ipAddress]);
+  // ========================================================
+  // 🚀 BROWSER LOCKDOWN (KIOSK MODE TRAPS)
+  // ========================================================
+  useEffect(() => {
+    // Only deploy the traps if they are actively logged in
+    if (isConnected) {
+      
+      // 1. TRAP THE BACK BUTTON (History API Hijack)
+      window.history.pushState(null, "", window.location.href);
+      const handlePopState = (e) => {
+        window.history.pushState(null, "", window.location.href);
+        console.warn("Back button disabled by Robot Controller!");
+      };
+      window.addEventListener("popstate", handlePopState);
 
+      // 2. TRAP PAGE RELOADS & CLOSING THE TAB
+      const handleBeforeUnload = (e) => {
+        e.preventDefault();
+        // Standard browsers require this exact property to trigger the warning box
+        e.returnValue = "Are you sure? This will instantly cut the robot connection!"; 
+      };
+      window.addEventListener("beforeunload", handleBeforeUnload);
+
+      // Cleanup when they use the proper Disconnect button
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+    }
+  }, [isConnected]);
   const [robotState, setRobotState] = useState({
     mode: "Sim", started: false, paused: false, servo_on: false, error_message: "No error",
     cartesian: { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0 },

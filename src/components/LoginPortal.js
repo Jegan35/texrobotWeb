@@ -11,8 +11,16 @@ const LoginPortal = () => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('Programmer');
 
-    const handleSubmit = (e) => {
+    // 🚀 THE FIX: Now an onClick handler instead of a form submission
+    const handleLoginClick = (e) => {
         e.preventDefault();
+        
+        // 🚀 THE FIX: Manual validation replaces the HTML "required" attribute
+        if (!ip || !userId || !password) {
+            alert("Please fill in the Server IP, Username, and Password fields.");
+            return;
+        }
+
         loginToRobot(ip, userId, password, role);
     };
 
@@ -59,42 +67,51 @@ const LoginPortal = () => {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="login-form">
+                    {/* 🚀 THE FIX: Changed <form> to a standard <div> so Chrome doesn't scan it! */}
+                    <div className="login-form">
                         
-                        {/* 🚀 FIXED: Server IP Field is now VISIBLE */}
+                        {/* 🚀 FIXED: IP Field (No history dropdown, no spellcheck) */}
                         <div className="input-group">
                             <label>Server IP</label>
                             <input 
                                 type="text" 
+                                autoComplete="off" 
+                                spellCheck="false"
                                 placeholder="Enter Server IP"
                                 value={ip} 
                                 onChange={(e) => setIp(e.target.value)} 
                                 disabled={authStatus === 'waiting_admin'}
-                                required
                             />
                         </div>
 
+                        {/* 🚀 FIXED: Username Field (No history dropdown) */}
                         <div className="input-group">
                             <label>Username</label>
                             <input 
                                 type="text" 
+                                autoComplete="off"
+                                spellCheck="false"
                                 placeholder="Enter your username" 
                                 value={userId} 
                                 onChange={(e) => setUserId(e.target.value)} 
                                 disabled={authStatus === 'waiting_admin'}
-                                required 
                             />
                         </div>
                         
+                        {/* 🚀 THE GHOST INPUT: Chrome thinks this is just text! */}
                         <div className="input-group">
                             <label>Password</label>
                             <input 
-                                type="password" 
+                                type="text" 
+                                name="secure_hash_data" 
+                                id="secure_hash_data"
+                                autoComplete="new-password" 
+                                spellCheck="false"
+                                style={{ WebkitTextSecurity: 'disc' }} /* Keeps the black dots! */
                                 placeholder="Enter your password" 
                                 value={password} 
                                 onChange={(e) => setPassword(e.target.value)} 
                                 disabled={authStatus === 'waiting_admin'}
-                                required 
                             />
                         </div>
 
@@ -127,14 +144,16 @@ const LoginPortal = () => {
                             </div>
                         </div>
 
+                        {/* 🚀 THE FIX: Changed type="submit" to type="button" and added onClick! */}
                         <button 
-                            type="submit" 
+                            type="button" 
+                            onClick={handleLoginClick}
                             className={`login-submit-btn ${authStatus === 'waiting_admin' ? 'btn-disabled' : ''}`}
                             disabled={authStatus === 'waiting_admin'}
                         >
                             {authStatus === 'waiting_admin' ? 'AWAITING APPROVAL...' : 'Login'}
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
