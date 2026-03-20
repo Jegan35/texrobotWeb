@@ -12,6 +12,41 @@ function AppContent() {
   const [showReloadWarning, setShowReloadWarning] = useState(false);
   const [reloadFocus, setReloadFocus] = useState('cancel');
   const [failedFocus, setFailedFocus] = useState('retry');
+  // 🚀 THE FULLSCREEN ENFORCER STATE
+  const [enforceFS, setEnforceFS] = useState(false);
+
+  // Detect if the user swipes edge and drops out of fullscreen
+  useEffect(() => {
+    const handleFSChange = () => {
+      // If we are logged in, but the browser is no longer in fullscreen...
+      if (isConnected && !document.fullscreenElement && !document.webkitFullscreenElement) {
+        setEnforceFS(true); // Trigger the trap!
+      }
+    };
+    
+    document.addEventListener("fullscreenchange", handleFSChange);
+    document.addEventListener("webkitfullscreenchange", handleFSChange);
+    
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFSChange);
+      document.removeEventListener("webkitfullscreenchange", handleFSChange);
+    };
+  }, [isConnected]);
+
+  const handleResumeFullscreen = async () => {
+    try {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) await elem.requestFullscreen();
+        else if (elem.webkitRequestFullscreen) await elem.webkitRequestFullscreen();
+        
+        if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+            await window.screen.orientation.lock("landscape");
+        }
+        setEnforceFS(false); // Remove the trap
+    } catch (err) {
+        console.warn("Could not resume:", err);
+    }
+  };
 
   useEffect(() => { if (connectionFailed) setFailedFocus('retry'); }, [connectionFailed]);
   useEffect(() => { if (showReloadWarning) setReloadFocus('cancel'); }, [showReloadWarning]);
@@ -62,6 +97,21 @@ function AppContent() {
   // --- KEYBOARD MODAL CONTROLS ---
   useEffect(() => {
     if (!showReloadWarning && !accessFull && !connectionFailed) return;
+    {/* 🚀 THE FULLSCREEN ENFORCER OVERLAY */}
+      {enforceFS && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: '#000', zIndex: 999999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{ color: '#F44336', fontSize: '3rem', marginBottom: '10px', textTransform: 'uppercase' }}>⚠️ Operation Paused</h1>
+            <p style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '40px' }}>Application must run in Fullscreen mode.</p>
+            <button 
+                onClick={handleResumeFullscreen} 
+                style={{ padding: '20px 40px', fontSize: '1.5rem', fontWeight: '900', backgroundColor: '#00bcd4', color: '#111', border: 'none', borderRadius: '8px', cursor: 'pointer', textTransform: 'uppercase', boxShadow: '0 0 20px rgba(0, 188, 212, 0.5)' }}
+            >
+              Resume Operation
+            </button>
+          </div>
+        </div>
+      )}
     const handleModalKeys = (e) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
       if (showReloadWarning) {
