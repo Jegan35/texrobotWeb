@@ -23,10 +23,10 @@
     top: 0;
     right: 0;
     width: 110px; 
-    bottom: 0;
+    bottom: 0; 
     
-    /* 🚀 Pure transparent grey - NO BLUR */
-    background-color: rgba(43, 48, 59, 0.75); 
+    /* 🚀 THEME FIX: Changed to Cartesian Blue */
+    background-color: #47A6DE; 
     
     border-left: 4px solid #111;
     box-sizing: border-box; 
@@ -44,12 +44,13 @@
     width: 100%;
     flex: 1;
     justify-content: space-evenly;
-    margin-bottom: 90px; 
+    /* Keeps joints pushed up to clear the 110px bulb panel */
+    margin-bottom: 110px; 
 }
 
 .rs-joints-header {
-    /* 🚀 CHANGED TO WHITE SO IT'S READABLE ON GREY */
-    color: #ffffff;
+    /* 🚀 THEME FIX: Changed text to Black */
+    color: black; 
     font-size: clamp(1.3rem, 1.8vh, 1rem); 
     font-weight: 600;
     letter-spacing: 1px;
@@ -66,8 +67,8 @@
 }
 
 .rs-joint-label {
-    /* 🚀 LABELS IN RED */
-    color: #FF3B30;
+    /* 🚀 THEME FIX: Changed labels to Black */
+    color: black; 
     font-size: clamp(1.5rem, 2vh, 1.4rem); 
     font-weight: 900;
     margin-bottom: 0; 
@@ -75,14 +76,14 @@
 }
 
 .rs-joint-value {
-    /* 🚀 VALUES IN GREEN */
-    color: #00E676;
+    /* 🚀 THEME FIX: Changed numbers to Black to match Cartesian */
+    color: black !important; 
     font-size: clamp(1.8rem, 2.5vh, 1.8rem); 
     font-weight: 600;
     white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Subtle glow for the green numbers */
+    /* Kept the slight green glow for a cool screen effect */
     text-shadow: 0 0 5px rgba(0, 230, 118, 0.3);
 }
 
@@ -91,32 +92,29 @@
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 90px; 
+    /* Locks to 110px to perfectly match the Cartesian panel border */
+    height: 110px; 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     
-    /* 🚀 Make this completely transparent! Inherits from Joints panel. */
     background-color: transparent; 
-    
     border-top: 4px solid #111;
     box-sizing: border-box;
 }
 
 .rs-sys-bulb-base {
-    width: 34px;
-    height: 34px;
+    width: 54px; 
+    height: 54px; 
     border-radius: 50%;
     
-    /* 🚀 THE FIX: Forces a deep, dark black socket */
     background-color: #0a0a0a !important; 
-    border: 1px solid #000000 !important;
+    border: 2px solid #000000 !important; 
     
-    padding: 4px; /* This creates the thickness of the black ring */
+    padding: 6px; 
     position: relative;
     
-    /* Adds a sleek mechanical shadow so it looks embedded */
     box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 3px 6px rgba(0,0,0,0.9);
 }
 
@@ -138,19 +136,21 @@
 }
 
 .rs-sys-text {
-    font-size:0.6rem;
+    font-size: 0.8rem; 
     font-weight: 900;
     margin-top: 8px;
     letter-spacing: 1px;
 }
-/* 🚀 CHANGED 'OK' TEXT TO WHITE FOR GREY BG */
-.rs-sys-text.ok { color: #ffffff; }
+
+/* 🚀 THEME FIX: Changed 'SYS OK' text to Black */
+.rs-sys-text.ok { color: black; } 
+/* Kept 'SYS ERR' red for emergency visibility! */
 .rs-sys-text.err { color: #FF3B30; }
 
 /* --- RECENTER BUTTON --- */
 .rs-recenter-btn {
     position: absolute;
-    bottom: 115px; 
+    bottom: 145px; 
     left: 20px;
     z-index: 20;
     
@@ -187,15 +187,7 @@
 }
 
 /* ==============================================================
-   CARTESIAN PANEL (BOTTOM OVERLAY) - MATCHING JOINTS THEME
-   ============================================================== */
-
-/* 1. MAIN WRAPPER (Solid Blue to match Joints) */
-/* ==============================================================
-   CARTESIAN PANEL (BOTTOM OVERLAY) - STRICT LOCKED LAYOUT
-   ============================================================== */
-/* ==============================================================
-   CARTESIAN PANEL - ANTI-COLLAPSE HYBRID LAYOUT
+   CARTESIAN PANEL - 20/40/40 STRICT PERCENTAGE LAYOUT
    ============================================================== */
 
 /* 1. MAIN WRAPPER */
@@ -204,15 +196,15 @@
     bottom: 0;
     left: 0;
     right: 110px; 
-    height: 90px; 
+    height: 110px; 
     background-color: #47A6DE; 
     border-top: 4px solid #111;
     border-right: none !important; 
     box-sizing: border-box; 
     z-index: 10;
     display: flex;
-    align-items: center;
-    padding: 0 clamp(5px, 1vw, 15px); 
+    align-items: stretch;
+    padding: 0; 
     user-select: none;
     pointer-events: none;
     overflow: hidden; 
@@ -224,108 +216,73 @@
     font-weight: 600; 
     font-size: clamp(1rem, 1.5vw, 1.5rem); 
     letter-spacing: 1px;
-    margin-right: clamp(10px, 2vw, 20px); 
-    flex-shrink: 0;
-}
-
-/* 3. CARTESIAN 2-COLUMN LAYOUT (3 & 3) */
-.rs-cartesian-split-container {
-    display: flex;
-    justify-content: space-evenly; 
-    flex: 1;
-    align-items: center;
-    /* 🚀 Lets the empty space shrink before crushing the columns */
-    gap: clamp(10px, 4vw, 80px); 
-    padding-right: clamp(5px, 1vw, 20px); 
-}
-/* ==============================================================
-   CARTESIAN PANEL - STRICT 20/40/40 PERCENTAGE LAYOUT
-   ============================================================== */
-
-/* 1. MAIN WRAPPER (100% of available space) */
-.rs-cartesian-panel {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 110px; /* Protects the SYS OK bulb area */
-    height: 90px; 
-    background-color: #47A6DE; 
-    border-top: 4px solid #111;
-    border-right: none !important; 
-    box-sizing: border-box; 
-    z-index: 10;
-    display: flex;
-    align-items: stretch; /* Stretches columns to full height for the borders */
-    padding: 0; 
-    user-select: none;
-    pointer-events: none;
-    overflow: hidden; 
-}
-
-/* 2. THE WORD "CARTESIAN" (Exactly 20% Width) */
-.rs-cartesian-title {
-    flex: 0 0 20%; /* 🚀 20% ku strict ah lock panniduchu */
+    
+    flex: 0 0 20%; 
     width: 20%;
-    color: black; 
-    font-weight: 600; 
-    font-size: clamp(0.8rem, 1.2vw, 1.3rem); /* Auto-scales text */
-    letter-spacing: 1px;
+    
     display: flex;
-    align-items: center; 
-    justify-content: center; /* Centers perfectly in its 20% box */
+    justify-content: center; 
+    align-items: center;
+    border-right: 2px solid #111; 
     margin: 0; 
-    padding: 0 5px;
+    padding: 0; 
     box-sizing: border-box;
-    min-width: 0; 
 }
 
-/* 3. CARTESIAN SPLIT CONTAINER (The remaining 80%) */
+/* 3. CARTESIAN 2-COLUMN LAYOUT */
 .rs-cartesian-split-container {
-    flex: 0 0 80%; /* 🚀 Balance 80% iku eduthukichu */
-    width: 80%;
     display: flex;
-    align-items: stretch; 
-    gap: 0; /* No gap because borders handle the separation */
+    flex: 0 0 80%; 
+    width: 80%;
+    
+    align-items: center;
+    justify-content: center; 
+    gap: 0; 
+    padding: 0; 
     box-sizing: border-box;
-    min-width: 0; 
 }
 
-/* 4. THE VERTICAL COLUMNS (50% of 80% = Exactly 40% Total Width) */
+/* 4. THE VERTICAL COLUMNS */
 .rs-cartesian-col {
-    flex: 0 0 50%; /* 🚀 40-40 ya split aagidum */
-    width: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center; 
+    
+    flex: 0 0 50%; 
+    width: 50%;
+    
+    height: 100%;
+    gap: 1px; 
     box-sizing: border-box;
-    border-left: 3px solid #111; /* Solid lines like your drawing */
-    padding: 0 clamp(5px, 2vw, 20px); 
-    min-width: 0; /* CRITICAL: Stops text from breaking the 40% rule */
 }
 
-/* Cap off the final column with a right border */
-.rs-cartesian-col:last-child {
-    border-right: 3px solid #111; 
+/* Second vertical divider */
+.rs-cartesian-col:first-child {
+    border-right: 2px solid #111; 
 }
 
-/* 5. INDIVIDUAL ROW LAYOUT (Inside the 40% blocks) */
+/* 5. INDIVIDUAL ROW LAYOUT (Dynamic Squeeze Lock) */
 .rs-cart-row {
     display: grid;
-    /* 🚀 LOCKED THE LAYOUT: No more clamp() on the middle column! 
-       By locking it strictly to 95px, the gap between X and 0.000 is permanently fixed. */
-    grid-template-columns: 20px 95px 25px; 
+    /* 🚀 THE DYNAMIC ADJUST FIX: 
+       'max-content' guarantees the 0.000 never gets cut off. 
+       '1fr' lets it breathe out to 150px on big screens. */
+    grid-template-columns: 25px minmax(max-content, 1fr) 30px; 
     align-items: baseline; 
-    justify-content: center; /* 🚀 Centers the tight grid inside your 40% column */
-    gap: 2px; /* Ultra-tight gap */
+    
+    /* 🚀 The gap shrinks dynamically when you minimize, protecting the font size! */
+    gap: clamp(2px, 1vw, 8px); 
     line-height: 1.15; 
-    min-width: 0; 
+    width: 100%;
+    max-width: 150px; /* Keeps the text perfectly grouped in the center */
 }
 
 /* 6. LABELS (X, Y, Z, A, B, C) */
 .rs-cart-lbl {
     color: black;
-    /* 🚀 BIG FONT LOCKED: Minimum size is now 1.4rem so it never gets tiny on iPads */
-    font-size: clamp(1.4rem, 1.6vw, 1.6rem); 
+    /* 🚀 LOCKED FONT SIZE: Removed clamp! Will never shrink. */
+    font-size: 1.6rem; 
     font-weight: 600; 
     text-align: left;
 }
@@ -333,8 +290,8 @@
 /* 7. THE NUMBERS */
 .rs-cart-val {
     color: black !important;
-    /* 🚀 BIG FONT LOCKED: Matches the label, stays large and readable */
-    font-size: clamp(1.4rem, 1.6vw, 1.6rem); 
+    /* 🚀 LOCKED FONT SIZE: Removed clamp! Stays perfectly readable. */
+    font-size: 1.6rem; 
     font-weight: 600; 
     text-align: right; 
     padding-right: 0px; 
@@ -342,13 +299,14 @@
     text-shadow: 0 0 5px rgba(0, 230, 118, 0.3);
     font-variant-numeric: tabular-nums; 
     overflow: hidden; 
+    text-overflow: ellipsis;
 }
 
 /* 8. UNITS (mm, °) */
 .rs-cart-unit {
     color: black;
-    /* 🚀 Kept proportional to the big numbers */
-    font-size: clamp(0.9rem, 1vw, 1.1rem);
+    /* 🚀 LOCKED FONT SIZE */
+    font-size: 1rem; 
     font-weight: 600; 
     text-align: left;
     padding-left: 2px;
