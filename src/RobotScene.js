@@ -360,28 +360,26 @@ const RobotScene = () => {
       <button className="rs-recenter-btn" onClick={handleRecenter}>
         <span className="rs-recenter-icon">🎯</span> RECENTER
       </button>
-
-      {/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */}
+{/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */}
       <div className="rs-cartesian-panel">
         <div className="rs-cartesian-title">CARTESIAN</div>
         
-        {/* 🚀 FIXED 2-COLUMN LAYOUT (3 & 3) */}
         <div className="rs-cartesian-split-container">
           
           {/* COLUMN 1: X, Y, Z */}
           <div className="rs-cartesian-col">
-            <div className="rs-cart-row">
+            {/* 🚀 THE FIX: Use new XYZ class */}
+            <div className="rs-cart-row-xyz">
               <span className="rs-cart-lbl">X</span>
-              {/* 🚀 THE FIX: We now use formatXYZ for the first column! */}
               <span className="rs-cart-val">{formatXYZ(c.x)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
-            <div className="rs-cart-row">
+            <div className="rs-cart-row-xyz">
               <span className="rs-cart-lbl">Y</span>
               <span className="rs-cart-val">{formatXYZ(c.y)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
-            <div className="rs-cart-row">
+            <div className="rs-cart-row-xyz">
               <span className="rs-cart-lbl">Z</span>
               <span className="rs-cart-val">{formatXYZ(c.z)}</span>
               <span className="rs-cart-unit">mm</span>
@@ -390,23 +388,24 @@ const RobotScene = () => {
 
           {/* COLUMN 2: A, B, C */}
           <div className="rs-cartesian-col">
-            <div className="rs-cart-row">
+            {/* 🚀 THE FIX: Use new ABC class */}
+            <div className="rs-cart-row-abc">
               <span className="rs-cart-lbl">A</span>
-              {/* 🚀 THE FIX: We now use formatABC for the second column! */}
               <span className="rs-cart-val">{formatABC(c.rx)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
-            <div className="rs-cart-row">
+            <div className="rs-cart-row-abc">
               <span className="rs-cart-lbl">B</span>
               <span className="rs-cart-val">{formatABC(c.ry)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
-            <div className="rs-cart-row">
+            <div className="rs-cart-row-abc">
               <span className="rs-cart-lbl">C</span>
               <span className="rs-cart-val">{formatABC(c.rz)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
           </div>
+
         </div>
       </div>
       {/* --- 3D CANVAS --- */}

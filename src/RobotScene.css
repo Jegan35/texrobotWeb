@@ -289,16 +289,30 @@
     width: 46.25%;
 }
 
-/* 5. INDIVIDUAL ROW LAYOUT */
-.rs-cart-row {
+/* 5. INDIVIDUAL ROW LAYOUTS (SPLIT FOR XYZ and ABC) */
+
+/* 🚀 XYZ ROW: Designed for 4 leading zeros and wider "mm" unit */
+.rs-cart-row-xyz {
     display: grid;
+    /* 30px reserved for the "mm" text */
     grid-template-columns: 25px minmax(max-content, 1fr) 30px; 
     align-items: baseline; 
     gap: clamp(2px, 1vw, 8px); 
     line-height: 1.15; 
     width: 100%;
-    /* 🚀 INCREASED slightly from 150px to 165px so XYZ has room to breathe */
     max-width: 165px; 
+}
+
+/* 🚀 ABC ROW: Designed for 3 leading zeros and narrow "°" unit */
+.rs-cart-row-abc {
+    display: grid;
+    /* Only 15px reserved for the tiny "°" symbol so it pulls tightly together! */
+    grid-template-columns: 25px minmax(max-content, 1fr) 15px; 
+    align-items: baseline; 
+    gap: clamp(2px, 1vw, 8px); 
+    line-height: 1.15; 
+    width: 100%;
+    max-width: 150px; /* Tighter width so it sits perfectly in the center without that awkward right gap */
 }
 
 /* 6. LABELS (X, Y, Z, A, B, C) */
