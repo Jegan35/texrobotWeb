@@ -809,6 +809,49 @@ const renderJogPanel = () => {
             </div>
         </div>
       )}
+      {/* --- MODIFY TP FLOATING PANEL (NO SCREEN OVERLAY) --- */}
+      {showModTpModal && (
+        <div className="floating-tp-panel">
+            <div className="floating-tp-title">
+                ✏️ MODIFY TARGET POINT
+            </div>
+            <div className="floating-tp-divider"></div>
+
+            <div className="floating-tp-form">
+                <div className="floating-tp-row">
+                    <label className="floating-tp-label">Name:</label>
+                    <input className="modal-input floating-tp-input" value={modTpData.name} onChange={e => setModTpData({...modTpData, name: e.target.value})} />
+                </div>
+                <div className="floating-tp-row">
+                    <label className="floating-tp-label">X (mm):</label>
+                    <input className="modal-input floating-tp-input" value={modTpData.x} onChange={e => setModTpData({...modTpData, x: e.target.value})} />
+                </div>
+                <div className="floating-tp-row">
+                    <label className="floating-tp-label">Y (mm):</label>
+                    <input className="modal-input floating-tp-input" value={modTpData.y} onChange={e => setModTpData({...modTpData, y: e.target.value})} />
+                </div>
+                <div className="floating-tp-row">
+                    <label className="floating-tp-label">Z (mm):</label>
+                    <input className="modal-input floating-tp-input" value={modTpData.z} onChange={e => setModTpData({...modTpData, z: e.target.value})} />
+                </div>
+            </div>
+
+            <div className="modal-btn-row" style={{ marginTop: '15px' }}>
+                <button 
+                    className="modal-btn btn-floating-cancel" 
+                    onClick={() => setShowModTpModal(false)}
+                >
+                    CANCEL
+                </button>
+                <button 
+                    className="modal-btn btn-floating-update" 
+                    onClick={handleModifyConfirm}
+                >
+                    UPDATE TP
+                </button>
+            </div>
+        </div>
+      )}
 
      <div className="rp-master-container">
         <div className="rp-main-content">
@@ -823,6 +866,7 @@ const renderJogPanel = () => {
                         currentMode={!isTopPanelOpen ? (row2Tab === 'IO_MODULES' ? 'I/O PANEL' : row2Tab.replace('_', ' ')) : currentView} 
                         isOpen={isSidebarOpen} 
                         onDisconnectClick={() => setShowDisconnectModal(true)} 
+                        isAutoMode={rs.mode === 'AUTO' || rs.run_mode === 'AUTO'}
                      />
                 </div>
                 

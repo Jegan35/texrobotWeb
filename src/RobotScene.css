@@ -43,29 +43,46 @@
     flex-direction: column;
     width: 100%;
     flex: 1;
-    justify-content: space-evenly;
-    /* Keeps joints pushed up to clear the 110px bulb panel */
+    /* 🚀 Removed 'space-evenly' so the boxes can stretch and touch each other perfectly */
     margin-bottom: 110px; 
 }
 
+/* 2. THE JOINTS HEADER */
 .rs-joints-header {
-    /* 🚀 THEME FIX: Changed text to Black */
     color: black; 
-    font-size: clamp(1.3rem, 1.8vh, 1rem); 
+    font-size: clamp(1.3rem, 1.5vh, 1.3rem); 
     font-weight: 600;
     letter-spacing: 1px;
-    margin-top: clamp(5px, 2vh, 15px);
+    
+    /* 🚀 THE FIX: Forces full width and adds the solid border underneath! */
+    width: 100%;
+    text-align: center;
+    border-bottom: 3px solid #111; 
+    padding: 12px 0; 
+    margin: 0; 
+    box-sizing: border-box;
 }
 
 .rs-joint-item {
-    text-align: center;
     width: 100%;
+    /* 🚀 THE FIX: 'flex: 1' forces every joint to be the exact same height box! */
+    flex: 1; 
     display: flex;
     flex-direction: column;
+    justify-content: center; /* Centers the text inside its box */
     align-items: center;
-    gap: clamp(0px, 0.5vh, 2px); 
+    gap: 0px; 
+    
+    /* 🚀 ADDED THE RED LINES YOU DREW: A strict 3px border under every item */
+    border-bottom: 3px solid #111; 
+    box-sizing: border-box;
 }
 
+/* 3. REMOVE BORDER FROM THE LAST JOINT (J6) */
+.rs-joint-item:last-child {
+    /* 🚀 J6 doesn't need a bottom line because the Bulb panel acts as its bottom wall */
+    border-bottom: none; 
+}
 .rs-joint-label {
     /* 🚀 THEME FIX: Changed labels to Black */
     color: black; 
@@ -76,15 +93,16 @@
 }
 
 .rs-joint-value {
-    /* 🚀 THEME FIX: Changed numbers to Black to match Cartesian */
     color: black !important; 
-    font-size: clamp(1.8rem, 2.5vh, 1.8rem); 
+    font-size: clamp(1.8rem, 2.3vh, 1.8rem); 
     font-weight: 600;
     white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Kept the slight green glow for a cool screen effect */
     text-shadow: 0 0 5px rgba(0, 230, 118, 0.3);
+    
+    /* 🚀 ADD THIS LINE: Forces numbers to be monospaced so they never jitter when updating! */
+    font-variant-numeric: tabular-nums; 
 }
 
 /* --- SYSTEM INDICATOR BULB PANEL --- */

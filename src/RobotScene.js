@@ -294,6 +294,14 @@ const RobotScene = () => {
     const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
     return isNegative ? `-${formattedNum}` : formattedNum;
   };
+  // 🚀 JOINTS FORMATTER (Forces 00.00 padding)
+  const formatJoint = (val) => {
+    if (val === undefined || val === null) return "00.00";
+    const isNegative = val < 0;
+    // padStart(5, '0') ensures at least 2 digits, a dot, and 2 decimals (e.g., "05.00")
+    const formattedNum = Math.abs(val).toFixed(2).padStart(5, '0');
+    return isNegative ? `-${formattedNum}` : formattedNum;
+  };
 
   // --- CAMERA RECENTER LOGIC ---
   const handleRecenter = () => {
@@ -309,7 +317,7 @@ const RobotScene = () => {
       
       <HamburgerMenu onToggle={(isOpen) => setIsMenuOpen(isOpen)} />
 
-      {/* --- JOINTS PANEL --- */}
+      {/* --- JOINTS PANEL (TOP RIGHT) --- */}
       <div className="rs-joints-panel">
         <div className="rs-joints-header">JOINTS</div>
         
@@ -319,8 +327,9 @@ const RobotScene = () => {
             return (
               <div key={label} className="rs-joint-item">
                 <div className="rs-joint-label">{label}</div>
+                {/* 🚀 APPLY THE FORMAT HELPER HERE */}
                 <div className="rs-joint-value">
-                  {val !== undefined ? val.toFixed(2) : "0.00"}°
+                  {formatJoint(val)}°
                 </div>
               </div>
             );

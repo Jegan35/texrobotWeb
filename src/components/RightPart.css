@@ -50,16 +50,32 @@
 .rh-status-standby { border: 1px solid #4CAF50; color: #4CAF50; background-color: rgba(76, 175, 80, 0.05); text-shadow: 0 0 5px rgba(76, 175, 80, 0.5); box-shadow: inset 0 0 8px rgba(76, 175, 80, 0.2); }
 .rh-status-motion { border: 1px solid #FF9800; color: #FF9800; background-color: rgba(255, 152, 0, 0.1); text-shadow: 0 0 5px rgba(255, 152, 0, 0.8); animation: warningGlow 1s infinite alternate; }
 
+/* --- DYNAMIC MODE DOTS --- */
 .rh-blinking-dot { 
-    width: 10px; height: 10px; border-radius: 50%; background-color: #00bcd4; 
-    box-shadow: 0 0 8px rgba(0, 188, 212, 0.8); animation: rhPulse 1.5s infinite alternate; flex-shrink: 0;
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
 }
-@keyframes rhPulse { 
-    0% { opacity: 0.3; filter: brightness(0.8); box-shadow: 0 0 2px rgba(0, 188, 212, 0.2); } 
-    100% { opacity: 1; filter: brightness(1.2); box-shadow: 0 0 12px rgba(0, 188, 212, 1); } 
-}
-@keyframes warningGlow { 0% { box-shadow: inset 0 0 5px rgba(255, 152, 0, 0.2), 0 0 5px rgba(255, 152, 0, 0.2); } 100% { box-shadow: inset 0 0 15px rgba(255, 152, 0, 0.5), 0 0 15px rgba(255, 152, 0, 0.6); } }
 
+/* Default Blue Dot */
+.rh-blinking-dot.dot-blue {
+    background-color: #00bcd4;
+    box-shadow: 0 0 8px rgba(0, 188, 212, 0.8);
+    animation: rhPulseBlue 1.5s infinite alternate;
+}
+@keyframes rhPulseBlue { 
+    0% { opacity: 0.3; box-shadow: 0 0 2px rgba(0, 188, 212, 0.2); } 
+    100% { opacity: 1; box-shadow: 0 0 12px rgba(0, 188, 212, 1); } 
+}
+
+/* 🚀 Orange Dot for Auto Mode */
+.rh-blinking-dot.dot-orange {
+    background-color: #FF9800;
+    box-shadow: 0 0 8px rgba(255, 152, 0, 0.8);
+    animation: rhPulseOrange 1.5s infinite alternate;
+}
+@keyframes rhPulseOrange { 
+    0% { opacity: 0.3; box-shadow: 0 0 2px rgba(255, 152, 0, 0.2); } 
+    100% { opacity: 1; box-shadow: 0 0 12px rgba(255, 152, 0, 1); } 
+}
 /* ==============================================================
    3. TABS & UTILITY BUTTONS
    ============================================================== */
@@ -249,8 +265,22 @@
 .set-tab-btn.active { background: #151822; color: #00bcd4; border-left: 4px solid #00bcd4; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); text-shadow: 0 0 5px rgba(0,188,212,0.3); }
 .settings-content-area { flex: 1; display: flex; flex-direction: column; background: #2b303b; min-width: 0; }
 .settings-scroll-content { flex: 1; overflow-y: auto; background: #f4f3ef; display: flex; flex-direction: column; padding: 0; }
-
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.7); z-index: 9999999 !important; display: flex; align-items: center; justify-content: center; }
+/* --- MODALS --- */
+.modal-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background-color: rgba(0, 0, 0, 0.7); 
+    
+    /* 🚀 THE FIX: Forces the modal to the absolute top layer! */
+    z-index: 9999999 !important; 
+    
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
 .modal-box { background-color: #202430; border-top: 4px solid #8e24aa; padding: 20px; width: 320px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 .modal-title { color: white; font-weight: 900; text-align: center; font-size: 1.1rem; letter-spacing: 1px; }
 .modal-divider { height: 1px; background-color: #333; width: 100%; margin-bottom: 5px; }
@@ -568,4 +598,76 @@
 
 .slider-box-custom input[type="range"]::-webkit-slider-thumb:active, .premium-slider::-webkit-slider-thumb:active { 
     transform: scale(1.1); 
+}
+/* --- FLOATING TP MODAL (NO OVERLAY) --- */
+.floating-tp-panel {
+    position: absolute;
+    bottom: 120px; /* 🚀 Pushes it just above the bottom buttons */
+    left: 790px;   /* 🚀 THE FIX: Moves it left, directly over the TP button! */
+    width: 250px;  /* 🚀 SMALLER: Reduced from 320px to 250px */
+    background-color: #202430;
+    border-top: 4px solid #9c27b0;
+    padding: 12px 15px; /* 🚀 SMALLER: Tighter padding inside the box */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.9), 0 0 15px rgba(156, 39, 176, 0.4);
+    z-index: 9999999;
+}
+
+.floating-tp-title {
+    color: #9c27b0;
+    font-size: 1.05rem; /* 🚀 SMALLER: Reduced font size */
+    font-weight: 900;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.floating-tp-divider {
+    height: 1px;
+    background-color: #333;
+    width: 100%;
+    margin: 5px 0;
+}
+
+.floating-tp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 🚀 Tighter gap between inputs */
+}
+
+.floating-tp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.floating-tp-label {
+    color: #aaa;
+    font-weight: bold;
+    font-size: 0.85rem; /* 🚀 SMALLER: Label text */
+}
+
+.floating-tp-input {
+    width: 60%;
+    padding: 6px !important; /* 🚀 SMALLER: Shrinks the input box height */
+    font-size: 0.85rem !important;
+}
+
+/* 🚀 SMALLER: Shrinks the Cancel/Update buttons so they match the new compact box */
+.floating-tp-panel .modal-btn-row {
+    margin-top: 10px !important;
+}
+.floating-tp-panel .modal-btn {
+    padding: 8px; 
+    font-size: 0.85rem;
+}
+
+.btn-floating-cancel {
+    background: #333947;
+    border-color: #111;
+}
+
+.btn-floating-update {
+    background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%);
 }
