@@ -265,40 +265,40 @@
     box-sizing: border-box;
 }
 
-/* 4. THE VERTICAL COLUMNS */
+/* 4. THE VERTICAL COLUMNS (Base styles) */
 .rs-cartesian-col {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center; 
-    
-    flex: 0 0 50%; 
-    width: 50%;
-    
     height: 100%;
     gap: 1px; 
     box-sizing: border-box;
 }
 
-/* Second vertical divider */
+/* 🚀 THE FIX: First column (X, Y, Z) gets 43% of the total width */
 .rs-cartesian-col:first-child {
+    flex: 0 0 53.75%; 
+    width: 53.75%;
     border-right: 2px solid #111; 
 }
 
-/* 5. INDIVIDUAL ROW LAYOUT (Dynamic Squeeze Lock) */
+/* 🚀 THE FIX: Second column (A, B, C) gets 37% of the total width */
+.rs-cartesian-col:last-child {
+    flex: 0 0 46.25%;
+    width: 46.25%;
+}
+
+/* 5. INDIVIDUAL ROW LAYOUT */
 .rs-cart-row {
     display: grid;
-    /* 🚀 THE DYNAMIC ADJUST FIX: 
-       'max-content' guarantees the 0.000 never gets cut off. 
-       '1fr' lets it breathe out to 150px on big screens. */
     grid-template-columns: 25px minmax(max-content, 1fr) 30px; 
     align-items: baseline; 
-    
-    /* 🚀 The gap shrinks dynamically when you minimize, protecting the font size! */
     gap: clamp(2px, 1vw, 8px); 
     line-height: 1.15; 
     width: 100%;
-    max-width: 150px; /* Keeps the text perfectly grouped in the center */
+    /* 🚀 INCREASED slightly from 150px to 165px so XYZ has room to breathe */
+    max-width: 165px; 
 }
 
 /* 6. LABELS (X, Y, Z, A, B, C) */

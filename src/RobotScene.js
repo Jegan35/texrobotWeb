@@ -285,24 +285,30 @@ const RobotScene = () => {
   const isSystemOk = !(hasErrorMessage || hasErrorFlag);
   
   const controlsRef = useRef(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [setIsMenuOpen] = useState(false);
 
   // 🚀 CARTESIAN FORMATTER (Forces 000.000 padding)
-  const formatCartesian = (val) => {
+// 🚀 FORMATTER FOR JOINTS (7 characters: 000.000)
+  const formatJoint = (val) => {
+    if (val === undefined || val === null) return "000.000";
+    const isNegative = val < 0;
+    const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
+    return isNegative ? `-${formattedNum}` : formattedNum;
+  };
+
+  // 🚀 FORMATTER FOR X, Y, Z (8 characters: 0000.000)
+  const formatXYZ = (val) => {
     if (val === undefined || val === null) return "0000.000";
     const isNegative = val < 0;
     const formattedNum = Math.abs(val).toFixed(3).padStart(8, '0');
     return isNegative ? `-${formattedNum}` : formattedNum;
   };
-  // 🚀 JOINTS FORMATTER (Forces 00.00 padding)
- const formatJoint = (val) => {
-    // 🚀 Changed fallback to 3 zeros and 3 decimals
-    if (val === undefined || val === null) return "000.000"; 
-    
+
+  // 🚀 FORMATTER FOR A, B, C (7 characters: 000.000)
+  const formatABC = (val) => {
+    if (val === undefined || val === null) return "000.000";
     const isNegative = val < 0;
-    // 🚀 toFixed(3) for decimals, padStart(7, '0') to guarantee 000.000 format
     const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
-    
     return isNegative ? `-${formattedNum}` : formattedNum;
   };
 
@@ -366,18 +372,18 @@ const RobotScene = () => {
           <div className="rs-cartesian-col">
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">X</span>
-              {/* 🚀 APPLY THE FORMAT HELPER HERE */}
-              <span className="rs-cart-val">{formatCartesian(c.x)}</span>
+              {/* 🚀 THE FIX: We now use formatXYZ for the first column! */}
+              <span className="rs-cart-val">{formatXYZ(c.x)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">Y</span>
-              <span className="rs-cart-val">{formatCartesian(c.y)}</span>
+              <span className="rs-cart-val">{formatXYZ(c.y)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">Z</span>
-              <span className="rs-cart-val">{formatCartesian(c.z)}</span>
+              <span className="rs-cart-val">{formatXYZ(c.z)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
           </div>
@@ -386,21 +392,21 @@ const RobotScene = () => {
           <div className="rs-cartesian-col">
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">A</span>
-              <span className="rs-cart-val">{formatCartesian(c.rx)}</span>
+              {/* 🚀 THE FIX: We now use formatABC for the second column! */}
+              <span className="rs-cart-val">{formatABC(c.rx)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">B</span>
-              <span className="rs-cart-val">{formatCartesian(c.ry)}</span>
+              <span className="rs-cart-val">{formatABC(c.ry)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">C</span>
-              <span className="rs-cart-val">{formatCartesian(c.rz)}</span>
+              <span className="rs-cart-val">{formatABC(c.rz)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
           </div>
-
         </div>
       </div>
       {/* --- 3D CANVAS --- */}
