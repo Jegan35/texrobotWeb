@@ -15,11 +15,9 @@ export const WebSocketProvider = ({ children }) => {
   const [authMessage, setAuthMessage] = useState('');
   const [userRole, setUserRole] = useState(null); 
   
-  // We use a ref for credentials so the ws.onopen closure always has the latest values for auto-reconnects
   const [loginCreds, setLoginCredsState] = useState(null);
   const loginCredsRef = useRef(null);
   
-  // Make sure the role is saved in the state and ref!
   const setLoginCreds = (creds) => {
       setLoginCredsState(creds);
       loginCredsRef.current = creds;
@@ -50,37 +48,73 @@ export const WebSocketProvider = ({ children }) => {
     program_count_output: "0", is_calculating_trajectory: false,
     is_physically_moving: false,
     speed_op: 0, di_val: 0, do_val: 0,
-    highlighted_instruction: -1, // <--- 1. INITIAL STATE ADDED HERE
+    highlighted_instruction: -1, 
     staging_data: {},
     error_pos_data: {}, ether_cat_data: {}, variable_data: {}, mech_data: {},
     blueTrajectory: [], redTrajectory: [],
     graph_data: []
   });
 
+  // ========================================================
+  // 🚀 FULLSCREEN & ORIENTATION LOCK HELPERS
+  // ========================================================
+  const goFullScreenAndLock = async () => {
+      const elem = document.documentElement;
+      try {
+          // 1. Enter Fullscreen
+          if (elem.requestFullscreen) {
+              await elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) { /* Safari */
+              await elem.webkitRequestFullscreen();
+          }
+          
+          // 2. Lock Orientation to Landscape (Prevents Auto-Rotate!)
+          if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+              await window.screen.orientation.lock("landscape");
+          }
+      } catch (err) {
+          console.warn("Fullscreen or Orientation Lock failed:", err);
+      }
+  };
+
+  const exitFullScreenAndUnlock = async () => {
+      try {
+          // 1. Unlock Orientation
+          if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+              window.screen.orientation.unlock();
+          }
+          
+          // 2. Exit Fullscreen
+          if (document.fullscreenElement || document.webkitFullscreenElement) {
+              if (document.exitFullscreen) {
+                  await document.exitFullscreen();
+              } else if (document.webkitExitFullscreen) { /* Safari */
+                  await document.webkitExitFullscreen();
+              }
+          }
+      } catch (err) {
+          console.warn("Exit Fullscreen failed:", err);
+      }
+  };
+
   // --- LOGIN HANDLER WITH OFFLINE DUMMY BYPASS ---
   const loginToRobot = (ip, user, pass, role) => {
-      
-      // ========================================================
-      // 🛠️ DUMMY ACCESS / OFFLINE MODE BYPASS
-      // If User ID and Password are "dummy", bypass the server!
-      // ========================================================
       if (user === 'dummy' && pass === 'dummy') {
           console.warn(`[OFFLINE MODE] Dummy Login Activated as ${role}`);
-          setAuthStatus('idle'); // Clears the loading screen
-          setUserRole(role);     // Sets Operator or Programmer
-          setIsConnected(true);  // Unlocks the Main UI
-          return;                // STOP HERE. Do not attempt to connect to WS.
+          setAuthStatus('idle'); 
+          setUserRole(role);     
+          setIsConnected(true);  
+          
+          // 🚀 TRIGGER FULLSCREEN & LOCK ROTATION
+          goFullScreenAndLock(); 
+          return;                
       }
 
-      // --- NORMAL PRODUCTION LOGIN ---
       setAuthStatus('authenticating');
       setAuthMessage('Connecting to server...');
-      
-      // Save all 3 pieces of data so they can be sent when the socket connects
       setLoginCreds({ user, pass, role }); 
-      
       setIpAddress(ip);
-      ipRef.current = ip; // Sync immediately for the connection
+      ipRef.current = ip; 
       connectWebSocket();
   };
 
@@ -114,11 +148,7 @@ export const WebSocketProvider = ({ children }) => {
         console.log(`CONNECTED TO: ${wsUrl}`);
         setIsConnecting(false);
 
-        // --- SEND AUTHENTICATION IMMEDIATELY UPON SOCKET OPEN ---
         if (loginCredsRef.current) {
-            console.log(`Sending REMOTE_AUTH: User=${loginCredsRef.current.user}, Role=${loginCredsRef.current.role}`);
-            
-            // This JSON payload exactly matches your C++ logic
             wsRef.current.send(JSON.stringify({
                 command: "REMOTE_AUTH",
                 username: loginCredsRef.current.user,
@@ -143,9 +173,6 @@ export const WebSocketProvider = ({ children }) => {
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
 
-        // --- AUTHENTICATION RESPONSES FROM C++ ---
-        
-        // 1. C++ rejected us
         if (data.type === "auth_rejected") {
             if (data.message.includes("Safety Lock")) {
                 setAuthStatus('safety_lock');
@@ -155,23 +182,24 @@ export const WebSocketProvider = ({ children }) => {
             setAuthMessage(data.message); 
             isIntentionalDisconnect.current = true;
             wsRef.current.close();
+            exitFullScreenAndUnlock(); // Ensure unlock if rejected
         }
-        // 2. C++ verified credentials and role match, waiting for Admin on the physical screen
         else if (data.type === "auth_success") {
             setAuthStatus('waiting_admin');
             setAuthMessage(data.message);
         }
-        // 3. Admin physically clicked 'Accept'
         else if (data.type === "connection_accepted") {
           console.log("C++ Admin Accepted Connection!");
-          setAuthStatus('idle'); // Clear the login screen
+          setAuthStatus('idle'); 
           setIsConnected(true);
           setIsConnecting(false);
           setAccessFull(false);
           setConnectionFailed(false);
-          setUserRole(data.role); // Save the verified role
+          setUserRole(data.role); 
+          
+          // 🚀 TRIGGER FULLSCREEN & LOCK ROTATION
+          goFullScreenAndLock();
         }
-        // 4. Admin physically clicked 'Reject'
         else if (data.type === "connection_rejected" || data.type === "access_full") {
           console.warn("C++ Admin Rejected Connection.");
           setIsConnected(false); setIsConnecting(false); setAccessFull(true);
@@ -180,8 +208,8 @@ export const WebSocketProvider = ({ children }) => {
           setAuthMessage(data.message || "Connection denied.");
           isAccessFullRef.current = true;
           wsRef.current.close();
+          exitFullScreenAndUnlock(); // Ensure unlock
         }
-        // 5. Admin kicked us out mid-session
         else if (data.type === "force_disconnect") {
           setIsConnected(false); setIsConnecting(false); setAccessFull(true);
           setRejectMessage(data.message || "You have been disconnected by the server admin.");
@@ -190,6 +218,9 @@ export const WebSocketProvider = ({ children }) => {
           setAuthMessage(data.message || "Disconnected by admin.");
           isIntentionalDisconnect.current = true;
           wsRef.current.close();
+          
+          // 🚀 UNLOCK AND EXIT FULLSCREEN IF KICKED
+          exitFullScreenAndUnlock();
         }
         
         // --- EXISTING ROBOT STATUS LOGIC ---
@@ -247,7 +278,6 @@ export const WebSocketProvider = ({ children }) => {
               variable_data: data.variable_data || prevState.variable_data || {},
               staging_data: data.staging_data || prevState.staging_data || {},
               
-              // <--- 2. STATE UPDATE ADDED HERE --->
               highlighted_instruction: data.highlighted_instruction !== undefined ? data.highlighted_instruction : prevState.highlighted_instruction,
 
               tp_list: finalTpList,
@@ -284,8 +314,12 @@ export const WebSocketProvider = ({ children }) => {
     isIntentionalDisconnect.current = true;
     setIsConnecting(false);
     setIsConnected(false);
-    setAuthStatus('idle'); // Clear auth on disconnect
+    setAuthStatus('idle'); 
     setUserRole(null);
+    
+    // 🚀 UNLOCK AND EXIT FULLSCREEN ON DISCONNECT
+    exitFullScreenAndUnlock();
+
     if (wsRef.current) wsRef.current.close();
   };
 
@@ -309,4 +343,4 @@ export const WebSocketProvider = ({ children }) => {
   );
 };
 
-export const useWebSocket = () => useContext(WebSocketContext);
+export const useWebSocket = () => useContext(WebSocketContext); 

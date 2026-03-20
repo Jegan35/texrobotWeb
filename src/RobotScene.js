@@ -437,7 +437,7 @@ const RobotScene = () => {
           </Suspense>
 
           {/* 🚀 INCREASE THE MARGIN: 120px from the right, 100px from the bottom */}
-<GizmoHelper alignment="bottom-right" margin={[165, 160]}>
+<GizmoHelper alignment="bottom-right" margin={[175, 170]}>
             <GizmoViewport axisColors={[COLORS.X_RED, COLORS.Y_GREEN, COLORS.Z_BLUE]} labelColor="white" />
           </GizmoHelper>
         </Canvas>
