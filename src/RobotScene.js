@@ -269,10 +269,11 @@ const RobotScene = () => {
   const bluePts = robotState?.blueTrajectory || [];
   const redPts = robotState?.redTrajectory || [];
 
-  // --- CONNECT SYSTEM OK STATE ---
+// --- CONNECT SYSTEM OK STATE ---
   const rs = robotState || {};
   const currentError = rs.error_message || "No error";
   const errLower = currentError.toLowerCase().trim();
+  
   const hasErrorMessage = !["no error", "no active errors", "error cleared"].includes(errLower) && errLower !== "";
 
   const hasErrorFlag = 
@@ -282,8 +283,17 @@ const RobotScene = () => {
       (rs.error_code !== undefined && rs.error_code !== 0 && rs.error_code !== "0");
 
   const isSystemOk = !(hasErrorMessage || hasErrorFlag);
+  
   const controlsRef = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // 🚀 CARTESIAN FORMATTER (Forces 000.000 padding)
+  const formatCartesian = (val) => {
+    if (val === undefined || val === null) return "000.000";
+    const isNegative = val < 0;
+    const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
+    return isNegative ? `-${formattedNum}` : formattedNum;
+  };
 
   // --- CAMERA RECENTER LOGIC ---
   const handleRecenter = () => {
@@ -344,17 +354,18 @@ const RobotScene = () => {
           <div className="rs-cartesian-col">
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">X</span>
-              <span className="rs-cart-val">{c.x !== undefined ? c.x.toFixed(3) : "0.000"}</span>
+              {/* 🚀 APPLY THE FORMAT HELPER HERE */}
+              <span className="rs-cart-val">{formatCartesian(c.x)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">Y</span>
-              <span className="rs-cart-val">{c.y !== undefined ? c.y.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-val">{formatCartesian(c.y)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">Z</span>
-              <span className="rs-cart-val">{c.z !== undefined ? c.z.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-val">{formatCartesian(c.z)}</span>
               <span className="rs-cart-unit">mm</span>
             </div>
           </div>
@@ -363,17 +374,17 @@ const RobotScene = () => {
           <div className="rs-cartesian-col">
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">A</span>
-              <span className="rs-cart-val">{c.rx !== undefined ? c.rx.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-val">{formatCartesian(c.rx)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">B</span>
-              <span className="rs-cart-val">{c.ry !== undefined ? c.ry.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-val">{formatCartesian(c.ry)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
             <div className="rs-cart-row">
               <span className="rs-cart-lbl">C</span>
-              <span className="rs-cart-val">{c.rz !== undefined ? c.rz.toFixed(3) : "0.000"}</span>
+              <span className="rs-cart-val">{formatCartesian(c.rz)}</span>
               <span className="rs-cart-unit">°</span>
             </div>
           </div>
