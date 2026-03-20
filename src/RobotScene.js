@@ -295,11 +295,14 @@ const RobotScene = () => {
     return isNegative ? `-${formattedNum}` : formattedNum;
   };
   // 🚀 JOINTS FORMATTER (Forces 00.00 padding)
-  const formatJoint = (val) => {
-    if (val === undefined || val === null) return "00.00";
+ const formatJoint = (val) => {
+    // 🚀 Changed fallback to 3 zeros and 3 decimals
+    if (val === undefined || val === null) return "000.000"; 
+    
     const isNegative = val < 0;
-    // padStart(5, '0') ensures at least 2 digits, a dot, and 2 decimals (e.g., "05.00")
-    const formattedNum = Math.abs(val).toFixed(2).padStart(5, '0');
+    // 🚀 toFixed(3) for decimals, padStart(7, '0') to guarantee 000.000 format
+    const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
+    
     return isNegative ? `-${formattedNum}` : formattedNum;
   };
 
