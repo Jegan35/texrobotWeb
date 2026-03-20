@@ -289,9 +289,9 @@ const RobotScene = () => {
 
   // 🚀 CARTESIAN FORMATTER (Forces 000.000 padding)
   const formatCartesian = (val) => {
-    if (val === undefined || val === null) return "000.000";
+    if (val === undefined || val === null) return "0000.000";
     const isNegative = val < 0;
-    const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
+    const formattedNum = Math.abs(val).toFixed(3).padStart(8, '0');
     return isNegative ? `-${formattedNum}` : formattedNum;
   };
   // 🚀 JOINTS FORMATTER (Forces 00.00 padding)
