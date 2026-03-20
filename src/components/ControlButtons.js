@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
 import './ControlButtons.css'; 
 
-const ControlButtons = () => {
+const ControlButtons = ({ userRole, currentMode }) => {
   // 1. WE ADDED userRole HERE TO CHECK WHO IS LOGGED IN!
-  const { sendCommand, robotState, userRole } = useWebSocket();
+  const { sendCommand, robotState } = useWebSocket();
 
   const rs = robotState || {};
   const servoOn = rs.servo_on === true;
   const isStarted = rs.started === true;
   const isRunning = rs.paused === false;
-  const mode = rs.mode || "MODE";
   const currentError = rs.error_message || "No error";
   
   const speedOp = rs.speed_op !== undefined ? Number(rs.speed_op).toFixed(1) : "0.0";
@@ -19,6 +18,19 @@ const ControlButtons = () => {
   const prFiles = rs.pr_file_list || [];
   const currentTp = rs.current_tp_name || "None";
   const currentPr = rs.current_pr_name || "None";
+
+  // 🚀 THE FIX: Dynamic color logic for the Mode Button!
+  const getModeColor = (modeStr) => {
+      if (!modeStr) return "#00E676"; // Default Green
+      const m = modeStr.toUpperCase();
+      if (m === "AUTO") return "#039BE5"; // Bright Blue for AUTO
+      if (m === "MANUAL" || m === "TEACH") return "#FFB300"; // Warning Yellow for MANUAL
+      return "#00E676"; // System Green for SIM / Default
+  };
+  
+  // Safely use currentMode passed from RightPart, defaulting to SIM
+  const displayMode = currentMode || (rs.mode ? rs.mode.toUpperCase() : "SIM");
+  const modeColor = getModeColor(displayMode);
 
   const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
   const [isSystemOkOpen, setIsSystemOkOpen] = useState(false);
@@ -239,8 +251,25 @@ const ControlButtons = () => {
         <button className={`btn ${isRunning ? 'btn-green' : 'btn-yellow'}`} onClick={handleRunPauseToggle}>{isRunning ? '► RUN' : '❚❚ PAUSE'}</button>
         <button className={`btn ${isStarted ? 'btn-red' : 'btn-orange'}`} onClick={handleStartStopToggle}>{isStarted ? '⏹ STOP' : '▶ START'}</button>
         <button className="btn btn-red1" onClick={handleExitClick}>✖ EXIT</button>
+        
+        {/* 🚀 THE FIX: Dynamic Mode Indicator Button! */}
         <div style={{ position: "relative", display: "flex", width: "100%" }}>
-          <button className="btn btn-outline-green" style={{ width: "100%" }} onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}>{mode}</button>
+          <button 
+              className="btn" 
+              style={{ 
+                  width: "100%",
+                  color: modeColor, 
+                  border: `2px solid ${modeColor}`,
+                  backgroundColor: '#1a1e29',
+                  fontWeight: '900',
+                  boxShadow: `inset 0 0 10px ${modeColor}33`,
+                  textTransform: 'uppercase'
+              }} 
+              onClick={() => setIsModeMenuOpen(!isModeMenuOpen)}
+          >
+              {displayMode}
+          </button>
+          
           {isModeMenuOpen && (
             <div style={{ position: 'absolute', bottom: '120%', left: 0, width: '100%', background: '#111', border: '2px solid #4CAF50', zIndex: 99999, borderRadius: '6px', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.8)' }}>
               <button className="popup-menu-btn" style={{ borderBottom: '1px solid #333' }} onClick={() => handleModeSelect('SIM')}>SIM</button>

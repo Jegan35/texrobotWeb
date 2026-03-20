@@ -3,7 +3,8 @@ import { useWebSocket } from '../context/WebSocketContext';
 import './LoginPortal.css';
 
 const LoginPortal = () => {
-    const { loginToRobot, authStatus, authMessage, connectionFailed } = useWebSocket();
+    // 🚀 THE FIX: Extract goFullScreenAndLock from Context!
+    const { loginToRobot, authStatus, authMessage, connectionFailed, goFullScreenAndLock } = useWebSocket();
     
     // Set your default IP here
     const [ip, setIp] = useState('192.168.1.36'); 
@@ -11,40 +12,32 @@ const LoginPortal = () => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('Programmer');
 
-    // 🚀 THE FIX: Now an onClick handler instead of a form submission
     const handleLoginClick = (e) => {
         e.preventDefault();
         
-        // 🚀 THE FIX: Manual validation replaces the HTML "required" attribute
         if (!ip || !userId || !password) {
             alert("Please fill in the Server IP, Username, and Password fields.");
             return;
         }
 
+        // 🚀 THE FIX: Force fullscreen the exact millisecond they click Login!
+        goFullScreenAndLock();
+
         loginToRobot(ip, userId, password, role);
     };
 
     return (
-        /* 🚀 BACKGROUND IMAGE: Safely pulls bg.png from the public folder */
-        <div 
-            className="login-master-container" 
-            style={{ backgroundImage: "url('/bg.png')" }}
-        >
+        <div className="login-master-container" style={{ backgroundImage: "url('/bg.png')" }}>
             <div className="login-box">
-                
-                {/* --- BLUE HEADER AREA WITH LOGO IMAGE --- */}
                 <div className="login-header-blue">
-                    {/* 🚀 LOGO IMAGE: Safely pulls logo.png from the public folder */}
                     <img src="/logo.png" alt="TEXSONICS Logo" className="login-logo-img" />
                 </div>
                 
                 <div className="login-body">
-                    {/* --- PIXEL/BLOCKY HEADING --- */}
                     <div className="auth-heading-container">
                         <h3 className="auth-heading">CONTROLLER<br/>AUTHENTICATION</h3>
                     </div>
 
-                    {/* DYNAMIC ERROR / SUCCESS MESSAGES */}
                     {authStatus === 'rejected' && <div className="login-error">{authMessage}</div>}
                     
                     {(authStatus === 'error' || connectionFailed) && (
@@ -67,10 +60,7 @@ const LoginPortal = () => {
                         </div>
                     )}
 
-                    {/* 🚀 THE FIX: Changed <form> to a standard <div> so Chrome doesn't scan it! */}
                     <div className="login-form">
-                        
-                        {/* 🚀 FIXED: IP Field (No history dropdown, no spellcheck) */}
                         <div className="input-group">
                             <label>Server IP</label>
                             <input 
@@ -84,7 +74,6 @@ const LoginPortal = () => {
                             />
                         </div>
 
-                        {/* 🚀 FIXED: Username Field (No history dropdown) */}
                         <div className="input-group">
                             <label>Username</label>
                             <input 
@@ -98,7 +87,6 @@ const LoginPortal = () => {
                             />
                         </div>
                         
-                        {/* 🚀 THE GHOST INPUT: Chrome thinks this is just text! */}
                         <div className="input-group">
                             <label>Password</label>
                             <input 
@@ -107,7 +95,7 @@ const LoginPortal = () => {
                                 id="secure_hash_data"
                                 autoComplete="new-password" 
                                 spellCheck="false"
-                                style={{ WebkitTextSecurity: 'disc' }} /* Keeps the black dots! */
+                                style={{ WebkitTextSecurity: 'disc' }} 
                                 placeholder="Enter your password" 
                                 value={password} 
                                 onChange={(e) => setPassword(e.target.value)} 
@@ -115,36 +103,20 @@ const LoginPortal = () => {
                             />
                         </div>
 
-                        {/* RADIO BUTTONS FOR ROLE */}
                         <div className="input-group">
                             <label>Role</label>
                             <div className="radio-group">
                                 <label className="radio-label">
-                                    <input 
-                                        type="radio" 
-                                        name="role"
-                                        value="Programmer"
-                                        checked={role === 'Programmer'}
-                                        onChange={(e) => setRole(e.target.value)}
-                                        disabled={authStatus === 'waiting_admin'}
-                                    />
+                                    <input type="radio" name="role" value="Programmer" checked={role === 'Programmer'} onChange={(e) => setRole(e.target.value)} disabled={authStatus === 'waiting_admin'} />
                                     Programmer
                                 </label>
                                 <label className="radio-label">
-                                    <input 
-                                        type="radio" 
-                                        name="role"
-                                        value="Operator"
-                                        checked={role === 'Operator'}
-                                        onChange={(e) => setRole(e.target.value)}
-                                        disabled={authStatus === 'waiting_admin'}
-                                    />
+                                    <input type="radio" name="role" value="Operator" checked={role === 'Operator'} onChange={(e) => setRole(e.target.value)} disabled={authStatus === 'waiting_admin'} />
                                     Operator
                                 </label>
                             </div>
                         </div>
 
-                        {/* 🚀 THE FIX: Changed type="submit" to type="button" and added onClick! */}
                         <button 
                             type="button" 
                             onClick={handleLoginClick}

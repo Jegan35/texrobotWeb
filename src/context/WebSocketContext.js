@@ -360,12 +360,14 @@ export const WebSocketProvider = ({ children }) => {
     }
   };
 
+ // AT THE VERY BOTTOM OF WebSocketContext.js
   return (
     <WebSocketContext.Provider value={{
       isConnected, isConnecting, ipAddress, setIpAddress, connectWebSocket, disconnectWebSocket, sendCommand, robotState,
       accessFull, setAccessFull, connectionFailed, setConnectionFailed, rejectMessage,
       isGraphReading, setGraphReading, 
-      loginToRobot, authStatus, authMessage, userRole 
+      loginToRobot, authStatus, authMessage, userRole,
+      goFullScreenAndLock // 🚀 ADD THIS EXPORT HERE!
     }}>
       {children}
     </WebSocketContext.Provider>

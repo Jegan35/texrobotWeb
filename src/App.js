@@ -4,23 +4,23 @@ import { WebSocketProvider, useWebSocket } from './context/WebSocketContext';
 // Components
 import RobotScene from './RobotScene';
 import RightPart from './components/RightPart';
-import LoginPortal from './components/LoginPortal'; // IMPORT THE NEW LOGIN PORTAL
+import LoginPortal from './components/LoginPortal'; 
 
 function AppContent() {
-  const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket, userRole, isConnected } = useWebSocket(); 
+  const { accessFull, setAccessFull, connectionFailed, setConnectionFailed, connectWebSocket, userRole, isConnected, disconnectWebSocket } = useWebSocket(); 
   
   const [showReloadWarning, setShowReloadWarning] = useState(false);
   const [reloadFocus, setReloadFocus] = useState('cancel');
   const [failedFocus, setFailedFocus] = useState('retry');
-  // 🚀 THE FULLSCREEN ENFORCER STATE
+  
+  // 🚀 THE UNIFIED TRAP STATE (Handles both ESC and Tablet Swipes!)
   const [enforceFS, setEnforceFS] = useState(false);
 
-  // Detect if the user swipes edge and drops out of fullscreen
+  // 1. Detect if the browser drops out of fullscreen (ESC Key)
   useEffect(() => {
     const handleFSChange = () => {
-      // If we are logged in, but the browser is no longer in fullscreen...
       if (isConnected && !document.fullscreenElement && !document.webkitFullscreenElement) {
-        setEnforceFS(true); // Trigger the trap!
+        setEnforceFS(true); 
       }
     };
     
@@ -33,16 +33,17 @@ function AppContent() {
     };
   }, [isConnected]);
 
+  // 2. Resume Operation function
   const handleResumeFullscreen = async () => {
+    setEnforceFS(false); // Instantly drop the black screen
     try {
         const elem = document.documentElement;
         if (elem.requestFullscreen) await elem.requestFullscreen();
         else if (elem.webkitRequestFullscreen) await elem.webkitRequestFullscreen();
         
         if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
-            await window.screen.orientation.lock("landscape");
+            await window.screen.orientation.lock("landscape").catch(e => console.warn("Orientation lock skipped", e));
         }
-        setEnforceFS(false); // Remove the trap
     } catch (err) {
         console.warn("Could not resume:", err);
     }
@@ -52,29 +53,30 @@ function AppContent() {
   useEffect(() => { if (showReloadWarning) setReloadFocus('cancel'); }, [showReloadWarning]);
 
   // ========================================================
-  // 🚀 BROWSER LOCKDOWN (KIOSK MODE TRAPS)
+  // 🚀 BROWSER LOCKDOWN & SWIPE TRAP
   // ========================================================
   useEffect(() => {
-    // Only deploy the traps if they are actively logged in
     if (isConnected) {
-      
-      // 1. TRAP THE BACK BUTTON & SWIPES (History API Hijack)
-      window.history.pushState(null, "", window.location.href);
+      // Create the deep history trap
+      window.history.pushState({ page: 'robot' }, "", window.location.href);
+      window.history.pushState({ page: 'robot' }, "", window.location.href);
+
+      // Intercept the Tablet Edge Swipe!
       const handlePopState = (e) => {
-        window.history.pushState(null, "", window.location.href);
-        console.warn("Back button disabled by Robot Controller!");
+        // Shove them back into the trap
+        window.history.pushState({ page: 'robot' }, "", window.location.href);
+        // 🚀 THE FIX: Trigger the EXACT SAME Pause screen as the ESC key!
+        setEnforceFS(true); 
       };
+
       window.addEventListener("popstate", handlePopState);
 
-      // 2. TRAP PAGE RELOADS & CLOSING THE TAB
       const handleBeforeUnload = (e) => {
         e.preventDefault();
-        // Standard browsers require this exact property to trigger the warning box
         e.returnValue = "Are you sure? This will instantly cut the robot connection!"; 
       };
       window.addEventListener("beforeunload", handleBeforeUnload);
 
-      // Cleanup when they use the proper Disconnect button
       return () => {
         window.removeEventListener("popstate", handlePopState);
         window.removeEventListener("beforeunload", handleBeforeUnload);
@@ -96,29 +98,20 @@ function AppContent() {
 
   // --- KEYBOARD MODAL CONTROLS ---
   useEffect(() => {
-    if (!showReloadWarning && !accessFull && !connectionFailed) return;
-    {/* 🚀 THE FULLSCREEN ENFORCER OVERLAY */}
-      {enforceFS && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: '#000', zIndex: 999999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center' }}>
-            <h1 style={{ color: '#F44336', fontSize: '3rem', marginBottom: '10px', textTransform: 'uppercase' }}>⚠️ Operation Paused</h1>
-            <p style={{ color: '#fff', fontSize: '1.2rem', marginBottom: '40px' }}>Application must run in Fullscreen mode.</p>
-            <button 
-                onClick={handleResumeFullscreen} 
-                style={{ padding: '20px 40px', fontSize: '1.5rem', fontWeight: '900', backgroundColor: '#00bcd4', color: '#111', border: 'none', borderRadius: '8px', cursor: 'pointer', textTransform: 'uppercase', boxShadow: '0 0 20px rgba(0, 188, 212, 0.5)' }}
-            >
-              Resume Operation
-            </button>
-          </div>
-        </div>
-      )}
+    if (!showReloadWarning && !accessFull && !connectionFailed && !enforceFS) return;
+    
     const handleModalKeys = (e) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+      
       if (showReloadWarning) {
         if (e.key === 'ArrowRight') setReloadFocus('reload');
         else if (e.key === 'ArrowLeft') setReloadFocus('cancel');
         else if (e.key === 'Enter') { e.preventDefault(); reloadFocus === 'cancel' ? setShowReloadWarning(false) : window.location.reload(); } 
         else if (e.key === 'Escape') { e.preventDefault(); setShowReloadWarning(false); }
+      }
+      else if (enforceFS) {
+        // Block ESC from doing anything while the pause screen is up
+        if (e.key === 'Escape') { e.preventDefault(); }
       }
       else if (accessFull && (e.key === 'Enter' || e.key === 'Escape')) { e.preventDefault(); setAccessFull(false); }
       else if (connectionFailed) {
@@ -130,10 +123,40 @@ function AppContent() {
     };
     window.addEventListener('keydown', handleModalKeys);
     return () => window.removeEventListener('keydown', handleModalKeys);
-  }, [showReloadWarning, accessFull, connectionFailed, reloadFocus, failedFocus, setAccessFull, setConnectionFailed, connectWebSocket]);
+  }, [showReloadWarning, accessFull, connectionFailed, reloadFocus, failedFocus, setAccessFull, setConnectionFailed, connectWebSocket, enforceFS]);
 
   return (
     <>
+      {/* 🚀 THE UNIFIED OPERATION PAUSED / DISCONNECT OVERLAY */}
+      {enforceFS && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.95)', zIndex: 999999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
+          <div style={{ textAlign: 'center', backgroundColor: '#1e222b', padding: '40px', borderRadius: '12px', borderTop: '4px solid #F44336', boxShadow: '0 15px 35px rgba(0,0,0,0.8)' }}>
+            <h1 style={{ color: '#F44336', fontSize: '2.5rem', margin: '0 0 10px 0', textTransform: 'uppercase' }}>⚠️ Operation Paused</h1>
+            <div style={{ width: '100%', height: '1px', backgroundColor: '#333', marginBottom: '20px' }}></div>
+            <p style={{ color: '#ddd', fontSize: '1.2rem', marginBottom: '35px' }}>Application must run in Fullscreen mode to continue.</p>
+            
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+                <button 
+                    onClick={() => {
+                        setEnforceFS(false);
+                        disconnectWebSocket();
+                    }} 
+                    style={{ padding: '15px 30px', fontSize: '1.2rem', fontWeight: '900', backgroundColor: '#333947', color: '#fff', border: '2px solid #E53935', borderRadius: '8px', cursor: 'pointer', textTransform: 'uppercase', transition: '0.2s' }}
+                >
+                  DISCONNECT
+                </button>
+                
+                <button 
+                    onClick={handleResumeFullscreen} 
+                    style={{ padding: '15px 30px', fontSize: '1.2rem', fontWeight: '900', backgroundColor: '#00bcd4', color: '#111', border: 'none', borderRadius: '8px', cursor: 'pointer', textTransform: 'uppercase', boxShadow: '0 0 20px rgba(0, 188, 212, 0.5)' }}
+                >
+                  RESUME OPERATION
+                </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* WARNING MODALS */}
       {showReloadWarning && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -255,16 +278,14 @@ function AppContent() {
   );
 }
 
-// MAIN ROUTER: Chooses between Login Screen or App
+// MAIN ROUTER
 function MainRouter() {
   const { isConnected } = useWebSocket();
 
-  // If we are NOT fully connected and approved, show the Login Portal
   if (!isConnected) {
       return <LoginPortal />;
   }
 
-  // Once Admin clicks Accept, we load the Main App!
   return <AppContent />;
 }
 
