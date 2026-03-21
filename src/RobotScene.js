@@ -289,29 +289,23 @@ const RobotScene = () => {
 
   // 🚀 CARTESIAN FORMATTER (Forces 000.000 padding)
 // 🚀 FORMATTER FOR JOINTS (7 characters: 000.000)
+ // 🚀 FORMATTER FOR JOINTS (Defaults to 000.000, but keeps real numbers clean)
   const formatJoint = (val) => {
-    if (val === undefined || val === null) return "000.000";
-    const isNegative = val < 0;
-    const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
-    return isNegative ? `-${formattedNum}` : formattedNum;
+    if (val === undefined || val === null || isNaN(val) || Number(val) === 0) return "000.000";
+    return Number(val).toFixed(3);
   };
 
-  // 🚀 FORMATTER FOR X, Y, Z (8 characters: 0000.000)
+  // 🚀 FORMATTER FOR X, Y, Z
   const formatXYZ = (val) => {
-    if (val === undefined || val === null) return "0000.000";
-    const isNegative = val < 0;
-    const formattedNum = Math.abs(val).toFixed(3).padStart(8, '0');
-    return isNegative ? `-${formattedNum}` : formattedNum;
+    if (val === undefined || val === null || isNaN(val) || Number(val) === 0) return "000.000";
+    return Number(val).toFixed(3);
   };
 
-  // 🚀 FORMATTER FOR A, B, C (7 characters: 000.000)
+  // 🚀 FORMATTER FOR A, B, C
   const formatABC = (val) => {
-    if (val === undefined || val === null) return "000.000";
-    const isNegative = val < 0;
-    const formattedNum = Math.abs(val).toFixed(3).padStart(7, '0');
-    return isNegative ? `-${formattedNum}` : formattedNum;
+    if (val === undefined || val === null || isNaN(val) || Number(val) === 0) return "000.000";
+    return Number(val).toFixed(3);
   };
-
   // --- CAMERA RECENTER LOGIC ---
   const handleRecenter = () => {
     if (controlsRef.current) {

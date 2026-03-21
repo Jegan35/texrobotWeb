@@ -128,6 +128,7 @@ function AppContent() {
   return (
     <>
       {/* 🚀 THE UNIFIED OPERATION PAUSED / DISCONNECT OVERLAY */}
+      {/* 🚀 THE UNIFIED OPERATION PAUSED OVERLAY */}
       {enforceFS && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.95)', zIndex: 999999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
           <div style={{ textAlign: 'center', backgroundColor: '#1e222b', padding: '40px', borderRadius: '12px', borderTop: '4px solid #F44336', boxShadow: '0 15px 35px rgba(0,0,0,0.8)' }}>
@@ -136,16 +137,6 @@ function AppContent() {
             <p style={{ color: '#ddd', fontSize: '1.2rem', marginBottom: '35px' }}>Application must run in Fullscreen mode to continue.</p>
             
             <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
-                <button 
-                    onClick={() => {
-                        setEnforceFS(false);
-                        disconnectWebSocket();
-                    }} 
-                    style={{ padding: '15px 30px', fontSize: '1.2rem', fontWeight: '900', backgroundColor: '#333947', color: '#fff', border: '2px solid #E53935', borderRadius: '8px', cursor: 'pointer', textTransform: 'uppercase', transition: '0.2s' }}
-                >
-                  DISCONNECT
-                </button>
-                
                 <button 
                     onClick={handleResumeFullscreen} 
                     style={{ padding: '15px 30px', fontSize: '1.2rem', fontWeight: '900', backgroundColor: '#00bcd4', color: '#111', border: 'none', borderRadius: '8px', cursor: 'pointer', textTransform: 'uppercase', boxShadow: '0 0 20px rgba(0, 188, 212, 0.5)' }}

@@ -158,22 +158,30 @@ const RightPart = () => {
 
   const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
 
-  const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp-standalone-input", direction = "down", wrapStyle = { width: '100%', height: '100%' }) => (
+const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp-standalone-input", direction = "down", wrapStyle = { width: '100%', height: '100%' }) => (
       <div className="rel-flex" style={wrapStyle}>
           <button className={`${btnClass} custom-select-btn`} onClick={() => toggleDropdown(menuKey)}>
               {currentValue}
           </button>
           {openDropdown === menuKey && (
-              <div className={`custom-select-menu custom-select-menu-${direction}`}>
-                  {options.map(o => (
-                      <div key={o} className="custom-select-item" onClick={() => {
-                          onSelect(o);
-                          setOpenDropdown(null);
-                      }}>
-                          {o}
-                      </div>
-                  ))}
-              </div>
+              <>
+                  {/* 🚀 Invisible Click-to-Close Overlay */}
+                  <div 
+                      style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} 
+                      onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}
+                  ></div>
+                  
+                  <div className={`custom-select-menu custom-select-menu-${direction}`} style={{ zIndex: 9999 }}>
+                      {options.map(o => (
+                          <div key={o} className="custom-select-item" onClick={() => {
+                              onSelect(o);
+                              setOpenDropdown(null);
+                          }}>
+                              {o}
+                          </div>
+                      ))}
+                  </div>
+              </>
           )}
       </div>
   );
@@ -810,48 +818,7 @@ const renderJogPanel = () => {
         </div>
       )}
       {/* --- MODIFY TP FLOATING PANEL (NO SCREEN OVERLAY) --- */}
-      {showModTpModal && (
-        <div className="floating-tp-panel">
-            <div className="floating-tp-title">
-                ✏️ MODIFY TARGET POINT
-            </div>
-            <div className="floating-tp-divider"></div>
-
-            <div className="floating-tp-form">
-                <div className="floating-tp-row">
-                    <label className="floating-tp-label">Name:</label>
-                    <input className="modal-input floating-tp-input" value={modTpData.name} onChange={e => setModTpData({...modTpData, name: e.target.value})} />
-                </div>
-                <div className="floating-tp-row">
-                    <label className="floating-tp-label">X (mm):</label>
-                    <input className="modal-input floating-tp-input" value={modTpData.x} onChange={e => setModTpData({...modTpData, x: e.target.value})} />
-                </div>
-                <div className="floating-tp-row">
-                    <label className="floating-tp-label">Y (mm):</label>
-                    <input className="modal-input floating-tp-input" value={modTpData.y} onChange={e => setModTpData({...modTpData, y: e.target.value})} />
-                </div>
-                <div className="floating-tp-row">
-                    <label className="floating-tp-label">Z (mm):</label>
-                    <input className="modal-input floating-tp-input" value={modTpData.z} onChange={e => setModTpData({...modTpData, z: e.target.value})} />
-                </div>
-            </div>
-
-            <div className="modal-btn-row" style={{ marginTop: '15px' }}>
-                <button 
-                    className="modal-btn btn-floating-cancel" 
-                    onClick={() => setShowModTpModal(false)}
-                >
-                    CANCEL
-                </button>
-                <button 
-                    className="modal-btn btn-floating-update" 
-                    onClick={handleModifyConfirm}
-                >
-                    UPDATE TP
-                </button>
-            </div>
-        </div>
-      )}
+      
 
      <div className="rp-master-container">
         <div className="rp-main-content">
@@ -1137,40 +1104,102 @@ const renderJogPanel = () => {
                     {bottomPanelMode === 'TP_CTRL' && (
                         <>
                             <div className="grid-7-col">
+                                {/* --- TP MODE DROPDOWN --- */}
                                 <div className="rel-flex">
                                     <button className="tp-btn btn-blue" onClick={() => toggleDropdown('TP_MODE')}>⚙ {displayTpMode}</button>
                                     {openDropdown === 'TP_MODE' && (
-                                        <div className="dropdown-menu">
-                                            <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('TP Mode', 'Tp')}>⚙ TP Mode</button>
-                                            <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVJ', 'MOVJ')}>⚙ MOVJ</button>
-                                            <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVL', 'MOVL')}>⚙ MOVL</button>
-                                        </div>
+                                        <>
+                                            {/* 🚀 Invisible Click-to-Close Overlay */}
+                                            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}></div>
+                                            
+                                            <div className="dropdown-menu" style={{ zIndex: 9999 }}>
+                                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('TP Mode', 'Tp')}>⚙ TP Mode</button>
+                                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVJ', 'MOVJ')}>⚙ MOVJ</button>
+                                                <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVL', 'MOVL')}>⚙ MOVL</button>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
+                                {/* --- TP OPTIONS DROPDOWN --- */}
                                 <div className="rel-flex">
                                     <button className="tp-btn btn-purple" onClick={() => toggleDropdown('TP')}>⚙ TP</button>
                                     {openDropdown === 'TP' && (
-                                        <div className="dropdown-menu">
-                                            <button className="dd-btn dd-purple" onClick={() => { sendCommand('INSERT_TP'); setOpenDropdown(null); }}>⚙ Insert TP</button>
-                                            <button className="dd-btn dd-purple" onClick={openModifyTpModal}>📄 Modify TP</button>
-                                            <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_TP_INDEX', selectedTpIndex); setOpenDropdown(null); }}>⎋ Delete TP</button>
-                                        </div>
+                                        <>
+                                            {/* 🚀 Invisible Click-to-Close Overlay */}
+                                            <div 
+                                                style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} 
+                                                onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}
+                                            ></div>
+                                            
+                                            <div className="dropdown-menu" style={{ zIndex: 9999 }}>
+                                                <button className="dd-btn dd-purple" onClick={() => { sendCommand('INSERT_TP'); setOpenDropdown(null); }}>⚙ Insert TP</button>
+                                                <button className="dd-btn dd-purple" onClick={openModifyTpModal}>📄 Modify TP</button>
+                                                <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_TP_INDEX', selectedTpIndex); setOpenDropdown(null); }}>⎋ Delete TP</button>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* 🚀 THE FIX: Anchored Modal + Invisible Click-to-Close Overlay! */}
+                                    {showModTpModal && (
+                                        <>
+                                            {/* Invisible Full-Screen Background */}
+                                            <div 
+                                                style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998 }} 
+                                                onClick={() => setShowModTpModal(false)}
+                                            ></div>
+                                            
+                                            {/* The Popup Window */}
+                                            <div className="floating-tp-panel" style={{ position: 'absolute', bottom: '120%', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, minWidth: '260px' }}>
+                                                <div className="floating-tp-title">✏️ MODIFY TARGET POINT</div>
+                                                <div className="floating-tp-divider"></div>
+
+                                                <div className="floating-tp-form">
+                                                    <div className="floating-tp-row">
+                                                        <label className="floating-tp-label">Name:</label>
+                                                        <input className="modal-input floating-tp-input" value={modTpData.name} onChange={e => setModTpData({...modTpData, name: e.target.value})} />
+                                                    </div>
+                                                    <div className="floating-tp-row">
+                                                        <label className="floating-tp-label">X (mm):</label>
+                                                        <input className="modal-input floating-tp-input" value={modTpData.x} onChange={e => setModTpData({...modTpData, x: e.target.value})} />
+                                                    </div>
+                                                    <div className="floating-tp-row">
+                                                        <label className="floating-tp-label">Y (mm):</label>
+                                                        <input className="modal-input floating-tp-input" value={modTpData.y} onChange={e => setModTpData({...modTpData, y: e.target.value})} />
+                                                    </div>
+                                                    <div className="floating-tp-row">
+                                                        <label className="floating-tp-label">Z (mm):</label>
+                                                        <input className="modal-input floating-tp-input" value={modTpData.z} onChange={e => setModTpData({...modTpData, z: e.target.value})} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="modal-btn-row" style={{ marginTop: '15px' }}>
+                                                    <button className="modal-btn btn-floating-cancel" onClick={() => setShowModTpModal(false)}>CANCEL</button>
+                                                    <button className="modal-btn btn-floating-update" onClick={handleModifyConfirm}>UPDATE</button>
+                                                </div>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                                 <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_TP')}>▶ Run TP</button>
                                 <button className="tp-btn btn-dark" onClick={() => {}}>📄 Op Pg</button>
                                 <input className="tp-standalone-input" value={rs.program_count_output || '0'} readOnly />
+                                {/* --- INST MENU DROPDOWN --- */}
                                 <div className="rel-flex">
                                     <button className="tp-btn btn-purple" onClick={() => toggleDropdown('INST')}>📄 Inst</button>
                                     {openDropdown === 'INST' && (
-                                        <div className="dropdown-menu inst-qty-input-dropdown">
-                                            <div className="gap-flex">
-                                                <input type="text" placeholder="S..." value={instInput} onChange={e => setInstInput(e.target.value)} className="inst-qty-input" />
-                                                <button className="dd-btn dd-purple f1" onClick={() => { sendCommand(instInput ? 'INSERT_PR_INSTRUCTION_AT' : 'INSERT_PR_INSTRUCTION', instInput); setOpenDropdown(null); }}>📄 Insert</button>
+                                        <>
+                                            {/* 🚀 Invisible Click-to-Close Overlay */}
+                                            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}></div>
+                                            
+                                            <div className="dropdown-menu inst-qty-input-dropdown" style={{ zIndex: 9999 }}>
+                                                <div className="gap-flex">
+                                                    <input type="text" placeholder="S..." value={instInput} onChange={e => setInstInput(e.target.value)} className="inst-qty-input" />
+                                                    <button className="dd-btn dd-purple f1" onClick={() => { sendCommand(instInput ? 'INSERT_PR_INSTRUCTION_AT' : 'INSERT_PR_INSTRUCTION', instInput); setOpenDropdown(null); }}>📄 Insert</button>
+                                                </div>
+                                                <button className="dd-btn dd-purple" onClick={() => { setOpenDropdown(null); }}>📄 Modify Inst</button>
+                                                <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_PR_INSTRUCTION'); setOpenDropdown(null); }}>⎋ Delete Inst</button>
                                             </div>
-                                            <button className="dd-btn dd-purple" onClick={() => { setOpenDropdown(null); }}>📄 Modify Inst</button>
-                                            <button className="dd-btn dd-red" onClick={() => { sendCommand('DELETE_PR_INSTRUCTION'); setOpenDropdown(null); }}>⎋ Delete Inst</button>
-                                        </div>
+                                        </>
                                     )}
                                 </div>
                                 <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>▶ Run Inst</button>
