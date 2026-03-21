@@ -258,7 +258,7 @@ function AppContent() {
 
             {/* 3. RIGHT: VERSION */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', flexShrink: 1, minWidth: 0 }}>
-                <div style={{ color: '#ccc', fontWeight: 'bold', fontSize: 'clamp(0.6rem, 1.2vw, 0.85rem)', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>ROBOT CONTROLLER V1.0</div>
+                <div style={{ color: 'WHITE', fontWeight: 'bold', fontSize: 'clamp(0.6rem, 1.2vw, 0.85rem)', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>ROBOT CONTROLLER WEB</div>
             </div>
 
           </div>

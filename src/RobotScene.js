@@ -356,7 +356,38 @@ const RobotScene = () => {
       </button>
 {/* --- CARTESIAN PANEL (BOTTOM OVERLAY) --- */}
       <div className="rs-cartesian-panel">
-        <div className="rs-cartesian-title">CARTESIAN</div>
+        <div className="rs-cartesian-title">
+  <div className="rs-cartesian-arrows-cluster">
+    <svg viewBox="0 0 100 100" className="rs-cartesian-basis-arrows">
+      <defs>
+        <marker id="cone-red" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#b71c1c" />
+        </marker>
+        <marker id="cone-green" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#246b29" />
+        </marker>
+        <marker id="cone-blue" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#0d47a1" />
+        </marker>
+      </defs>
+
+      {/* Basis vectors originating from a common point (50, 70) */}
+      <g strokeWidth="3" fill="none">
+        <line x1="50" y1="70" x2="50" y2="15" stroke="#0d47a1" markerEnd="url(#cone-blue)" />
+        <line x1="50" y1="70" x2="85" y2="90" stroke="#b71c1c" markerEnd="url(#cone-red)" />
+        <line x1="50" y1="70" x2="15" y2="90" stroke="#246b29" markerEnd="url(#cone-green)" />
+      </g>
+
+      {/* 🚀 The Center Root Dot */}
+      <circle cx="50" cy="70" r="5.5" fill="#111" />
+
+      {/* 🚀 Labels shifted perfectly into the empty spaces */}
+      <text x="62" y="25" textAnchor="start" fontSize="13" fontWeight="1000" fill="#0d47a1">Z</text>
+      <text x="88" y="85" textAnchor="start" fontSize="13" fontWeight="1000" fill="#b71c1c">X</text>
+      <text x="12" y="85" textAnchor="end" fontSize="13" fontWeight="1000" fill="#246b29">Y</text>
+    </svg>
+  </div>
+</div>
         
         <div className="rs-cartesian-split-container">
           
