@@ -203,6 +203,7 @@
     flex-shrink: 0; /* Prevents button from shrinking */
 }
 
+
 .login-submit-btn:hover {
     background: #4996c3; 
 }
