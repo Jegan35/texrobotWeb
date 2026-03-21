@@ -297,7 +297,7 @@ const RobotScene = () => {
 
   // 🚀 FORMATTER FOR X, Y, Z
   const formatXYZ = (val) => {
-    if (val === undefined || val === null || isNaN(val) || Number(val) === 0) return "000.000";
+    if (val === undefined || val === null || isNaN(val) || Number(val) === 0) return "0000.000";
     return Number(val).toFixed(3);
   };
 

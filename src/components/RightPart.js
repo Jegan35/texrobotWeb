@@ -821,7 +821,7 @@ const renderJogPanel = () => {
       
 
      <div className="rp-master-container">
-        <div className="rp-main-content">
+        <div className="rp-main-content" style={{ overflow: 'hidden' }}>
             
             <div className="rp-upper-half">
                 
