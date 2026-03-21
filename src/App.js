@@ -194,9 +194,18 @@ function AppContent() {
           {/* --- DYNAMIC TOP HEADER --- */}
           <div style={{ height: 'clamp(40px, 6vh, 50px)', flexShrink: 0, backgroundColor: '#151822', borderBottom: '2px solid #111', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 clamp(10px, 2vw, 20px)', overflow: 'hidden', gap: '10px' }}>
             
-            {/* 1. LEFT: BRANDING */}
+           {/* 1. LEFT: BRANDING */}
             <div style={{ display: 'flex', justifyContent: 'flex-start', flexShrink: 1, minWidth: 0 }}>
-                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: 'clamp(1rem, 2vw, 1.5rem)', letterSpacing: '1px', fontFamily: 'Impact, sans-serif', whiteSpace: 'nowrap' }}>TEXSONICS</div>
+                <img 
+                    src="/logo.png" 
+                    alt="TEXSONICS Logo" 
+                    style={{ 
+                        height: 'clamp(20px, 4vh, 35px)', /* 🚀 Scales perfectly with the header height */
+                        width: 'auto', 
+                        objectFit: 'contain', /* Keeps the logo proportions perfect */
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' /* Optional: adds a nice subtle shadow */
+                    }} 
+                />
             </div>
 
            {/* 2. CENTER: GREEN ROLE INDICATOR */}
