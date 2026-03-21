@@ -382,9 +382,9 @@ const RobotScene = () => {
       <circle cx="50" cy="70" r="5.5" fill="#111" />
 
       {/* 🚀 Labels shifted perfectly into the empty spaces */}
-      <text x="62" y="25" textAnchor="start" fontSize="13" fontWeight="1000" fill="#0d47a1">Z</text>
-      <text x="88" y="85" textAnchor="start" fontSize="13" fontWeight="1000" fill="#b71c1c">X</text>
-      <text x="12" y="85" textAnchor="end" fontSize="13" fontWeight="1000" fill="#246b29">Y</text>
+      <text x="62" y="25" textAnchor="start" fontSize="20" fontWeight="1000" fill="#0d47a1">Z</text>
+      <text x="85" y="81" textAnchor="start" fontSize="20" fontWeight="1000" fill="#b71c1c">X</text>
+      <text x="12" y="85" textAnchor="end" fontSize="20" fontWeight="1000" fill="#246b29">Y</text>
     </svg>
   </div>
 </div>
