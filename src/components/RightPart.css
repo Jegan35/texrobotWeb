@@ -11,7 +11,7 @@
    1. RIGHT PANEL LAYOUT STRUCTURE
    ============================================================== */
 .rp-master-container { display: flex; flex-direction: row; height: 100%; width: 100%; background-color: #202430; overflow: hidden; position: relative; }
-.rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; }
+.rp-main-content { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; height: 100%; transition: width 0.2s; overflow: hidden; box-sizing: border-box; }
 .rp-upper-half { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 150px; overflow: hidden; }
 
 .rp-row-1, .rp-row-2 { flex: 1 1 0; min-height: 120px; display: flex; flex-direction: column; border-bottom: 2px solid #111; overflow: hidden; background: #f4f3ef; position: relative; transition: all 0.3s ease; }
@@ -55,7 +55,6 @@
     width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
 }
 
-/* Default Blue Dot */
 .rh-blinking-dot.dot-blue {
     background-color: #00bcd4;
     box-shadow: 0 0 8px rgba(0, 188, 212, 0.8);
@@ -66,7 +65,6 @@
     100% { opacity: 1; box-shadow: 0 0 12px rgba(0, 188, 212, 1); } 
 }
 
-/* 🚀 Orange Dot for Auto Mode */
 .rh-blinking-dot.dot-orange {
     background-color: #FF9800;
     box-shadow: 0 0 8px rgba(255, 152, 0, 0.8);
@@ -76,6 +74,7 @@
     0% { opacity: 0.3; box-shadow: 0 0 2px rgba(255, 152, 0, 0.2); } 
     100% { opacity: 1; box-shadow: 0 0 12px rgba(255, 152, 0, 1); } 
 }
+
 /* ==============================================================
    3. TABS & UTILITY BUTTONS
    ============================================================== */
@@ -200,31 +199,69 @@
 .mech-table td { padding: 4px 6px; border: 1px solid #ccc; }
 .mech-table input { width: 100%; box-sizing: border-box; text-align: center; border: 1px solid #aaa; padding: 6px; font-weight: 900; font-size: 12px; border-radius: 2px; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
 
-/* ==============================================================
-   7. BOTTOM ROW INPUTS & BUTTONS (PR_CTRL / TP_CTRL)
-   ============================================================== */
-.pro-th-btn { background: linear-gradient(180deg, #373d49 0%, #262b33 100%); color: #fff; border: 1px solid #111; padding: clamp(2px, 0.5vh, 4px) clamp(8px, 1.5vw, 12px); font-size: clamp(0.65rem, 0.9vw, 0.75rem); font-weight: 900; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 5px; transition: 0.1s; text-transform: uppercase; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 2px 3px rgba(0,0,0,0.5); height: clamp(22px, 4vh, 26px); -webkit-touch-callout: none !important; user-select: none !important;}
+.pro-th-btn { 
+    background: linear-gradient(180deg, #373d49 0%, #262b33 100%); 
+    color: #fff; border: 1px solid #111; 
+    padding: clamp(2px, 0.5vh, 4px) clamp(10px, 1.5vw, 15px); 
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem); 
+    font-weight: 900; cursor: pointer; border-radius: 4px; 
+    display: flex; align-items: center; justify-content: center; 
+    gap: 6px; transition: 0.1s; text-transform: uppercase; 
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.1), 0 2px 3px rgba(0,0,0,0.5); 
+    height: clamp(26px, 4vh, 30px); 
+    white-space: nowrap; 
+    min-width: max-content; 
+    box-sizing: border-box;
+    -webkit-touch-callout: none !important; user-select: none !important;
+}
 .pro-th-btn:active { transform: translateY(2px); box-shadow: none; }
 .pro-th-btn.edit-btn.active { background: linear-gradient(180deg, #4CAF50 0%, #1B5E20 100%); color: #fff; border-color: #111; box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), 0 0 8px rgba(76, 175, 80, 0.6); }
 
-.grid-7-col { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(2px, 0.5vw, 4px); width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
+.grid-7-col { 
+    display: grid !important; 
+    grid-template-columns: repeat(7, 1fr) !important; 
+    width: 100% !important; 
+    gap: clamp(2px, 0.5vw, 4px); 
+    margin-bottom: 4px; 
+    box-sizing: border-box; 
+    padding: 0 2px; 
+}
+.grid-7-col > * {
+    width: 100% !important;
+    justify-self: stretch !important;
+}
+
 .grid-11-col { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: clamp(2px, 0.5vw, 4px); width: 100%; margin-bottom: 4px; box-sizing: border-box; padding: 0 2px; }
 
 .rel-flex { position: relative; display: flex; }
 .gap-flex { display: flex; gap: 5px; }
 .f1 { flex: 1; }
 
-.tp-btn { width: 100%; height: clamp(28px, 5vh, 35px); box-sizing: border-box; border-radius: 4PX; color: white; font-weight: 900; font-size: clamp(7px, 0.9vw, 12px); cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(0,0,0,0.8); box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); transition: 0.1s; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.6); padding: 0 2px; -webkit-touch-callout: none !important; user-select: none !important;}
+.tp-btn { width: 100%; height: clamp(28px, 5vh, 35px); box-sizing: border-box; border-radius: 4px; color: white; font-weight: 900; font-size: clamp(7px, 0.9vw, 12px); cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(0,0,0,0.8); box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); transition: 0.1s; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.6); padding: 0 2px; -webkit-touch-callout: none !important; user-select: none !important;}
 .tp-btn:active { transform: translateY(2px); box-shadow: none; border-color: rgba(0,0,0,0.8); }
+
+.tp-standalone-input { width: 100%; height: clamp(28px, 5vh, 35px); box-sizing: border-box; background: #fff; border: 2px solid rgba(0,0,0,0.8); border-radius: 0; text-align: center; font-weight: 900; font-size: clamp(7px, 0.9vw, 12px); color: #111; outline: none; box-shadow: none !important; cursor: pointer; text-transform: uppercase; margin: 0; padding: 0; }
+.tp-standalone-input:focus { border-color: #039BE5; background: #e3f2fd; }
+
+.pr-btn { 
+    width: 110px; 
+    flex-shrink: 0;
+    height: clamp(28px, 5vh, 35px); box-sizing: border-box; border-radius: 4px; color: white; font-weight: 900; font-size: clamp(7px, 0.9vw, 12px); cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(0,0,0,0.8); box-shadow: 0 2px 0 rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2); transition: 0.1s; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.6); padding: 0 8px; -webkit-touch-callout: none !important; user-select: none !important;
+}
+.pr-btn:active { transform: translateY(2px); box-shadow: none; border-color: rgba(0,0,0,0.8); }
+
+.pr-standalone-input { 
+    width: 110px; 
+    flex-shrink: 0;
+    height: clamp(28px, 5vh, 35px); box-sizing: border-box; background: #fff; border: 2px solid rgba(0,0,0,0.8); border-radius: 0; text-align: center; font-weight: 900; font-size: clamp(7px, 0.9vw, 12px); color: #111; outline: none; box-shadow: none !important; cursor: pointer; text-transform: uppercase; margin: 0; padding: 0; 
+}
+.pr-standalone-input:focus { border-color: #039BE5; background: #e3f2fd; }
 
 .btn-blue { background: linear-gradient(180deg, #42A5F5 0%, #0D47A1 100%); }
 .btn-purple { background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%); }
 .btn-teal { background: linear-gradient(180deg, #26A69A 0%, #00695C 100%); }
 .btn-dark { background: linear-gradient(180deg, #505868 0%, #2b303b 100%); }
 .btn-red { background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%); }
-
-.tp-standalone-input { width: 100%; height: clamp(28px, 5vh, 35px); box-sizing: border-box; background: #fff; border: 2px solid rgba(0,0,0,0.8); border-radius: 0; text-align: center; font-weight: 900; font-size: clamp(7px, 0.9vw, 12px); color: #111; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); cursor: pointer; text-transform: uppercase; margin: 0; padding: 0; }
-.tp-standalone-input:focus { border-color: #039BE5; background: #e3f2fd; }
 
 .custom-select-btn { display: flex; align-items: center; justify-content: center; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .custom-select-menu { position: absolute; left: 0; width: 100%; min-width: max-content; max-height: 250px; overflow-y: auto; background: #e3f2fd; border: 2px solid #111; z-index: 10000; display: flex; flex-direction: column; }
@@ -249,6 +286,18 @@
 
 .inst-qty-input { width: 50px; text-align: center; border: 1px solid #111; font-weight: 900; font-size: 0.9rem; outline: none; border-radius: 0; height: clamp(28px, 5vh, 35px); box-sizing: border-box; }
 
+.tp-standalone-input, 
+.pr-standalone-input,
+.pro-th-btn[style*="background: white"], 
+.pro-th-btn[style*="background: #fff"], 
+.tp-btn[style*="background: white"], 
+.tp-btn[style*="background: #fff"],
+.pr-btn[style*="background: white"], 
+.pr-btn[style*="background: #fff"] {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
 /* ==============================================================
    8. OVERLAYS, MODALS, MENUS & DEBUG
    ============================================================== */
@@ -265,7 +314,7 @@
 .set-tab-btn.active { background: #151822; color: #00bcd4; border-left: 4px solid #00bcd4; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); text-shadow: 0 0 5px rgba(0,188,212,0.3); }
 .settings-content-area { flex: 1; display: flex; flex-direction: column; background: #2b303b; min-width: 0; }
 .settings-scroll-content { flex: 1; overflow-y: auto; background: #f4f3ef; display: flex; flex-direction: column; padding: 0; }
-/* --- MODALS --- */
+
 .modal-overlay { 
     position: fixed; 
     top: 0; 
@@ -273,10 +322,7 @@
     width: 100vw; 
     height: 100vh; 
     background-color: rgba(0, 0, 0, 0.7); 
-    
-    /* 🚀 THE FIX: Forces the modal to the absolute top layer! */
     z-index: 9999999 !important; 
-    
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -377,7 +423,6 @@
 .divider-badge { position: absolute; top: -15px; background: #151822; color: #00bcd4; font-weight: 900; font-size: clamp(0.85rem, 1.1vw, 1.1rem); letter-spacing: 2px; padding: 4px 12px; border-radius: 4px; border: 1px solid #333; white-space: nowrap; text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.5); z-index: 2; }
 
 /* --- D-PAD LAYOUTS (OPERATOR VS PROGRAMMER) --- */
-/* 1. BASE D-PAD LAYOUT */
 .dpad-two-col-layout { 
     display: flex; 
     justify-content: center; 
@@ -404,7 +449,6 @@
     -webkit-touch-callout: none !important; user-select: none !important;
 }
 
-/* 2. OPERATOR MODE (MASSIVE SIZE - LOTS OF SPACE) */
 .dpad-large {
     margin: auto 0; 
     padding-top: clamp(60px, 8vh, 80px); 
@@ -419,7 +463,6 @@
 }
 
 
-/* 3. PROGRAMMER MODE (COMPACT SIZE - FITS ABOVE PANELS) */
 .dpad-compact {
     margin-top: clamp(88px, 8vh, 85px); 
     margin-bottom: auto; 
@@ -599,15 +642,16 @@
 .slider-box-custom input[type="range"]::-webkit-slider-thumb:active, .premium-slider::-webkit-slider-thumb:active { 
     transform: scale(1.1); 
 }
+
 /* --- FLOATING TP MODAL (NO OVERLAY) --- */
 .floating-tp-panel {
     position: absolute;
-    bottom: 120px; /* 🚀 Pushes it just above the bottom buttons */
-    left: 790px;   /* 🚀 THE FIX: Moves it left, directly over the TP button! */
-    width: 250px;  /* 🚀 SMALLER: Reduced from 320px to 250px */
+    bottom: 120px; 
+    left: 790px;  
+    width: 250px;  
     background-color: #202430;
     border-top: 4px solid #9c27b0;
-    padding: 12px 15px; /* 🚀 SMALLER: Tighter padding inside the box */
+    padding: 12px 15px; 
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -617,7 +661,7 @@
 
 .floating-tp-title {
     color: #9c27b0;
-    font-size: 1.05rem; /* 🚀 SMALLER: Reduced font size */
+    font-size: 1.05rem; 
     font-weight: 900;
     text-align: center;
     text-transform: uppercase;
@@ -633,7 +677,7 @@
 .floating-tp-form {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* 🚀 Tighter gap between inputs */
+    gap: 8px; 
 }
 
 .floating-tp-row {
@@ -645,16 +689,15 @@
 .floating-tp-label {
     color: #aaa;
     font-weight: bold;
-    font-size: 0.85rem; /* 🚀 SMALLER: Label text */
+    font-size: 0.85rem; 
 }
 
 .floating-tp-input {
     width: 60%;
-    padding: 6px !important; /* 🚀 SMALLER: Shrinks the input box height */
+    padding: 6px !important; 
     font-size: 0.85rem !important;
 }
 
-/* 🚀 SMALLER: Shrinks the Cancel/Update buttons so they match the new compact box */
 .floating-tp-panel .modal-btn-row {
     margin-top: 10px !important;
 }
@@ -670,4 +713,54 @@
 
 .btn-floating-update {
     background: linear-gradient(180deg, #BA68C8 0%, #6A1B9A 100%);
+}
+
+/* ==============================================================
+   11. UNIFIED PARAMETER SETTER (BOTTOM TRAY)
+   ============================================================== */
+
+.param-setter-container {
+    display: flex;
+    justify-content: center !important; 
+    align-items: center;
+    gap: 12px;
+    background: #e0e0e0;
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: 1px solid #999;
+    width: 100% !important; 
+    box-sizing: border-box;
+    margin-top: 4px;
+}
+
+.param-setter-label {
+    color: #111;
+    font-weight: 900;
+    font-size: 0.95rem;
+    flex-shrink: 0; 
+}
+
+.param-setter-input {
+    border: 2px solid #E53935 !important;
+    background: #fff !important;
+    color: #111 !important;
+    width: 80px !important;
+    font-weight: 900 !important;
+    flex-shrink: 0; 
+}
+
+.param-setter-input:focus {
+    border-color: #B71C1C !important;
+    background: #ffebee !important;
+}
+
+.param-setter-btn {
+    background: linear-gradient(180deg, #EF5350 0%, #B71C1C 100%) !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+    border: 1px solid #5a0000 !important;
+    padding: 0 25px !important;
+    width: auto !important;
+    letter-spacing: 1px;
+    flex-shrink: 0; 
 }

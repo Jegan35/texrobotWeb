@@ -3,10 +3,8 @@ import { useWebSocket } from '../context/WebSocketContext';
 import './LoginPortal.css';
 
 const LoginPortal = () => {
-    // 🚀 THE FIX: Extract goFullScreenAndLock from Context!
     const { loginToRobot, authStatus, authMessage, connectionFailed, goFullScreenAndLock } = useWebSocket();
     
-    // Set your default IP here
     const [ip, setIp] = useState('192.168.1.36'); 
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
@@ -20,10 +18,9 @@ const LoginPortal = () => {
             return;
         }
 
-        // 🚀 THE FIX: Force fullscreen the exact millisecond they click Login!
         goFullScreenAndLock();
-
-        loginToRobot(ip, userId, password, role);
+        // 🚀 Removed deviceId, passing only the core auth data
+        loginToRobot(ip, userId, password, role); 
     };
 
     return (

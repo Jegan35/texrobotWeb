@@ -221,6 +221,8 @@ const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp
   const [degIncVal, setDegIncVal] = useState(DEG_OPTIONS[0]);
   const [mmSpeedText, setMmSpeedText] = useState("50.0");
   const [degSpeedText, setDegSpeedText] = useState("50.0");
+  const [activeParam, setActiveParam] = useState('Go to');
+  const [paramVal, setParamVal] = useState('');
 
   const isJog = currentView.includes('JOG');
   const isJoints = currentView.includes('JOINTS');
@@ -230,7 +232,7 @@ const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp
   const tpList = rs.tp_list || [];
   const prList = rs.pr_program_data || [];
   const staging = rs.staging_data || {};
-  const isCalculating = rs.is_calculating_trajectory === true;
+  const [isCalculatingLocal, setIsCalculatingLocal] = useState(false);
 
   const errorData = rs.error_pos_data || {};
   const etherData = rs.ether_cat_data || {};
@@ -238,6 +240,14 @@ const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp
   const mechData = rs.mech_data || {};
   const diVal = rs.di_val || 0;
   const doVal = rs.do_val || 0;
+  useEffect(() => {
+      if (rs.is_calculating_trajectory === false) {
+          setIsCalculatingLocal(false);
+      }
+  }, [rs.is_calculating_trajectory]);
+
+  // Modal shows if backend is calculating OR if frontend forced it open
+  const isCalculating = rs.is_calculating_trajectory === true || isCalculatingLocal;
 
   useEffect(() => { if (rs.tp_run_mode) setDisplayTpMode(rs.tp_run_mode); }, [rs.tp_run_mode]);
   useEffect(() => { if (rs.global_speed_percentage !== undefined) setGlobalSpeed(rs.global_speed_percentage); }, [rs.global_speed_percentage]);
@@ -813,7 +823,7 @@ const renderJogPanel = () => {
                     <div className="calc-title">CALCULATING TRAJECTORY</div>
                     <div className="calc-desc">Please wait while the robotic<br/>path is being generated...</div>
                 </div>
-                <button className="tp-btn btn-red" style={{ width: '150px', height: '40px', marginTop: '10px' }} onClick={() => sendCommand('CANCEL_CALCULATION')}>FORCE CANCEL</button>
+<button className="tp-btn btn-red" style={{ width: '150px', height: '40px', marginTop: '10px' }} onClick={() => { setIsCalculatingLocal(false); sendCommand('CANCEL_CALCULATION'); }}>FORCE CANCEL</button>
             </div>
         </div>
       )}
@@ -938,13 +948,7 @@ const renderJogPanel = () => {
                                         {/* --- NEAT INDUSTRIAL OPERATOR ROUND BUTTONS --- */}
                                         {userRole !== 'Programmer' && (
                                             <div className="operator-floating-actions">
-                                                <button 
-                                                    className="fab-btn fab-teal" 
-                                                    title="Calculate Trajectory"
-                                                    onClick={() => sendCommand('CALCULATE_TRAJECTORY')}
-                                                >
-                                                    <span className="fab-icon-calc">🧮</span>
-                                                </button>
+                                                <button className="fab-btn fab-teal" title="Calculate Trajectory" onClick={() => { setIsCalculatingLocal(true); sendCommand('CALCULATE_TRAJECTORY'); }}><span className="fab-icon-calc">🧮</span></button>
 
                                                 <button 
                                                     className="fab-btn fab-green" 
@@ -1071,36 +1075,61 @@ const renderJogPanel = () => {
                     )}
 
                     {bottomPanelMode === 'PR_CTRL' && (
-                        <>
-                            <div className="grid-11-col">
-                                {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "tp-standalone-input", "up")}
-                                {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "tp-standalone-input", "up")}
-                                {renderDropdown('R5_DI2', DI2_OPTIONS, selDi2, (v) => { setSelDi2(v); sendCommand("SET_DIGI_2", v); }, "tp-standalone-input", "up")}
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
-                                {renderDropdown('R5_HL', DIG_STATE_OPTIONS, selHL, (v) => { setSelHL(v); sendCommand("SET_HIGH_LOW", v); }, "tp-standalone-input", "up")}
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_DELAY', delayVal)}>⏱ delay</button>
-                                <input className="tp-standalone-input" value={delayVal} onChange={e => setDelayVal(e.target.value)} />
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_GOTO_PROGRAM', gotoVal)}>→ go to</button>
-                                <input className="tp-standalone-input" value={gotoVal} onChange={e => setGotoVal(e.target.value)} />
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_LOOP', loopVal)}>↺ loop</button>
-                                <input className="tp-standalone-input" value={loopVal} onChange={e => setLoopVal(e.target.value)} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                            
+                            {/* ROW 1: Uses grid-7-col to perfectly force all 7 items into 1 row! */}
+                            <div className="grid-7-col">
+                                {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "pr-standalone-input", "up")}
+                                {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "pr-standalone-input", "up")}
+                                {renderDropdown('R5_DI2', DI2_OPTIONS, selDi2, (v) => { setSelDi2(v); sendCommand("SET_DIGI_2", v); }, "pr-standalone-input", "up")}
+                                <button className="pr-btn btn-dark" onClick={() => sendCommand('CONFIRM_HIGH_LOW')}># H/L</button>
+                                {renderDropdown('R5_HL', DIG_STATE_OPTIONS, selHL, (v) => { setSelHL(v); sendCommand("SET_HIGH_LOW", v); }, "pr-standalone-input", "up")}
+                                {renderDropdown('R5_VAR1', VAR1_OPTIONS, selVar1, (v) => { setSelVar1(v); sendCommand("SET_VAR1", v); }, "pr-standalone-input", "up")}
+                                {renderDropdown('R5_VAR2', VAR2_OPTIONS, selVar2, (v) => { setSelVar2(v); sendCommand("SET_VAR2", v); }, "pr-standalone-input", "up")}
                             </div>
-                            <div className="grid-11-col">
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand('SET_PROGRAM_SPEED', progSpeedVal)}>⏱ mm/s</button>
-                                <input className="tp-standalone-input" value={progSpeedVal} onChange={e => setProgSpeedVal(e.target.value)} />
-                                <button className="tp-btn btn-dark" onClick={() => {}}>🎯 RAD</button>
-                                <input className="tp-standalone-input" value={radiusVal} onChange={e => setRadiusVal(e.target.value)} />
-                                {renderDropdown('R5_VAR1', VAR1_OPTIONS, selVar1, (v) => { setSelVar1(v); sendCommand("SET_VAR1", v); }, "tp-standalone-input", "up")}
-                                <input className="tp-standalone-input" value={varInputVal} onChange={e => setVarInputVal(e.target.value)} onBlur={(e) => sendCommand('SET_VAR_VAL', e.target.value)} />
-                                {renderDropdown('R5_VAR2', VAR2_OPTIONS, selVar2, (v) => { setSelVar2(v); sendCommand("SET_VAR2", v); }, "tp-standalone-input", "up")}
-                                <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN ip</button>
-                                <input className="tp-standalone-input" value={anIpVal} onChange={e => setAnIpVal(e.target.value)} />
-                                <button className="tp-btn btn-dark" onClick={() => {}}>🌍 AN op</button>
-                                <input className="tp-standalone-input" value={anOpVal} onChange={e => setAnOpVal(e.target.value)} />
-                            </div>
-                        </>
-                    )}
 
+                            {/* ROW 2: Unified Parameter Setter */}
+                            <div className="param-setter-container">
+                                {renderDropdown(
+                                    'PR_PARAM_SEL', 
+                                    ['Com', 'Delay', 'Go to', 'Loop', 'Speed', 'Ip Pg', 'Radius', 'AN ip'], 
+                                    activeParam, 
+                                    setActiveParam, 
+                                    "tp-standalone-input", 
+                                    "up", 
+                                    { width: '130px' }
+                                )}
+                                
+                                <span className="param-setter-label">Val</span>
+                                
+                                <input 
+                                    className="tp-standalone-input param-setter-input" 
+                                    value={paramVal} 
+                                    onChange={e => setParamVal(e.target.value)} 
+                                />
+                                
+                                <button 
+                                    className="tp-btn param-setter-btn" 
+                                    onClick={() => {
+                                        switch(activeParam) {
+                                            case 'Com': sendCommand('SET_PROGRAM_COMMENT', paramVal); break;
+                                            case 'Delay': sendCommand('SET_DELAY', paramVal); break;
+                                            case 'Go to': sendCommand('SET_GOTO_PROGRAM', paramVal); break;
+                                            case 'Loop': sendCommand('SET_LOOP', paramVal); break;
+                                            case 'Speed': sendCommand('SET_PROGRAM_SPEED', paramVal); break;
+                                            case 'Ip Pg': sendCommand('SET_PROGRAM_INPUT', paramVal); break;
+                                            case 'Radius': sendCommand('SET_RADIUS', paramVal); break;
+                                            case 'AN ip': sendCommand('SET_AN_IP', paramVal); break;
+                                            default: break;
+                                        }
+                                    }}
+                                >
+                                    APPLY
+                                </button>
+                            </div>
+
+                        </div>
+                    )}
                     {bottomPanelMode === 'TP_CTRL' && (
                         <>
                             <div className="grid-7-col">
@@ -1211,7 +1240,7 @@ const renderJogPanel = () => {
                                 <input className="tp-standalone-input" value={tpNameVal} onChange={(e) => setTpNameVal(e.target.value)} onBlur={() => sendCommand("SET_TP_NAME", tpNameVal)} />
                                 <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_COMMENT", comVal)}>🌍 Com</button>
                                 <input className="tp-standalone-input" value={comVal} onChange={(e) => setComVal(e.target.value)} onBlur={() => sendCommand("SET_PROGRAM_COMMENT", comVal)} />
-                                <button className="tp-btn btn-teal" onClick={() => sendCommand('CALCULATE_TRAJECTORY')}>🧮 Calc Traj</button>
+                                <button className="tp-btn btn-teal" onClick={() => { setIsCalculatingLocal(true); sendCommand('CALCULATE_TRAJECTORY'); }}>🧮 Calc Traj</button>
                             </div>
                         </>
                     )}

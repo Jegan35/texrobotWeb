@@ -16,7 +16,6 @@ function AppContent() {
   // 🚀 THE UNIFIED TRAP STATE (Handles both ESC and Tablet Swipes!)
   const [enforceFS, setEnforceFS] = useState(false);
 
-  // 1. Detect if the browser drops out of fullscreen (ESC Key)
   useEffect(() => {
     const handleFSChange = () => {
       if (isConnected && !document.fullscreenElement && !document.webkitFullscreenElement) {
