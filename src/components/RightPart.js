@@ -133,8 +133,9 @@ const RightPart = () => {
   const [bottomPanelMode, setBottomPanelMode] = useState('MAIN_CTRL'); 
   
   const [openDropdown, setOpenDropdown] = useState(null);
+  const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
+
   const [row2Tab, setRow2Tab] = useState('PROGRAM_FILE');
-  
   const [isTopPanelOpen, setIsTopPanelOpen] = useState(false);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -156,16 +157,20 @@ const RightPart = () => {
   const [simDoNum, setSimDoNum] = useState(DO_SIM_NUM_LIST[0]);
   const [simDoState, setSimDoState] = useState(SIM_STATE_LIST[0]);
 
-  const toggleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
+  // 🚀 Single Declaration for all Parameters
+  const [activeParam, setActiveParam] = useState('Go to');
+  const [paramVal, setParamVal] = useState('');
+  const [activeTpParam, setActiveTpParam] = useState('Tp name');
+  const [tpParamVal, setTpParamVal] = useState('');
+  const [debugGoto, setDebugGoto] = useState('');
 
-const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp-standalone-input", direction = "down", wrapStyle = { width: '100%', height: '100%' }) => (
+  const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp-standalone-input", direction = "down", wrapStyle = { width: '100%', height: '100%' }) => (
       <div className="rel-flex" style={wrapStyle}>
           <button className={`${btnClass} custom-select-btn`} onClick={() => toggleDropdown(menuKey)}>
               {currentValue}
           </button>
           {openDropdown === menuKey && (
               <>
-                  {/* 🚀 Invisible Click-to-Close Overlay */}
                   <div 
                       style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} 
                       onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}
@@ -213,7 +218,6 @@ const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp
   const [varInputVal, setVarInputVal] = useState('0');
   const [anIpVal, setAnIpVal] = useState('0');
   const [anOpVal, setAnOpVal] = useState('0');
-  const [debugGoto, setDebugGoto] = useState('');
 
   const [globalSpeed, setGlobalSpeed] = useState(50);
   const [frameVal, setFrameVal] = useState(FRAME_OPTIONS[0]);
@@ -221,8 +225,6 @@ const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp
   const [degIncVal, setDegIncVal] = useState(DEG_OPTIONS[0]);
   const [mmSpeedText, setMmSpeedText] = useState("50.0");
   const [degSpeedText, setDegSpeedText] = useState("50.0");
-  const [activeParam, setActiveParam] = useState('Go to');
-  const [paramVal, setParamVal] = useState('');
 
   const isJog = currentView.includes('JOG');
   const isJoints = currentView.includes('JOINTS');
@@ -240,6 +242,7 @@ const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp
   const mechData = rs.mech_data || {};
   const diVal = rs.di_val || 0;
   const doVal = rs.do_val || 0;
+  
   useEffect(() => {
       if (rs.is_calculating_trajectory === false) {
           setIsCalculatingLocal(false);
@@ -601,21 +604,16 @@ const renderDropdown = (menuKey, options, currentValue, onSelect, btnClass = "tp
     </div>
   );
 
-// 1. ADD THIS FUNCTION RIGHT ABOVE renderJogPanel TO FIX THE ERROR
   const handleHomeClick = () => {
       console.log("HOME button clicked!");
-      // Add your robot's home API call here later, for example:
-      // if (ws) ws.send(JSON.stringify({ command: 'HOME' }));
   };
 
-  // 2. THE FULLY UPDATED JOG PANEL
-const renderJogPanel = () => {
+  const renderJogPanel = () => {
     if (isJoints) {
         return (
           <div className="jog-panel-container">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'clamp(8px, 1.5vh, 15px)', width: '100%', margin: 'auto 0' }}>
                
-               {/* 🚀 ADDED THE JOINTS TITLE AT THE TOP CENTER */}
                <div style={{ color: '#00bcd4', fontWeight: '900', fontSize: '1.2rem', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '5px', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                    JOINTS
                </div>
@@ -635,12 +633,10 @@ const renderJogPanel = () => {
             </div>
           </div>
         );
-// ... rest of the code ...
-} else {
+    } else {
         return (
           <div className="jog-panel-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', position: 'relative' }}>
             
-            {/* --- PREMIUM TOGGLE SWITCH (PINNED TO TOP LEFT) --- */}
             <div style={{ position: 'absolute', top: '20px', left: '20px', display: 'flex', background: '#111', borderRadius: '8px', padding: '4px', border: '1px solid #333', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)', zIndex: 10 }}>
                 <div 
                     onClick={() => setDpadMode('TRANSLATION')}
@@ -656,27 +652,19 @@ const renderJogPanel = () => {
                 </div>
             </div>
 
-            {/* --- DYNAMIC UNIFIED D-PAD --- */}
-            {/* --- DYNAMIC UNIFIED D-PAD --- */}
-{/* 🚀 THE FIX: Conditionally applies compact mode for Programmer, and massive mode for Operator! */}
-<div className={`dpad-two-col-layout ${userRole === 'Programmer' ? 'dpad-compact' : 'dpad-large'}`}>
+            <div className={`dpad-two-col-layout ${userRole === 'Programmer' ? 'dpad-compact' : 'dpad-large'}`}>
                 <div className="dpad-cross">
-                    {/* 🚀 CHANGED ROTATION LABELS TO Rx, Ry, Rz */}
                     
-                    {/* Y AXIS / Ry */}
                     <button className="dpad-btn dpad-up" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Y+':'Ry+')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y+':'Ry+')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y+':'Ry+')}>{dpadMode==='TRANSLATION'?'Y+':'Ry+'}</button>
                     <button className="dpad-btn dpad-down" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Y-':'Ry-')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y-':'Ry-')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Y-':'Ry-')}>{dpadMode==='TRANSLATION'?'Y-':'Ry-'}</button>
                     
-                    {/* X AXIS / Rx */}
                     <button className="dpad-btn dpad-left" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'X-':'Rx-')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X-':'Rx-')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X-':'Rx-')}>{dpadMode==='TRANSLATION'?'X-':'Rx-'}</button>
                     <button className="dpad-btn dpad-right" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'X+':'Rx+')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X+':'Rx+')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'X+':'Rx+')}>{dpadMode==='TRANSLATION'?'X+':'Rx+'}</button>
                     
-                    {/* HOME BUTTON */}
                     <div className="dpad-center" onClick={handleHomeClick}>
                         <span className="home-icon-span">HOME</span>
                     </div>
 
-                    {/* Z AXIS / Rz */}
                     <button className="dpad-btn dpad-z-up" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Z+':'Rz+')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z+':'Rz+')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z+':'Rz+')}>{dpadMode==='TRANSLATION'?'Z+':'Rz+'}</button>
                     <button className="dpad-btn dpad-z-down" onPointerDown={()=>handlePointerDown(dpadMode==='TRANSLATION'?'Z-':'Rz-')} onPointerUp={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z-':'Rz-')} onPointerLeave={()=>handlePointerUp(dpadMode==='TRANSLATION'?'Z-':'Rz-')}>{dpadMode==='TRANSLATION'?'Z-':'Rz-'}</button>
                 </div>
@@ -685,11 +673,13 @@ const renderJogPanel = () => {
         );
     }
   };
+
   return (
     <>
-      {/* SETTINGS OVERLAY */}
       {isSettingsOpen && (
           <div className="settings-master-overlay">
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }} onPointerDown={() => setIsSettingsOpen(false)}></div>
+
               <div className="settings-header">
                   <div className="settings-title"><span style={{fontSize: '1.8rem'}}>⚙</span> SYSTEM SETTINGS</div>
                   <button className="settings-close-btn" onClick={() => setIsSettingsOpen(false)}>✖ CLOSE PANEL</button>
@@ -780,7 +770,6 @@ const renderJogPanel = () => {
           </div>
       )}
 
-      {/* --- DISCONNECT CONFIRMATION MODAL --- */}
       {showDisconnectModal && (
         <div className="modal-overlay" style={{ backdropFilter: 'blur(8px)' }}>
             <div className="modal-box" style={{ borderTopColor: '#f44336' }}>
@@ -823,23 +812,19 @@ const renderJogPanel = () => {
                     <div className="calc-title">CALCULATING TRAJECTORY</div>
                     <div className="calc-desc">Please wait while the robotic<br/>path is being generated...</div>
                 </div>
-<button className="tp-btn btn-red" style={{ width: '150px', height: '40px', marginTop: '10px' }} onClick={() => { setIsCalculatingLocal(false); sendCommand('CANCEL_CALCULATION'); }}>FORCE CANCEL</button>
+                <button className="tp-btn btn-red" style={{ width: '150px', height: '40px', marginTop: '10px' }} onClick={() => { setIsCalculatingLocal(false); sendCommand('CANCEL_CALCULATION'); }}>FORCE CANCEL</button>
             </div>
         </div>
       )}
-      {/* --- MODIFY TP FLOATING PANEL (NO SCREEN OVERLAY) --- */}
-      
 
      <div className="rp-master-container">
         <div className="rp-main-content" style={{ overflow: 'hidden' }}>
             
             <div className="rp-upper-half">
-                
-               {/* Header */}
+               
                 <div className="rp-header-col">
                     <RightHeader 
                         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
-                        /* FIX: Now dynamically reads the active tab and formats the text perfectly! */
                         currentMode={!isTopPanelOpen ? (row2Tab === 'IO_MODULES' ? 'I/O PANEL' : row2Tab.replace('_', ' ')) : currentView} 
                         isOpen={isSidebarOpen} 
                         onDisconnectClick={() => setShowDisconnectModal(true)} 
@@ -847,12 +832,9 @@ const renderJogPanel = () => {
                      />
                 </div>
                 
-                {/* --- WHEN OPEN: JOG / SPEED TAKES FULL SPACE --- */}
                 {isTopPanelOpen ? (
                     <div className="rp-row-1" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', minHeight: 0 }}>
                         <div className="rp-content-col" style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', minHeight: 0 }}>
-                            
-                            {/* GUARANTEED VISIBLE BACK BUTTON */}
                             <button 
                                 onClick={() => setIsTopPanelOpen(false)}
                                 style={{
@@ -866,29 +848,17 @@ const renderJogPanel = () => {
                             >
                                 ◀ BACK
                             </button>
-
-                            {/* 🚀 ADDED overflowY: 'auto' so if it DOES get tight, you can easily scroll to the bottom buttons */}
                             <div className={`rp-panel-full ${currentView === 'SPEED CONFIG' || currentView === 'GRAPH VIEW' ? 'bg-dark' : 'bg-light-dark'}`} style={{ overflowY: 'auto' }}>
-                                {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : 
-                                 renderJogPanel()}
+                                {currentView === 'SPEED CONFIG' ? renderSpeedConfig() : renderJogPanel()}
                             </div>
-
                         </div>
                     </div>
                 ) : (
                     <div className={`rp-row-2 ${expandedRowPanel === 'PROGRAM' ? 'row-maximized' : ''}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                        {/* ========================================== */}
-                        {/* ROW 2: TABS NAVIGATION                     */}
-                        {/* ========================================== */}
                         <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '15px', boxSizing: 'border-box', width: '100%' }}>
                             <div style={{ display: 'flex' }}>
-                                {/* PROGRAM FILE TAB */}
                                 <div className={`dark-tab ${row2Tab === 'PROGRAM_FILE' ? 'active' : ''}`} onClick={() => handleTabSwitch('PROGRAM_FILE')} style={{ cursor: 'pointer' }}>PROGRAM FILE</div>
-                                
-                                {/* IO MODULES TAB */}
                                 <div className={`dark-tab ${row2Tab === 'IO_MODULES' ? 'active' : ''}`} onClick={() => handleTabSwitch('IO_MODULES')} style={{ cursor: 'pointer' }}>I/O PANEL</div>
-
-                                {/* --- SECURE PROGRAMMER TABS --- */}
                                 {userRole === 'Programmer' && (
                                     <>
                                         <div className={`dark-tab ${row2Tab === 'TP_FILE' ? 'active' : ''}`} onClick={() => handleTabSwitch('TP_FILE')} style={{ cursor: 'pointer' }}>TP FILE</div>
@@ -898,10 +868,7 @@ const renderJogPanel = () => {
                                 )}
                             </div>
                             
-                            {/* --- RIGHT SIDE ALIGNMENT (OP BOX + MAX BTN) --- */}
                             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                                
-                                {/* MOVED OP BOX: Shows in all tabs for operators */}
                                 {userRole !== 'Programmer' && (
                                     <div style={{ display: 'flex', flexShrink: 0, height: '26px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.8)' }}>
                                         <div style={{ background: 'linear-gradient(180deg, #373d49 0%, #262b33 100%)', color: '#fff', padding: '0 8px', display: 'flex', alignItems: 'center', fontSize: '0.7rem', fontWeight: '900', whiteSpace: 'nowrap', borderRight: '1px solid #111' }}>
@@ -915,8 +882,6 @@ const renderJogPanel = () => {
                                         />
                                     </div>
                                 )}
-
-                                {/* MAX / MIN TOGGLE BUTTON - ONLY SHOWS FOR TABLES! */}
                                 {(row2Tab === 'PROGRAM_FILE' || row2Tab === 'TP_FILE') && (
                                     <div className="panel-action-btn" onClick={() => setExpandedRowPanel(expandedRowPanel === 'PROGRAM' ? 'NONE' : 'PROGRAM')}>
                                         {expandedRowPanel === 'PROGRAM' ? '▼ MIN' : '⛶ MAX'}
@@ -926,11 +891,8 @@ const renderJogPanel = () => {
                         </div>
 
                         <div className="row2-content" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-                            
-                           {/* IF PROGRAM FILE IS SELECTED */}
                             {row2Tab === 'PROGRAM_FILE' && (
                                 <div className="table-container" style={{ width: '100%', height: '100%' }}>
-                                    
                                     <div className="table-wrapper">
                                         <div className="table-scroller">
                                             <MemoizedPrTableBody 
@@ -940,40 +902,24 @@ const renderJogPanel = () => {
                                                 activeInstruction={activeInstruction}
                                                 onRowClick={handlePrRowClick} 
                                             />
-                                            {/* --- FIX: GHOST SPACER --- */}
-                                            {/* This allows the user to scroll the last row safely past the floating buttons! */}
                                             {userRole !== 'Programmer' && <div style={{ height: '110px', width: '100%' }}></div>}
                                         </div>
-
-                                        {/* --- NEAT INDUSTRIAL OPERATOR ROUND BUTTONS --- */}
                                         {userRole !== 'Programmer' && (
                                             <div className="operator-floating-actions">
                                                 <button className="fab-btn fab-teal" title="Calculate Trajectory" onClick={() => { setIsCalculatingLocal(true); sendCommand('CALCULATE_TRAJECTORY'); }}><span className="fab-icon-calc">🧮</span></button>
-
-                                                <button 
-                                                    className="fab-btn fab-green" 
-                                                    title="Run Instruction"
-                                                    onClick={() => sendCommand('RUN_PROGRAM')}
-                                                >
-                                                    <span className="fab-icon-play">▶</span>
-                                                </button>
+                                                <button className="fab-btn fab-green" title="Run Instruction" onClick={() => sendCommand('RUN_PROGRAM')}><span className="fab-icon-play">▶</span></button>
                                             </div>
                                         )}
-                                        
                                     </div>
                                 </div>
                             )}
 
-                            {/* IF IO MODULES IS SELECTED */}
                             {row2Tab === 'IO_MODULES' && (
                                 <div style={{ width: '100%', height: '100%', padding: '15px 35px 15px 15px', overflowY: 'auto', boxSizing: 'border-box' }}>
                                     {renderIOModules()}
                                 </div>
                             )}
 
-                            {/* --- SECURE TAB CONTENT RENDERERS --- */}
-                            
-                            {/* IF TP FILE IS SELECTED */}
                             {row2Tab === 'TP_FILE' && userRole === 'Programmer' && (
                                 <div className="table-container" style={{ width: '100%', height: '100%' }}>
                                     <div className="table-wrapper">
@@ -989,76 +935,15 @@ const renderJogPanel = () => {
                                 </div>
                             )}
 
-                            {/* IF DATA VARIABLE IS SELECTED */}
                             {row2Tab === 'DATA_VAR' && userRole === 'Programmer' && (
                                 <div style={{ width: '100%', height: '100%', padding: '15px 35px 15px 15px', overflowY: 'auto', boxSizing: 'border-box' }}>
                                     {renderDataVariable()}
                                 </div>
                             )}
 
-                            {/* IF AXIS LIMIT IS SELECTED */}
                             {row2Tab === 'AXIS_LIMIT' && userRole === 'Programmer' && (
                                 <div style={{ width: '100%', height: '100%', padding: '15px 35px 15px 15px', overflowY: 'auto', boxSizing: 'border-box' }}>
                                     {renderAxisLimit()}
-                                </div>
-                            )}
-
-                        </div>
-                    </div>
-                )} 
-
-                {/* --- ROW 3 & 4 (INST & CONTROLS) --- */}
-                {/* SECURE BLOCK: ENTIRE INSTRUCTION ROW ONLY SHOWS FOR PROGRAMMER */}
-                {userRole === 'Programmer' && (
-                    <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
-                        <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '35px', boxSizing: 'border-box', width: '100%' }}>
-                            <div style={{ display: 'flex' }}>
-                                <div className="dark-tab active">INSTRUCTION</div>
-                            </div>
-                            
-                            <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
-                                <button 
-                                    className={`pro-th-btn edit-btn ${bottomPanelMode === 'MAIN_CTRL' ? 'active' : ''}`} 
-                                    onClick={() => { setBottomPanelMode('MAIN_CTRL'); }}
-                                >
-                                    🎮 MAIN CTRL
-                                </button>
-                                <button 
-                                    className={`pro-th-btn edit-btn ${bottomPanelMode === 'TP_CTRL' ? 'active' : ''}`} 
-                                    onClick={() => { setBottomPanelMode('TP_CTRL'); }}
-                                >
-                                    ✏️ TP EDIT
-                                </button>
-                                <button 
-                                    className={`pro-th-btn edit-btn ${bottomPanelMode === 'PR_CTRL' ? 'active' : ''}`} 
-                                    onClick={() => { setBottomPanelMode('PR_CTRL'); }}
-                                >
-                                    ✏️ PR EDIT
-                                </button>
-                            </div>
-                        </div>
-                    
-                        <div className="row2-content row4-auto-height">
-                            {activeRow4Tab === 'Inst' && (
-                                <div className="table-wrapper row4-table-wrapper">
-                                    <div className="table-scroller row4-scroller">
-                                        <table className="data-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>S.No</th><th>Instruction</th><th>Name</th><th>Value 1</th><th>Degree 1</th>
-                                                    <th>Name</th><th>Value 2</th><th>Degree 2</th><th>Speed</th>
-                                                    <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
-                                                    <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
-                                                    <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
                                 </div>
                             )}
                         </div>
@@ -1066,7 +951,61 @@ const renderJogPanel = () => {
                 )}
             </div> 
 
-            {/* --- ROW 5: BOTTOM PANEL COMMANDS --- */}
+            {userRole === 'Programmer' && !isTopPanelOpen && (
+                <div className={`rp-row-4 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
+                    <div className="dark-tabs bg-dark-deep" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '35px', boxSizing: 'border-box', width: '100%' }}>
+                        <div style={{ display: 'flex' }}>
+                            <div className="dark-tab active">INSTRUCTION</div>
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '10px', paddingBottom: '4px' }}>
+                            <button 
+                                className={`pro-th-btn edit-btn ${bottomPanelMode === 'MAIN_CTRL' ? 'active' : ''}`} 
+                                onClick={() => { setBottomPanelMode('MAIN_CTRL'); }}
+                            >
+                                🎮 MAIN CTRL
+                            </button>
+                            <button 
+                                className={`pro-th-btn edit-btn ${bottomPanelMode === 'TP_CTRL' ? 'active' : ''}`} 
+                                onClick={() => { setBottomPanelMode('TP_CTRL'); }}
+                            >
+                                ✏️ TP EDIT
+                            </button>
+                            <button 
+                                className={`pro-th-btn edit-btn ${bottomPanelMode === 'PR_CTRL' ? 'active' : ''}`} 
+                                onClick={() => { setBottomPanelMode('PR_CTRL'); }}
+                            >
+                                ✏️ PR EDIT
+                            </button>
+                        </div>
+                    </div>
+                    <div className="row2-content row4-auto-height">
+                        {activeRow4Tab === 'Inst' && (
+                            <div className="table-wrapper row4-table-wrapper">
+                                <div className="table-scroller row4-scroller">
+                                    <table className="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>S.No</th><th>Instruction</th><th>Name</th><th>Value 1</th><th>Degree 1</th>
+                                                <th>Name</th><th>Value 2</th><th>Degree 2</th><th>Speed</th>
+                                                <th>Radius</th><th>Frame</th><th>Tool</th><th>Comment</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td><td>{staging.instruction || '--'}</td><td>{staging.name1 || '--'}</td><td>{staging.value1 || '--'}</td>
+                                                <td>{staging.deg1 || '--'}</td><td>{staging.name2 || '--'}</td><td>{staging.value2 || '--'}</td><td>{staging.deg2 || '--'}</td>
+                                                <td>{staging.speed || '--'}</td><td>--</td><td>--</td><td>--</td><td>{staging.comment || '--'}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             <div className={`rp-row-5 ${expandedRowPanel === 'PROGRAM' ? 'row-minimized' : ''}`}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px', justifyContent: 'center' }}>
                     
@@ -1074,10 +1013,8 @@ const renderJogPanel = () => {
                         <ControlButtons userRole={userRole} />
                     )}
 
-                    {bottomPanelMode === 'PR_CTRL' && (
+                    {userRole === 'Programmer' && bottomPanelMode === 'PR_CTRL' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                            
-                            {/* ROW 1: Uses grid-7-col to perfectly force all 7 items into 1 row! */}
                             <div className="grid-7-col">
                                 {renderDropdown('R5_INST', INST_OPTIONS, selInst, (v) => { setSelInst(v); sendCommand("SET_INSTRUCTION_TYPE", v); }, "pr-standalone-input", "up")}
                                 {renderDropdown('R5_DI1', DI_OPTIONS, selDi1, (v) => { setSelDi1(v); sendCommand("SET_DIGI_1", v); }, "pr-standalone-input", "up")}
@@ -1088,7 +1025,6 @@ const renderJogPanel = () => {
                                 {renderDropdown('R5_VAR2', VAR2_OPTIONS, selVar2, (v) => { setSelVar2(v); sendCommand("SET_VAR2", v); }, "pr-standalone-input", "up")}
                             </div>
 
-                            {/* ROW 2: Unified Parameter Setter */}
                             <div className="param-setter-container">
                                 {renderDropdown(
                                     'PR_PARAM_SEL', 
@@ -1099,15 +1035,12 @@ const renderJogPanel = () => {
                                     "up", 
                                     { width: '130px' }
                                 )}
-                                
                                 <span className="param-setter-label">Val</span>
-                                
                                 <input 
                                     className="tp-standalone-input param-setter-input" 
                                     value={paramVal} 
                                     onChange={e => setParamVal(e.target.value)} 
                                 />
-                                
                                 <button 
                                     className="tp-btn param-setter-btn" 
                                     onClick={() => {
@@ -1122,25 +1055,23 @@ const renderJogPanel = () => {
                                             case 'AN ip': sendCommand('SET_AN_IP', paramVal); break;
                                             default: break;
                                         }
+                                        setParamVal('');
                                     }}
                                 >
                                     APPLY
                                 </button>
                             </div>
-
                         </div>
                     )}
-                    {bottomPanelMode === 'TP_CTRL' && (
-                        <>
+
+                    {userRole === 'Programmer' && bottomPanelMode === 'TP_CTRL' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
                             <div className="grid-7-col">
-                                {/* --- TP MODE DROPDOWN --- */}
                                 <div className="rel-flex">
                                     <button className="tp-btn btn-blue" onClick={() => toggleDropdown('TP_MODE')}>⚙ {displayTpMode}</button>
                                     {openDropdown === 'TP_MODE' && (
                                         <>
-                                            {/* 🚀 Invisible Click-to-Close Overlay */}
                                             <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}></div>
-                                            
                                             <div className="dropdown-menu" style={{ zIndex: 9999 }}>
                                                 <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('TP Mode', 'Tp')}>⚙ TP Mode</button>
                                                 <button className="dd-btn dd-blue" onClick={() => handleTpModeSelect('MOVJ', 'MOVJ')}>⚙ MOVJ</button>
@@ -1149,17 +1080,11 @@ const renderJogPanel = () => {
                                         </>
                                     )}
                                 </div>
-                                {/* --- TP OPTIONS DROPDOWN --- */}
                                 <div className="rel-flex">
                                     <button className="tp-btn btn-purple" onClick={() => toggleDropdown('TP')}>⚙ TP</button>
                                     {openDropdown === 'TP' && (
                                         <>
-                                            {/* 🚀 Invisible Click-to-Close Overlay */}
-                                            <div 
-                                                style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} 
-                                                onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}
-                                            ></div>
-                                            
+                                            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}></div>
                                             <div className="dropdown-menu" style={{ zIndex: 9999 }}>
                                                 <button className="dd-btn dd-purple" onClick={() => { sendCommand('INSERT_TP'); setOpenDropdown(null); }}>⚙ Insert TP</button>
                                                 <button className="dd-btn dd-purple" onClick={openModifyTpModal}>📄 Modify TP</button>
@@ -1167,40 +1092,18 @@ const renderJogPanel = () => {
                                             </div>
                                         </>
                                     )}
-
-                                    {/* 🚀 THE FIX: Anchored Modal + Invisible Click-to-Close Overlay! */}
                                     {showModTpModal && (
                                         <>
-                                            {/* Invisible Full-Screen Background */}
-                                            <div 
-                                                style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998 }} 
-                                                onClick={() => setShowModTpModal(false)}
-                                            ></div>
-                                            
-                                            {/* The Popup Window */}
+                                            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998 }} onPointerDown={(e) => { e.stopPropagation(); setShowModTpModal(false); }}></div>
                                             <div className="floating-tp-panel" style={{ position: 'absolute', bottom: '120%', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, minWidth: '260px' }}>
                                                 <div className="floating-tp-title">✏️ MODIFY TARGET POINT</div>
                                                 <div className="floating-tp-divider"></div>
-
                                                 <div className="floating-tp-form">
-                                                    <div className="floating-tp-row">
-                                                        <label className="floating-tp-label">Name:</label>
-                                                        <input className="modal-input floating-tp-input" value={modTpData.name} onChange={e => setModTpData({...modTpData, name: e.target.value})} />
-                                                    </div>
-                                                    <div className="floating-tp-row">
-                                                        <label className="floating-tp-label">X (mm):</label>
-                                                        <input className="modal-input floating-tp-input" value={modTpData.x} onChange={e => setModTpData({...modTpData, x: e.target.value})} />
-                                                    </div>
-                                                    <div className="floating-tp-row">
-                                                        <label className="floating-tp-label">Y (mm):</label>
-                                                        <input className="modal-input floating-tp-input" value={modTpData.y} onChange={e => setModTpData({...modTpData, y: e.target.value})} />
-                                                    </div>
-                                                    <div className="floating-tp-row">
-                                                        <label className="floating-tp-label">Z (mm):</label>
-                                                        <input className="modal-input floating-tp-input" value={modTpData.z} onChange={e => setModTpData({...modTpData, z: e.target.value})} />
-                                                    </div>
+                                                    <div className="floating-tp-row"><label className="floating-tp-label">Name:</label><input className="modal-input floating-tp-input" value={modTpData.name} onChange={e => setModTpData({...modTpData, name: e.target.value})} /></div>
+                                                    <div className="floating-tp-row"><label className="floating-tp-label">X (mm):</label><input className="modal-input floating-tp-input" value={modTpData.x} onChange={e => setModTpData({...modTpData, x: e.target.value})} /></div>
+                                                    <div className="floating-tp-row"><label className="floating-tp-label">Y (mm):</label><input className="modal-input floating-tp-input" value={modTpData.y} onChange={e => setModTpData({...modTpData, y: e.target.value})} /></div>
+                                                    <div className="floating-tp-row"><label className="floating-tp-label">Z (mm):</label><input className="modal-input floating-tp-input" value={modTpData.z} onChange={e => setModTpData({...modTpData, z: e.target.value})} /></div>
                                                 </div>
-
                                                 <div className="modal-btn-row" style={{ marginTop: '15px' }}>
                                                     <button className="modal-btn btn-floating-cancel" onClick={() => setShowModTpModal(false)}>CANCEL</button>
                                                     <button className="modal-btn btn-floating-update" onClick={handleModifyConfirm}>UPDATE</button>
@@ -1210,16 +1113,11 @@ const renderJogPanel = () => {
                                     )}
                                 </div>
                                 <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_TP')}>▶ Run TP</button>
-                                <button className="tp-btn btn-dark" onClick={() => {}}>📄 Op Pg</button>
-                                <input className="tp-standalone-input" value={rs.program_count_output || '0'} readOnly />
-                                {/* --- INST MENU DROPDOWN --- */}
                                 <div className="rel-flex">
                                     <button className="tp-btn btn-purple" onClick={() => toggleDropdown('INST')}>📄 Inst</button>
                                     {openDropdown === 'INST' && (
                                         <>
-                                            {/* 🚀 Invisible Click-to-Close Overlay */}
                                             <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9998, cursor: 'default' }} onClick={(e) => { e.stopPropagation(); setOpenDropdown(null); }}></div>
-                                            
                                             <div className="dropdown-menu inst-qty-input-dropdown" style={{ zIndex: 9999 }}>
                                                 <div className="gap-flex">
                                                     <input type="text" placeholder="S..." value={instInput} onChange={e => setInstInput(e.target.value)} className="inst-qty-input" />
@@ -1232,32 +1130,41 @@ const renderJogPanel = () => {
                                     )}
                                 </div>
                                 <button className="tp-btn btn-green" onClick={() => sendCommand('RUN_PROGRAM')}>▶ Run Inst</button>
-                            </div>
-                            <div className="grid-7-col">
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_INPUT", ipPgInput)}>📄 Ip Pg</button>
-                                <input className="tp-standalone-input" value={ipPgInput} onChange={(e) => setIpPgInput(e.target.value)} onBlur={() => sendCommand("SET_PROGRAM_INPUT", ipPgInput)} />
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_TP_NAME", tpNameVal)}>🏷 Tp name</button>
-                                <input className="tp-standalone-input" value={tpNameVal} onChange={(e) => setTpNameVal(e.target.value)} onBlur={() => sendCommand("SET_TP_NAME", tpNameVal)} />
-                                <button className="tp-btn btn-dark" onClick={() => sendCommand("SET_PROGRAM_COMMENT", comVal)}>🌍 Com</button>
-                                <input className="tp-standalone-input" value={comVal} onChange={(e) => setComVal(e.target.value)} onBlur={() => sendCommand("SET_PROGRAM_COMMENT", comVal)} />
                                 <button className="tp-btn btn-teal" onClick={() => { setIsCalculatingLocal(true); sendCommand('CALCULATE_TRAJECTORY'); }}>🧮 Calc Traj</button>
+                                {/* 7. OP PG DISPLAY (Operator Button+Box Style) */}
+<div style={{ display: 'flex', height: 'clamp(28px, 5vh, 35px)', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.8)', boxSizing: 'border-box', boxShadow: '0 2px 0 rgba(0,0,0,0.4)' }}>
+    <div style={{ background: 'linear-gradient(180deg, #505868 0%, #2b303b 100%)', color: '#fff', padding: '0 6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'clamp(7px, 0.9vw, 12px)', fontWeight: '900', whiteSpace: 'nowrap', borderRight: '1px solid #111', flex: 1, textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}>
+        📄 OP PG
+    </div>
+    <input 
+        readOnly 
+        style={{ background: '#e0e0e0', color: '#111', border: 'none', width: '45%', textAlign: 'center', fontSize: 'clamp(10px, 1vw, 14px)', fontWeight: '900', outline: 'none', cursor: 'default', margin: 0, padding: 0 }}
+        value={rs.program_count_output || '0'} 
+        title="Current Output Program"
+    />
+</div>
                             </div>
-                        </>
+                            <div className="param-setter-container">
+                                {renderDropdown('TP_PARAM_SETTER', ['Ip Pg', 'Tp name', 'Com'], activeTpParam, setActiveTpParam, "tp-standalone-input", "up", { width: '130px' })}
+                                <span className="param-setter-label">Val</span>
+                                <input className="tp-standalone-input param-setter-input" value={tpParamVal} onChange={e => setTpParamVal(e.target.value)} />
+                                <button className="tp-btn param-setter-btn" onClick={() => {
+                                        switch(activeTpParam) {
+                                            case 'Ip Pg': sendCommand("SET_PROGRAM_INPUT", tpParamVal); break;
+                                            case 'Tp name': sendCommand("SET_TP_NAME", tpParamVal); break;
+                                            case 'Com': sendCommand("SET_PROGRAM_COMMENT", tpParamVal); break;
+                                            default: break;
+                                        }
+                                        setTpParamVal('');
+                                }}>APPLY</button>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
         </div>
         
-        <RightMenuSidebar 
-            isOpen={isSidebarOpen} 
-            onClose={() => setIsSidebarOpen(false)} 
-            onSelectView={(view) => {
-                setCurrentView(view);
-                setIsTopPanelOpen(true);
-                setExpandedRowPanel('NONE'); 
-            }} 
-            activeView={currentView} 
-        />
+        <RightMenuSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onSelectView={(view) => { setCurrentView(view); setIsTopPanelOpen(true); setExpandedRowPanel('NONE'); }} activeView={currentView} />
       </div>
     </>
   );

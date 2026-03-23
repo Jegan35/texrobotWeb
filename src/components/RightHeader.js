@@ -1,35 +1,35 @@
 import React from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
-import './RightPart.css';
+import './RightPart.css'; // Make sure this points to wherever your CSS is!
 
-const RightHeader = ({ onMenuToggle, currentMode, isOpen, onDisconnectClick, isAutoMode, activeView }) => {         
+const RightHeader = ({ onMenuToggle, currentMode, isOpen, onDisconnectClick, isAutoMode }) => {         
     const { robotState } = useWebSocket();
     const isMoving = robotState?.is_physically_moving || false;
 
     // --- CHECK IF ROBOT IS IN AUTO MODE ---
-    // 🚀 THE FIX: We check the backend state AND the Sidebar active view!
+    // 🚀 THE FIX: Safely checks the prop from RightPart AND the direct backend state
     const backendMode = String(robotState?.mode || '').toUpperCase();
-    const isAuto = robotState?.auto_mode === true || backendMode === 'AUTO' || isAutoMode === true || activeView === 'AUTO';
+    const isAuto = isAutoMode === true || backendMode === 'AUTO' || robotState?.run_mode === 'AUTO';
 
     // --- DETERMINE WHAT TO SHOW ---
+    // If it's in Auto, FORCE the text to say "AUTO". Otherwise, show the current tab name.
     const displayMode = isAuto ? 'AUTO' : (currentMode || '');
     
-    // Determine the dot CSS class
-    let dotClass = 'dot-blue'; // Default
-    if (isAuto) {
-        dotClass = 'dot-orange';
-    }
+    // 🚀 THE FIX: Dynamically assign the dot class
+    const dotClass = isAuto ? 'dot-orange' : 'dot-blue';
 
     return (
         <div className="rh-master-container">
             
+            {/* MENU BUTTON */}
             <div className="rh-menu-btn" onClick={onMenuToggle}>
                 <span className={`rh-hamburger ${isOpen ? 'rotated' : ''}`}>≡</span>
                 <span style={{ fontWeight: '900', fontSize: '1.1rem', letterSpacing: '1px' }}>MENU</span>
             </div>
 
+            {/* MODE DISPLAY BOX (WITH BLINKING DOT) */}
             <div className="rh-mode-box">
-                {/* 🚀 THE FIX: Uses pure CSS classes so the animation colors don't conflict! */}
+                {/* 🚀 Flashes Orange in AUTO, Blue otherwise! */}
                 <div className={`rh-blinking-dot ${dotClass}`}></div>
                 
                 <span style={{ 
@@ -37,12 +37,14 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen, onDisconnectClick, isA
                     letterSpacing: '1px', 
                     textTransform: 'uppercase', 
                     fontSize: '0.85rem',
-                    color: isAuto ? '#FF9800' : 'white' 
+                    color: isAuto ? '#FF9800' : 'white', // Turns text orange too!
+                    transition: 'color 0.3s ease'
                 }}>
                     {displayMode}
                 </span>
             </div>
 
+            {/* MOTION STATUS */}
             <div className="rh-status-container">
                 {isMoving ? (
                     <div className="rh-status-motion">IN MOTION</div>
@@ -51,6 +53,7 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen, onDisconnectClick, isA
                 )}
             </div>
             
+            {/* DISCONNECT BUTTON */}
             <button 
                 className="industrial-disconnect-btn" 
                 onClick={onDisconnectClick}
