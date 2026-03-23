@@ -66,4 +66,5 @@ const RightHeader = ({ onMenuToggle, currentMode, isOpen, onDisconnectClick, isA
     );
 };
 
+
 export default RightHeader;
