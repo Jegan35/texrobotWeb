@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { WebSocketProvider, useWebSocket } from './context/WebSocketContext';
 
-
 // Components
 import RobotScene from './RobotScene';
 import RightPart from './components/RightPart';
